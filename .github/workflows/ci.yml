@@ -37,30 +37,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 다른 이름의 Docker 파일 사용
-      - name: Build Docker Image
-        run: docker build -t app-dev -f Dockerfile-dev .
-
-      # 도커 컴포즈를 통한 컨테이너 실행 (개발환경 전용)(빌드 테스트 통과 목적)
-      - name: Install Docker Compose
-        run: sudo apt-get install -y docker-compose
-
-      - name: Start Docker-compose
-        working-directory: ./
-        run: docker-compose -f docker-compose-dev.yml up -d
-
-
-      # nc -z : netcat 명령어로 포트 연결 확인
-      # 최대 30번60초(2초 × 30회) 반복하며 MySQL 포트(13306)의 연결 상태를 체크합니다.
-      - name: Wait For MySQL to be ready
-        run: |
-          for i in {1..30}; do  
-            nc -z localhost 13306 && echo "MySQL is ready!" && exit 0
-            echo "Waiting for MySQL..."
-            sleep 2
-          done
-          echo "MySQL did not become ready in time!" && exit 1
-
       # 2) JDK 17 버전 설치, 다른 JDK 버전을 사용한다면 수정 필요
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -73,9 +49,27 @@ jobs:
         run: chmod +x gradlew
         shell: bash
 
-
       # 4) .build시작 >> 리눅스 명령어다.
       # 빌드와 테스트를 함께 실행
       - name: Build and Test with Gradle
         run: ./gradlew clean build
         shell: bash
+
+      # 도커 컴포즈를 통한 컨테이너 실행 (개발환경 전용)(빌드 테스트 통과 목적)
+      - name: Install Docker Compose
+        run: sudo apt-get install -y docker-compose
+
+      - name: Start Docker-compose
+        working-directory: ./
+        run: docker-compose -f docker-compose-dev.yml up -d
+
+      # nc -z : netcat 명령어로 포트 연결 확인
+      # 최대 30번60초(2초 × 30회) 반복하며 MySQL 포트(13306)의 연결 상태를 체크합니다.
+      - name: Wait For MySQL to be ready
+        run: |
+          for i in {1..30}; do  
+            nc -z localhost 13306 && echo "MySQL is ready!" && exit 0
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+          echo "MySQL did not become ready in time!" && exit 1
