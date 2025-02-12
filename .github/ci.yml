@@ -47,7 +47,7 @@ jobs:
 
       - name: Start Docker-compose
         working-directory: ./
-        run: docker-compose -f docker-compose.dev.yml up -d
+        run: docker-compose -f docker-compose-dev.yml up -d
 
 
       # nc -z : netcat 명령어로 포트 연결 확인
