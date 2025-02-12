@@ -5,9 +5,9 @@ spring:
   config:
     import: optional:file:.env[.properties]
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASS}
+    url: jdbc:mysql://festamate-database.c7iqy64cixra.ap-northeast-2.rds.amazonaws.com:3306/festamate
+    username: admin
+    password: '00000000'
     driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
