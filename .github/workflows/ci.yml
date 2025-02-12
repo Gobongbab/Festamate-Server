@@ -55,7 +55,7 @@ jobs:
       - name: Build and Test with Gradle
         run: ./gradlew clean build
         shell: bash
-
+      # ㅅㄷㄴㅅ
       # 테스트 결과 리포트 생성 스텝 추가
        - name: Publish Test Report
        uses: dorny/test-reporter@v1
