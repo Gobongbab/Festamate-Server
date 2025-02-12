@@ -27,6 +27,17 @@ jobs:
       # 1) 워크플로우 실행 전 기본적으로 체크아웃 필요
       - uses: actions/checkout@v3
 
+      # Gradle 의존성에 대한 캐싱 추가 (매 빌드마다 의존성을 다시 다운로드하게 되어 빌드 시간이 길어지는 걸 방지)
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       # 2) JDK 17 버전 설치, 다른 JDK 버전을 사용한다면 수정 필요
       - name: Set up JDK 17
         uses: actions/setup-java@v3
