@@ -59,10 +59,6 @@ jobs:
       - name: Install Docker Compose
         run: sudo apt-get install -y docker-compose
 
-      # 다른 이름의 Docker 파일 사용
-      - name: Build Docker Image
-        run: docker build -t app-dev -f Dockerfile.dev .
-
       - name: Start Docker-compose
         working-directory: ./
         run: docker-compose -f docker-compose-dev.yml up -d
