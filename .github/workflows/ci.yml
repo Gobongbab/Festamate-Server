@@ -39,7 +39,7 @@ jobs:
 
       # 다른 이름의 Docker 파일 사용
       - name: Build Docker Image
-        run: docker build -t app-dev -f Dockerfile.dev .
+        run: docker build -t app-dev -f Dockerfile-dev .
 
       # 도커 컴포즈를 통한 컨테이너 실행 (개발환경 전용)(빌드 테스트 통과 목적)
       - name: Install Docker Compose
