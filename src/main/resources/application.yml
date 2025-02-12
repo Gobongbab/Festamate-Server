@@ -5,9 +5,9 @@ spring:
   config:
     import: optional:file:.env[.properties]
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASS}
+    url: ${{secrets.DB_URL}}
+    username: ${{secrets.DB_USER}}
+    password: ${{secrets.DB_PASS}}
     driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
