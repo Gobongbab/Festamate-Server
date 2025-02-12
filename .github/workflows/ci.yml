@@ -57,14 +57,14 @@ jobs:
         shell: bash
       # ㅅㄷㄴㅅ
       # 테스트 결과 리포트 생성 스텝 추가
-       - name: Publish Test Report
-       uses: dorny/test-reporter@v1
-       if: success() || failure()    # 테스트 성공/실패 상관없이 리포트 생성
-       with:
-         name: Test Results            # 테스트 리포트 이름
-         path: '**/build/test-results/test/TEST-ci.xml'    # 테스트 결과 XML 경로
-         reporter: java-junit          # 리포터 형식 지정
-         fail-on-error: true          # 테스트 실패시 워크플로우 실패 처리
+#       - name: Publish Test Report
+#       uses: dorny/test-reporter@v1
+#       if: success() || failure()    # 테스트 성공/실패 상관없이 리포트 생성
+#       with:
+#         name: Test Results            # 테스트 리포트 이름
+#         path: '**/build/test-results/test/TEST-ci.xml'    # 테스트 결과 XML 경로
+#         reporter: java-junit          # 리포터 형식 지정
+#         fail-on-error: true          # 테스트 실패시 워크플로우 실패 처리
 
       # 도커 컴포즈를 통한 컨테이너 실행 (개발환경 전용)(빌드 테스트 통과 목적)
       - name: Install Docker Compose
