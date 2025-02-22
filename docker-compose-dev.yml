@@ -3,38 +3,22 @@ version: '3.8'
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    container_name: spring-app-dev
+    container_name: festamate
+    image: test/festamate:latest
     ports:
       - "8080:8080"
+    restart: unless-stopped
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      # 필요한 환경변수들 추가
+    networks:
+      - festamate-network
     depends_on:
       - db
       - redis
     networks:
-      - spring-dev-network
-
-  # MySQL 데이터베이스 서비스 설정
-  db:
-    image: mysql:8.0.33
-    restart: always # 컨테이너 자동 재시작
-    container_name: mysql-dev
-    ports:
-      - "13306:3306"
-    environment: # MySQL 환경 변수 설정
-      - MYSQL_DATABASE=Festamate
-      - MYSQL_ROOT_PASSWORD=0000
-      - TZ=Asia/Seoul
-    command: # MySQL 문자셋 설정
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    volumes:
-      - mysql-dev-data:/var/lib/mysql # 데이터 영속성을 위한 볼륨 설정
-    networks:
-      - spring-dev-network # 스프링 애플리케이션과 통신을 위한 네트워크
+      festamate-network:
+        driver: bridge
 
   # Redis 캐시 서버 설정
   redis:
