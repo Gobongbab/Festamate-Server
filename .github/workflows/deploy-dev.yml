@@ -51,9 +51,12 @@ jobs:
       - name: Build and Push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: .  # 도커 빌드 컨텍스트 위치
-          push: true  # 이미지를 Docker Hub에 푸시할지 여부
-          tags: ${{ secrets.DOCKER_USERNAME }}/festamate:latest  # 이미지 태그 설정
+          context: . # 도커 빌드 컨텍스트 위치
+          file: ./Dockerfile.dev  # Dockerfile.dev 사용
+          push: true # 이미지를 Docker Hub에 푸시할지 여부
+          tags: ${{ secrets.DOCKER_USERNAME }}/festamate:latest # 이미지 태그 설정
+
+
 
       # EC2 인스턴스에 SSH로 접속하여 배포 명령 실행
       - name: Deploy to EC2
