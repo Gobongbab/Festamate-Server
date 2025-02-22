@@ -70,6 +70,6 @@ jobs:
             # 모든 컨테이너 삭제 (실패해도 계속 진행)
             docker rm $(docker ps -a -q) || true
             # 새로운 컨테이너 실행 (8080 포트 매핑)
-            docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/your-app-name:latest
+            docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/festa-mate:latest
             # 사용하지 않는 이미지 정리
             docker image prune -f
