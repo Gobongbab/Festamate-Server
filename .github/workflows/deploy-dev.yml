@@ -53,7 +53,7 @@ jobs:
         with:
           context: .  # 도커 빌드 컨텍스트 위치
           push: true  # 이미지를 Docker Hub에 푸시할지 여부
-          tags: ${{ secrets.DOCKER_USERNAME }}/festa-mate:latest  # 이미지 태그 설정
+          tags: ${{ secrets.DOCKER_USERNAME }}/festamate:latest  # 이미지 태그 설정
 
       # EC2 인스턴스에 SSH로 접속하여 배포 명령 실행
       - name: Deploy to EC2
@@ -64,12 +64,12 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}  # EC2 접속용 SSH 키
           script: |  # EC2에서 실행할 명령어들
             # 최신 도커 이미지 pull
-            docker pull ${{ secrets.DOCKER_USERNAME }}/festa-mate:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/festamate:latest
             # 실행 중인 모든 컨테이너 중지 (실패해도 계속 진행)
             docker stop $(docker ps -a -q) || true
             # 모든 컨테이너 삭제 (실패해도 계속 진행)
             docker rm $(docker ps -a -q) || true
             # 새로운 컨테이너 실행 (8080 포트 매핑)
-            docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/festa-mate:latest
+            docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/festamate:latest
             # 사용하지 않는 이미지 정리
             docker image prune -f
