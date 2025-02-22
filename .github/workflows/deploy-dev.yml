@@ -56,7 +56,14 @@ jobs:
           push: true # 이미지를 Docker Hub에 푸시할지 여부
           tags: ${{ secrets.DOCKER_USERNAME }}/festamate:latest # 이미지 태그 설정
 
-
+      - name: Copy docker-compose file to EC2
+          uses: appleboy/scp-action@master
+          with:
+            host: ${{ secrets.EC2_HOST }}
+            username: ${{ secrets.EC2_USERNAME }}
+            key: ${{ secrets.EC2_PRIVATE_KEY }}
+            source: "docker-compose.dev.yml"
+            target: "~/app"
 
       # EC2 인스턴스에 SSH로 접속하여 배포 명령 실행
       - name: Deploy to EC2
