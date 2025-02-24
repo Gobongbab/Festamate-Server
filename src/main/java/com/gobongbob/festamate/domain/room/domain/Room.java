@@ -9,13 +9,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -23,6 +22,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Room {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,4 +42,20 @@ public class Room {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host_id")
     private Member host;
+
+    public void updateRoom(
+            int headCount,
+            Gender preferredGender,
+            String openChatLink,
+            LocalDateTime meetingDateTime,
+            String title,
+            String content
+    ) {
+        this.headCount = headCount;
+        this.preferredGender = preferredGender;
+        this.openChatLink = openChatLink;
+        this.meetingDateTime = meetingDateTime;
+        this.title = title;
+        this.content = content;
+    }
 }
