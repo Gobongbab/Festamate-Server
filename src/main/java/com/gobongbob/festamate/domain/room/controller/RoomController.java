@@ -8,6 +8,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,6 +46,13 @@ public class RoomController {
             @RequestBody RoomUpdateRequest request
     ) {
         roomService.updateRoomById(roomId, request);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{roomId}")
+    public ResponseEntity<Void> deleteRoomById(@PathVariable Long roomId) {
+        roomService.deleteRoomById(roomId);
 
         return ResponseEntity.ok().build();
     }
