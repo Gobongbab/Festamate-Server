@@ -23,10 +23,16 @@ public class RoomService {
         roomRepository.save(room);
     }
 
-    public List<RoomResponse> findRooms() {
+    public List<RoomResponse> findAllRooms() {
         return roomRepository.findAll()
                 .stream()
                 .map(RoomResponse::toDto)
                 .toList();
+    }
+
+    public RoomResponse findRoomById(Long roomId) {
+        return roomRepository.findById(roomId)
+                .map(RoomResponse::toDto)
+                .orElseThrow(() -> new IllegalArgumentException("해당 방이 존재하지 않습니다."));
     }
 }
