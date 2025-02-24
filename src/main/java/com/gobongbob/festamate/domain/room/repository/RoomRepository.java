@@ -13,5 +13,5 @@ public interface RoomRepository extends Repository<Long, Room> {
 
     Optional<Room> findById(Long id);
 
-    void deleteById(Long roomId);
+    void delete(Room room);
 }
