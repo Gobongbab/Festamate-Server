@@ -35,12 +35,12 @@ public class RoomService {
     public RoomResponse findRoomById(Long roomId) {
         return roomRepository.findById(roomId)
                 .map(RoomResponse::toDto)
-                .orElseThrow(() -> new IllegalArgumentException("해당 방이 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
     }
 
     public void updateRoomById(Long roomId, RoomUpdateRequest request) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 방이 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
 
         /*
         모임방 정보를 수정할 수 있는 조건인지 확인하는 로직이 추후 추가되어야 합니다.
@@ -58,5 +58,16 @@ public class RoomService {
         );
 
         roomRepository.save(room);
+    }
+
+    public void deleteRoomById(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+
+        /*
+        요청한 사용자가 방장인지 확인하는 로직이 추후 추가되어야 합니다.
+         */
+
+        roomRepository.delete(room);
     }
 }
