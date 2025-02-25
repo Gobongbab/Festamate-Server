@@ -7,27 +7,17 @@ on:
     types:
       - completed
 
-  # develop 브랜치에 push가 발생했을 때 실행
-  push:
-    branches:
-      - develop
-  # develop 브랜치로 PR이 생성됐을 때 실행
-  pull_request:
-    branches:
-      - develop
+#  # develop 브랜치에 push가 발생했을 때 실행
+#  push:
+#    branches:
+#      - develop
+#  # develop 브랜치로 PR이 생성됐을 때 실행
+#  pull_request:
+#    branches:
+#      - develop
 
 jobs:
-  check-workflow-status:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check workflow status
-        run: |
-          echo "Workflow name: ${{ github.event.workflow_run.name }}"
-          echo "Workflow conclusion: ${{ github.event.workflow_run.conclusion }}"
-          echo "Workflow status: ${{ github.event.workflow_run.status }}"
-
   build-and-deploy:
-
     # CI 워크플로우가 성공했을 때만 실행
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
