@@ -1,4 +1,4 @@
-name: Build and Deploy to EC2
+name: Java CD
 
 on:
   # CI 워크플로우가 완료된 후 실행
@@ -19,6 +19,11 @@ on:
 
 jobs:
   build-and-deploy:
+
+    - name: Check CI workflow
+        run:
+          echo "CI workflow conclusion: ${{ github.event.workflow_run.conclusion }}"
+
     # CI 워크플로우가 성공했을 때만 실행
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
