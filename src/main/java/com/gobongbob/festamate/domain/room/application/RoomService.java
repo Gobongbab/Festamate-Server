@@ -38,6 +38,7 @@ public class RoomService {
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
     }
 
+    @Transactional
     public void updateRoomById(Long roomId, RoomUpdateRequest request) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
@@ -60,6 +61,7 @@ public class RoomService {
         roomRepository.save(room);
     }
 
+    @Transactional
     public void deleteRoomById(Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
