@@ -1,0 +1,43 @@
+# 개발용
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    container_name: spring-app-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+    depends_on:
+      - db
+    networks:
+      - spring-dev-network
+
+  # MySQL 데이터베이스 서비스 설정
+  db:
+    image: mysql:8.0.33
+    restart: always # 컨테이너 자동 재시작
+    container_name: mysql-dev
+    ports:
+      - "13306:3306"
+    environment: # MySQL 환경 변수 설정
+      - MYSQL_DATABASE=festamate
+      - MYSQL_ROOT_PASSWORD=0000
+      - TZ=Asia/Seoul
+    command: # MySQL 문자셋 설정
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-dev-data:/var/lib/mysql # 데이터 영속성을 위한 볼륨 설정
+    networks:
+      - spring-dev-network # 스프링 애플리케이션과 통신을 위한 네트워크
+
+volumes:
+  mysql-dev-data: # MySQL 데이터 저장용 볼륨
+
+networks:
+  spring-dev-network: # 서비스 간 통신을 위한 브릿지 네트워크
+    driver: bridge

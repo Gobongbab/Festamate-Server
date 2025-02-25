@@ -9,4 +9,4 @@ EXPOSE 8080
 
 # 개발 프로필 활성화
 ENV USE_PROFILE=dev
-ENTRYPOINT ["java", "-Dspring.profiles.active=${USE_PROFILE}", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=local", "-jar", "app.jar"]
