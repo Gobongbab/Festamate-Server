@@ -31,8 +31,9 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
-          tags: gobongbab/festamate:latest
+          file: ./Dockerfile.dev  # Dockerfile.dev 사용
+          push: true # 이미지를 Docker Hub에 푸시할지 여부
+          tags: ${{ secrets.DOCKER_USERNAME }}/festamate:latest # 이미지 태그 설정
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
