@@ -1,4 +1,4 @@
-package com.gobongbob.festamate.domain.room.repository;
+package com.gobongbob.festamate.domain.room.persistence;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
 import java.util.List;

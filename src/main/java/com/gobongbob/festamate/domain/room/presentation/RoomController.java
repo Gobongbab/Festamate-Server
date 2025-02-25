@@ -1,9 +1,9 @@
-package com.gobongbob.festamate.domain.room.controller;
+package com.gobongbob.festamate.domain.room.presentation;
 
+import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
-import com.gobongbob.festamate.domain.room.service.RoomService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

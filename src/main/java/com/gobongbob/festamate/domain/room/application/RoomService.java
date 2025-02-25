@@ -1,11 +1,11 @@
-package com.gobongbob.festamate.domain.room.service;
+package com.gobongbob.festamate.domain.room.application;
 
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
-import com.gobongbob.festamate.domain.room.repository.RoomRepository;
+import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
