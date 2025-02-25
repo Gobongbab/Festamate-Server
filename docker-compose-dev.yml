@@ -4,21 +4,24 @@ version: '3.8'
 services:
   app:
     container_name: festamate
-    image: test/festamate:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gobongbab/festamate:latest
     ports:
       - "8080:8080"
     restart: unless-stopped
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      # 필요한 환경변수들 추가
+      - USE_PROFILE=dev
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASS=${DB_PASS}
     networks:
       - festamate-network
     depends_on:
-      - db
       - redis
-    networks:
-      festamate-network:
-        driver: bridge
 
   # Redis 캐시 서버 설정
   redis:
@@ -35,12 +38,11 @@ services:
     volumes:
       - redis-dev-data:/data # Redis 데이터 영속성을 위한 볼륨
     networks:
-      - spring-dev-network # 스프링 애플리케이션과 통신을 위한 네트워크
+      - festamate-network
 
 volumes:
-  mysql-dev-data: # MySQL 데이터 저장용 볼륨
   redis-dev-data: # Redis 데이터 저장용 볼륨
 
 networks:
-  spring-dev-network: # 서비스 간 통신을 위한 브릿지 네트워크
+  festamate-network: # 서비스 간 통신을 위한 브릿지 네트워크
     driver: bridge
