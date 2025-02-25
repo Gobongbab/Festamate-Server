@@ -18,19 +18,15 @@ on:
       - develop
 
 jobs:
-  debug-workflow:
+  check-workflow-status:
     runs-on: ubuntu-latest
     steps:
-      - name: Print workflow conclusion
-        run:
-          echo "CI workflow conclusion -> ${{ github.event.workflow_run.conclusion }}"
+      - name: Check workflow status
+        run: |
+          echo "Workflow name: ${{ github.event.workflow_run.name }}"
+          echo "Workflow conclusion: ${{ github.event.workflow_run.conclusion }}"
+          echo "Workflow status: ${{ github.event.workflow_run.status }}"
 
-  #      - name: Print other workflow details
-  #        run: |
-  #          echo "Workflow ID: ${{ github.event.workflow_run.id }}"
-  #          echo "Workflow name: ${{ github.event.workflow_run.name }}"
-  #          echo "Workflow status: ${{ github.event.workflow_run.status }}"
-  #
   build-and-deploy:
 
     # CI 워크플로우가 성공했을 때만 실행
