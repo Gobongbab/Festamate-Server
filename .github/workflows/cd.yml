@@ -7,7 +7,6 @@ on:
     types:
       - completed
 
-
 jobs:
   build-and-deploy:
     # CI가 성공한 경우에만 실행
@@ -20,8 +19,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.workflow_run.head_branch }}
 
       # CI 워크플로우에서 아티팩트로 업로드한 JAR 파일 다운로드
       - name: Download JAR artifact
