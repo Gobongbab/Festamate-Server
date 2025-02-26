@@ -5,9 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
+import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.fixture.RoomFixture;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.serviceSliceTest;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -49,6 +51,49 @@ class RoomServiceTest extends serviceSliceTest {
             // then
             assertThat(findRoom.getHeadCount()).isEqualTo(room.getHeadCount());
             assertThat(findRoom.getPreferredGender()).isEqualTo(room.getPreferredGender());
+        }
+    }
+
+    @Nested
+    @DisplayName("모임방을 조회할 시")
+    class findRoom {
+
+        @Test
+        @DisplayName("특정 모임방을 단건으로 조회하는 데 성공한다.")
+        void successFindRoomById() {
+            // given
+            Room room = RoomFixture.createRoom(4, Gender.MALE);
+            Room savedRoom = roomRepository.save(room);
+
+            // when
+            RoomResponse findRoom = roomService.findRoomById(room.getId());
+
+            // then
+            assertThat(savedRoom.getId()).isEqualTo(findRoom.id());
+        }
+
+        @Test
+        @DisplayName("모든 모임방 조회하는 데 성공한다.")
+        void successFindAllRooms() {
+            // given
+            List<RoomCreateRequest> requests = RoomFixture.createRooms()
+                    .stream()
+                    .map(room -> new RoomCreateRequest(
+                                    room.getHeadCount(),
+                                    room.getPreferredGender().getName(),
+                                    room.getOpenChatLink(),
+                                    room.getMeetingDateTime(),
+                                    room.getTitle(),
+                                    room.getContent()
+                            )
+                    ).toList();
+
+            // when
+            requests.forEach(roomService::createRoom);
+            List<RoomResponse> findRoomResponses = roomService.findAllRooms();
+
+            // then
+            assertThat(findRoomResponses).hasSize(requests.size());
         }
     }
 }
