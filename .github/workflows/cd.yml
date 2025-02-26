@@ -30,8 +30,8 @@ jobs:
       - name: Build and push with Docker Compose
         run: |
           # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시
-          docker-compose -f docker-compose-dev.yml build
-          docker-compose -f docker-compose-dev.yml push
+          docker compose -f docker-compose-dev.yml build
+          docker compose -f docker-compose-dev.yml push
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
@@ -56,13 +56,13 @@ jobs:
             EOF
             
             # 이전 컨테이너 중지 및 제거
-            docker-compose down || true
+            docker compose down || true
             
             # 최신 이미지 pull
-            docker-compose pull
+            docker compose pull
             
             # 컨테이너 시작
-            docker-compose up -d
+            docker compose up -d
             
             # 사용하지 않는 이미지 정리
             docker image prune -af
