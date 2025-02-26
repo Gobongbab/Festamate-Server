@@ -59,7 +59,7 @@ class RoomServiceTest extends serviceSliceTest {
     class findRoom {
 
         @Test
-        @DisplayName("특정 모임방을 단건으로 조회하는 데 성공한다.")
+        @DisplayName("특정 모임방 단건 조회에 성공한다.")
         void successFindRoomById() {
             // given
             Room room = RoomFixture.createRoom(4, Gender.MALE);
@@ -73,7 +73,7 @@ class RoomServiceTest extends serviceSliceTest {
         }
 
         @Test
-        @DisplayName("모든 모임방 조회하는 데 성공한다.")
+        @DisplayName("모든 모임방 조회에 성공한다.")
         void successFindAllRooms() {
             // given
             List<RoomCreateRequest> requests = RoomFixture.createRooms()
@@ -135,7 +135,7 @@ class RoomServiceTest extends serviceSliceTest {
 
         @Test
         @Transactional
-        @DisplayName("특정 모임방을 삭제한다")
+        @DisplayName("모임방을 삭제에 성공한다.")
         void deleteRoomById() {
             // given
             Room room = RoomFixture.createRoom(4, Gender.MALE);
