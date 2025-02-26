@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
+import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.fixture.RoomFixture;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
@@ -94,6 +95,38 @@ class RoomServiceTest extends serviceSliceTest {
 
             // then
             assertThat(findRoomResponses).hasSize(requests.size());
+        }
+    }
+
+    @Nested
+    @Transactional
+    @DisplayName("모임방을 수정할 시")
+    class updateRoom {
+
+        @Test
+        @DisplayName("수정에 성공한다.")
+        void successUpdateRoomById() {
+            // given
+            Room room = RoomFixture.createRoom(4, Gender.MALE);
+            roomRepository.save(room);
+
+            int headCountToUpdate = 8;
+            Gender preferredGenderToUpdate = Gender.FEMALE;
+
+            // when
+            RoomUpdateRequest request = new RoomUpdateRequest(
+                    headCountToUpdate,
+                    preferredGenderToUpdate.getName(),
+                    room.getOpenChatLink(),
+                    room.getMeetingDateTime(),
+                    room.getTitle(),
+                    room.getContent()
+            );
+            roomService.updateRoomById(room.getId(), request);
+
+            // then
+            assertThat(room.getHeadCount()).isEqualTo(headCountToUpdate);
+            assertThat(room.getPreferredGender()).isEqualTo(preferredGenderToUpdate);
         }
     }
 }
