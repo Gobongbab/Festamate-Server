@@ -1,7 +1,9 @@
 package com.gobongbob.festamate.domain.member.domain;
 
 import java.util.Arrays;
+import lombok.Getter;
 
+@Getter
 public enum Gender {
     MALE("남성"),
     FEMALE("여성");
