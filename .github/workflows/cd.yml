@@ -68,6 +68,7 @@ jobs:
       # 8) Docker Compose 빌드 및 푸시
       - name: Build and push with Docker Compose
         run: |
+          docker ps
           # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시
           docker-compose build
           docker-compose push
