@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.room.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -127,6 +128,29 @@ class RoomServiceTest extends serviceSliceTest {
             // then
             assertThat(room.getHeadCount()).isEqualTo(headCountToUpdate);
             assertThat(room.getPreferredGender()).isEqualTo(preferredGenderToUpdate);
+        }
+    }
+
+    @Nested
+    @DisplayName("모임방을 삭제할 시")
+    class deleteRoom {
+
+        @Test
+        @Transactional
+        @DisplayName("특정 모임방을 삭제한다")
+        void deleteRoomById() {
+            // given
+            Room room = RoomFixture.createRoom(4, Gender.MALE);
+            roomRepository.save(room);
+
+            // when
+            roomService.deleteRoomById(room.getId());
+
+            // then
+            Long roomId = room.getId();
+            assertThatThrownBy(() -> roomService.findRoomById(roomId))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("모임방이 존재하지 않습니다.");
         }
     }
 }
