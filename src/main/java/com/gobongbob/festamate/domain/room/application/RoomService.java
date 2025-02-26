@@ -57,8 +57,6 @@ public class RoomService {
                 request.title(),
                 request.content()
         );
-
-        roomRepository.save(room);
     }
 
     @Transactional
