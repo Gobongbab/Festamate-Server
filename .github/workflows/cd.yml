@@ -2,7 +2,7 @@ name: Java CD
 
 on:
   # CI 워크플로우가 완료된 후 실행
-  workflow_run:
+  workflow_run: # workflow_run은 이전 워크플로우의 실행 결과에 따라 현재 워크플로우를 트리거할 수 있는 강력한 이벤트
     workflows: [ "Java CI" ]
     types:
       - completed
@@ -20,7 +20,7 @@ jobs:
   build-and-deploy:
     # CI가 성공한 경우에만 실행
     runs-on: ubuntu-latest
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.status == 'completed' }}
 
     steps:
       - name: Checkout code
@@ -28,7 +28,7 @@ jobs:
 
       # CI 워크플로우에서 아티팩트로 업로드한 JAR 파일 다운로드
       - name: Download JAR artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           workflow: Java CI
           name: app-jar
