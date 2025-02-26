@@ -48,15 +48,15 @@ jobs:
         run: ./gradlew clean build
         shell: bash
 
-      # 5) Docker 및 Docker Compose 설정
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      # Docker Compose 설치 단계 추가
-      - name: Set up Docker Compose
-        uses: docker/setup-compose-action@v1
-        with:
-          version: latest
+      #      # 5) Docker 및 Docker Compose 설정
+      #      - name: Set up Docker Buildx
+      #        uses: docker/setup-buildx-action@v2
+      #
+      #      # Docker Compose 설치 단계 추가
+      #      - name: Set up Docker Compose
+      #        uses: docker/setup-compose-action@v1
+      #        with:
+      #          version: latest
 
       # 6) Docker Hub 로그인
       - name: Login to Docker Hub
