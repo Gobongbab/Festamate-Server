@@ -46,13 +46,11 @@ class RoomServiceTest extends serviceSliceTest {
             );
 
             // when
-            roomService.createRoom(request);
-            Room findRoom = roomRepository.findById(room.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+            Room createdRoom = roomService.createRoom(request);
 
             // then
-            assertThat(findRoom.getHeadCount()).isEqualTo(room.getHeadCount());
-            assertThat(findRoom.getPreferredGender()).isEqualTo(room.getPreferredGender());
+            assertThat(createdRoom.getHeadCount()).isEqualTo(room.getHeadCount());
+            assertThat(createdRoom.getPreferredGender()).isEqualTo(room.getPreferredGender());
         }
     }
 

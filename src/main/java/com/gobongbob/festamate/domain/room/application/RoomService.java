@@ -19,10 +19,10 @@ public class RoomService {
     private final RoomRepository roomRepository;
 
     @Transactional
-    public void createRoom(RoomCreateRequest request) {
+    public Room createRoom(RoomCreateRequest request) {
         Room room = request.toEntity();
 
-        roomRepository.save(room);
+        return roomRepository.save(room);
     }
 
     public List<RoomResponse> findAllRooms() {
