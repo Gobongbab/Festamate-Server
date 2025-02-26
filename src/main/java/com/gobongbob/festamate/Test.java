@@ -17,7 +17,7 @@ public class Test {
 
 
   @GetMapping("/health")
-  public SuccessResponse<String> healthCheck() {
+  public ResponseEntity<String> healthCheck() {
 
     return ResponseEntity.ok().build();
   }
