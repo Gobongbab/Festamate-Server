@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-@DisplayName("모임방 관련 기능 테스트")
+@DisplayName("RoomServiceTest")
 class RoomServiceTest extends serviceSliceTest {
 
     @Autowired
