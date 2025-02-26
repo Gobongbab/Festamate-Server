@@ -51,7 +51,7 @@ jobs:
 
       # Docker 설정 추가
       - name: Set up Docker
-      uses: docker/setup-docker@v1
+        uses: docker/setup-docker@v1
 
       #      # Docker Compose 설정 추가
       #       - name: Set up Docker Compose
