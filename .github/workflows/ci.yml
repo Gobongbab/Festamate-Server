@@ -55,11 +55,3 @@ jobs:
       - name: Build and Test with Gradle
         run: ./gradlew clean build
         shell: bash
-
-      # 5) 빌드된 JAR 파일을 아티팩트로 업로드
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-jar
-          path: build/libs/*.jar
-          retention-days: 1
