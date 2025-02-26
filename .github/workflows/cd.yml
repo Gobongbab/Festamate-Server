@@ -83,13 +83,13 @@ jobs:
             EOF
             
             # 이전 컨테이너 중지 및 제거
-            docker-compose down
+            docker compose down
             
             # 최신 이미지 pull
-            docker-compose pull
+            docker compose pull
             
             # 컨테이너 시작
-            docker-compose up -d
+            docker compose up -d
             
             # 사용하지 않는 이미지 정리 (선택사항)
             docker image prune -af

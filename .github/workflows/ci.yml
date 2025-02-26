@@ -19,7 +19,7 @@ permissions:
   pull-requests: write # PR 코멘트를 위한 권한 추가
 
 jobs:
-  build:
+  build-test:
     # Ubuntu 최신 버전에서 실행
     runs-on: ubuntu-latest
 
