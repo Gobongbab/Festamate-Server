@@ -3,7 +3,7 @@ name: Java CD
 on:
   # CI 워크플로우가 완료된 후 실행
   workflow_run: # workflow_run은 이전 워크플로우의 실행 결과에 따라 현재 워크플로우를 트리거할 수 있는 강력한 이벤트
-    workflows: [ "Java CI" ]
+    workflows: [ "Java", "CI" ]
     types:
       - completed
 # test
