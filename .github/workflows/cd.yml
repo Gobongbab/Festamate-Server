@@ -6,15 +6,7 @@ on:
     workflows: [ "Java CI" ]
     types:
       - completed
-
-  #  # develop 브랜치에 push가 발생했을 때 실행
-  #  push:
-  #    branches:
-  #      - develop
-  # develop 브랜치로 PR이 생성됐을 때 실행
-  pull_request:
-    branches:
-      - develop
+  
 
 jobs:
   build-and-deploy:
