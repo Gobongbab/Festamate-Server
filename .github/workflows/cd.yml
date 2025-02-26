@@ -20,9 +20,12 @@ jobs:
   build-and-deploy:
     # CI가 성공한 경우에만 실행
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
+    # if: ${{ github.event.workflow_run.status == 'completed' }} -> 이녀석 때문에 워크플로우가 skip된다;;
 
     steps:
+      - name: Log Workflow Conclusion
+        run: echo "Workflow concluded with status-> ${{ github.event.workflow_run.conclusion }}"
+
       - name: Checkout code
         uses: actions/checkout@v3
 
