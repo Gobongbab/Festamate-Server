@@ -1,0 +1,79 @@
+name: Java CD
+
+on:
+  # CI 워크플로우가 완료된 후 실행
+  workflow_run: # workflow_run은 이전 워크플로우의 실행 결과에 따라 현재 워크플로우를 트리거할 수 있는 강력한 이벤트
+    workflows: [ "Java CI" ]
+    types:
+      - completed
+
+jobs:
+  build-and-deploy:
+    # CI가 성공한 경우에만 실행
+    runs-on: ubuntu-latest
+    # if: ${{ github.event.workflow_run.status == 'completed' }} -> 이녀석 때문에 워크플로우가 skip된다;;
+
+    steps:
+      - name: Log Workflow Conclusion
+        run: echo "Workflow concluded with status-> ${{ github.event.workflow_run.conclusion }}"
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # CI 워크플로우에서 아티팩트로 업로드한 JAR 파일 다운로드
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          workflow: Java CI
+          name: app-jar
+          path: build/libs/
+
+      #      # 다운로드한 JAR 파일 확인 (디버깅용)
+      #      - name: List JAR files
+      #        run: ls -la build/libs/
+      #        shell: bash
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile.dev  # Dockerfile.dev 사용
+          push: true # 이미지를 Docker Hub에 푸시할지 여부
+          tags: ${{ secrets.DOCKER_USERNAME }}/festamate:latest # 이미지 태그 설정
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            # 환경 변수 파일 생성 (민감한 정보는 GitHub Secrets에서 가져옴)
+            cat > .env << EOF
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASS=${{ secrets.DB_PASS }}
+            EOF
+            
+            # 이전 컨테이너 중지 및 제거
+            docker-compose down
+            
+            # 최신 이미지 pull
+            docker-compose pull
+            
+            # 컨테이너 시작
+            docker-compose up -d
+            
+            # 사용하지 않는 이미지 정리 (선택사항)
+            docker image prune -af

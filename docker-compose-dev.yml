@@ -3,38 +3,25 @@ version: '3.8'
 
 services:
   app:
+    container_name: festamate
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    container_name: spring-app-dev
+      dockerfile: Dockerfile
+    image: gobongbab/festamate:latest
     ports:
       - "8080:8080"
+    restart: unless-stopped
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - USE_PROFILE=dev
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASS=${DB_PASS}
+    networks:
+      - festamate-network
     depends_on:
-      - db
       - redis
-    networks:
-      - spring-dev-network
-
-  # MySQL 데이터베이스 서비스 설정
-  db:
-    image: mysql:8.0.33
-    restart: always # 컨테이너 자동 재시작
-    container_name: mysql-dev
-    ports:
-      - "13306:3306"
-    environment: # MySQL 환경 변수 설정
-      - MYSQL_DATABASE=Festamate
-      - MYSQL_ROOT_PASSWORD=0000
-      - TZ=Asia/Seoul
-    command: # MySQL 문자셋 설정
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    volumes:
-      - mysql-dev-data:/var/lib/mysql # 데이터 영속성을 위한 볼륨 설정
-    networks:
-      - spring-dev-network # 스프링 애플리케이션과 통신을 위한 네트워크
 
   # Redis 캐시 서버 설정
   redis:
@@ -51,12 +38,11 @@ services:
     volumes:
       - redis-dev-data:/data # Redis 데이터 영속성을 위한 볼륨
     networks:
-      - spring-dev-network # 스프링 애플리케이션과 통신을 위한 네트워크
+      - festamate-network
 
 volumes:
-  mysql-dev-data: # MySQL 데이터 저장용 볼륨
   redis-dev-data: # Redis 데이터 저장용 볼륨
 
 networks:
-  spring-dev-network: # 서비스 간 통신을 위한 브릿지 네트워크
+  festamate-network: # 서비스 간 통신을 위한 브릿지 네트워크
     driver: bridge
