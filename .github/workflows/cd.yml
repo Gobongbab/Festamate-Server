@@ -84,6 +84,8 @@ jobs:
             DB_PASS=${{ secrets.DB_PASS }}
             EOF
             
+            pwd
+            
             ls -la
             
             docker ps
