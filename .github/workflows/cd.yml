@@ -84,6 +84,10 @@ jobs:
             DB_PASS=${{ secrets.DB_PASS }}
             EOF
             
+            ls -la
+            
+            docker ps
+            
             # 이전 컨테이너 중지 및 제거
             docker compose down || true
             
