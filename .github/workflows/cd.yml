@@ -1,55 +1,70 @@
 name: Java CD
 
 on:
-  # CI 워크플로우가 완료된 후 실행
-  workflow_run: # workflow_run은 이전 워크플로우의 실행 결과에 따라 현재 워크플로우를 트리거할 수 있는 강력한 이벤트
-    workflows: [ "Java CI" ]
-    types:
-      - completed
+  pull_request:
+    # develop 브랜치에 대한 PR일 때만 실행
+    branches: [ develop ]
+    # 다음 파일들이 변경되었을 때는 워크플로우를 실행하지 않음
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
 
 jobs:
   build-and-deploy:
-    # CI가 성공한 경우에만 실행
     runs-on: ubuntu-latest
-    # if: ${{ github.event.workflow_run.status == 'completed' }} -> 이녀석 때문에 워크플로우가 skip된다;;
 
     steps:
-      - name: Log Workflow Conclusion
-        run: echo "Workflow concluded with status-> ${{ github.event.workflow_run.conclusion }}"
-
+      # 1) 워크플로우가 실행되는 러너(가상 머신)에 해당 리포지토리의 코드를 클론하기 위해 사용
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # CI 워크플로우에서 아티팩트로 업로드한 JAR 파일 다운로드
-      - name: Download JAR artifact
-        uses: actions/download-artifact@v4
+      # Gradle 의존성에 대한 캐싱 추가 (매 빌드마다 의존성을 다시 다운로드하게 되어 빌드 시간이 길어지는 걸 방지)
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
         with:
-          workflow: Java CI
-          name: app-jar
-          path: build/libs/
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      #      # 다운로드한 JAR 파일 확인 (디버깅용)
-      #      - name: List JAR files
-      #        run: ls -la build/libs/
-      #        shell: bash
+      # 2) JDK 17 버전 설치, 다른 JDK 버전을 사용한다면 수정 필요
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      # 3)권한 부여 >> 리눅스 명령어다
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        shell: bash
 
+      # 4) .build시작 >> 리눅스 명령어다.
+      # 빌드와 테스트를 함께 실행
+      - name: Build and Test with Gradle
+        run: ./gradlew clean build
+        shell: bash
+
+      # 6) Docker Hub 로그인
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: ./Dockerfile.dev  # Dockerfile.dev 사용
-          push: true # 이미지를 Docker Hub에 푸시할지 여부
-          tags: ${{ secrets.DOCKER_USERNAME }}/festamate:latest # 이미지 태그 설정
+      # 8) Docker Compose 빌드 및 푸시
+      - name: Build and push with Docker Compose
+        run: |
+          # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시
+          docker compose -f docker-compose-dev.yml build
+          docker compose -f docker-compose-dev.yml push
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
+      # 9) EC2에 배포
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -57,6 +72,9 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
+            # Docker Hub 로그인
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+            
             # 환경 변수 파일 생성 (민감한 정보는 GitHub Secrets에서 가져옴)
             cat > .env << EOF
             DB_HOST=${{ secrets.DB_HOST }}
@@ -66,14 +84,21 @@ jobs:
             DB_PASS=${{ secrets.DB_PASS }}
             EOF
             
+            pwd
+            
+            ls -la
+            
+            docker ps
+            
             # 이전 컨테이너 중지 및 제거
-            docker-compose down
+            docker stop festamate || true
+            docker rm festamate || true
             
             # 최신 이미지 pull
-            docker-compose pull
+            docker pull gobongbab/festamate:latest
             
             # 컨테이너 시작
-            docker-compose up -d
+            docker run -d --name festamate -p 8080:8080 --env-file .env gobongbab/festamate:latest
             
-            # 사용하지 않는 이미지 정리 (선택사항)
+            # 사용하지 않는 이미지 정리
             docker image prune -af
