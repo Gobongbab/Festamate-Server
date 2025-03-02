@@ -1,4 +1,4 @@
-package com.gobongbob.festamate.domain.room.fixture;
+package com.gobongbob.festamate.common.fixture;
 
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
