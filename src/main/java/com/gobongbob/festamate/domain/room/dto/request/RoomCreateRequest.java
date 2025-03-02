@@ -16,7 +16,7 @@ public record RoomCreateRequest(
         String content
 ) {
 
-    public Room toEntity(Member host) {
+    public Room toEntity(Member member) {
         return Room.builder()
                 .headCount(headCount)
                 .preferredGender(Gender.findByName(preferredGender))
@@ -24,7 +24,7 @@ public record RoomCreateRequest(
                 .meetingDateTime(meetingDateTime)
                 .title(title)
                 .content(content)
-                .host(host)
+                .host(member)
                 .build();
     }
 }
