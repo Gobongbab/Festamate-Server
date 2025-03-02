@@ -85,7 +85,7 @@ public class RoomService {
     }
 
     private static void validateIsHost(Room room, Member member) {
-        if (room.isHost(member)) {
+        if (!room.isHost(member)) {
             throw new IllegalArgumentException("방장만 모임방 정보를 수정할 수 있습니다.");
         }
     }
