@@ -14,7 +14,7 @@ public enum Major {
     private final String college;
     private final String department;
 
-    public static Major findByName(String department) {
+    public static Major findByDepartment(String department) {
         return Arrays.stream(Major.values())
                 .filter(major -> major.getDepartment().equals(department))
                 .findFirst()
