@@ -25,4 +25,13 @@ public class MemberFixture {
                 .build();
     }
 
+    public static Member MEMBER1() {
+        return MemberFixture.createMember(
+                "testNickname1",
+                "202500001",
+                "testLoginId1",
+                "01012345678",
+                Major.COMPUTER_SCIENCE
+        );
+    }
 }
