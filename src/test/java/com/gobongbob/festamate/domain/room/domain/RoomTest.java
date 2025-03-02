@@ -2,8 +2,11 @@ package com.gobongbob.festamate.domain.room.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.gobongbob.festamate.common.fixture.MemberFixture;
+import com.gobongbob.festamate.common.fixture.RoomFixture;
+import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.member.domain.Gender;
-import com.gobongbob.festamate.domain.room.fixture.RoomFixture;
+import com.gobongbob.festamate.domain.member.domain.Member;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +17,15 @@ class RoomTest {
     @DisplayName("모임방 객체를 수정한다")
     void updateRoom() {
         // given
-        Room room = RoomFixture.createRoom(4, Gender.MALE);
+        Member member = MemberFixture.createMember(
+                "testNickname1",
+                "202500001",
+                "testLoginId1",
+                "01012345678",
+                Major.COMPUTER_SCIENCE
+        );
+
+        Room room = RoomFixture.createRoom(4, Gender.MALE, member);
 
         // when
         room.updateRoom(

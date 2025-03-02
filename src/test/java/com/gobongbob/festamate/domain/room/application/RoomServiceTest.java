@@ -3,12 +3,16 @@ package com.gobongbob.festamate.domain.room.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.gobongbob.festamate.common.fixture.MemberFixture;
+import com.gobongbob.festamate.common.fixture.RoomFixture;
+import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.member.domain.Gender;
+import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
-import com.gobongbob.festamate.domain.room.fixture.RoomFixture;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.serviceSliceTest;
 import java.util.List;
@@ -25,6 +29,8 @@ class RoomServiceTest extends serviceSliceTest {
     RoomService roomService;
     @Autowired
     RoomRepository roomRepository;
+    @Autowired
+    MemberRepository memberRepository;
 
     @Nested
     @DisplayName("모임방을 생성할 시")
@@ -35,7 +41,16 @@ class RoomServiceTest extends serviceSliceTest {
         @DisplayName("모임방을 생성에 성공한다.")
         void successCreateRoom() {
             // given
-            Room room = RoomFixture.createRoom(4, Gender.MALE);
+            Member member = MemberFixture.createMember(
+                    "testNickname1",
+                    "202500001",
+                    "testLoginId1",
+                    "01012345678",
+                    Major.COMPUTER_SCIENCE
+            );
+            memberRepository.save(member);
+
+            Room room = RoomFixture.createRoom(4, Gender.MALE, member);
             RoomCreateRequest request = new RoomCreateRequest(
                     room.getHeadCount(),
                     room.getPreferredGender().getName(),
@@ -46,7 +61,7 @@ class RoomServiceTest extends serviceSliceTest {
             );
 
             // when
-            Room createdRoom = roomService.createRoom(request);
+            Room createdRoom = roomService.createRoom(request, member.getId());
 
             // then
             assertThat(createdRoom.getHeadCount()).isEqualTo(room.getHeadCount());
@@ -62,7 +77,16 @@ class RoomServiceTest extends serviceSliceTest {
         @DisplayName("특정 모임방 단건 조회에 성공한다.")
         void successFindRoomById() {
             // given
-            Room room = RoomFixture.createRoom(4, Gender.MALE);
+            Member member = MemberFixture.createMember(
+                    "testNickname1",
+                    "202500001",
+                    "testLoginId1",
+                    "01012345678",
+                    Major.COMPUTER_SCIENCE
+            );
+            Member createdMember = memberRepository.save(member);
+
+            Room room = RoomFixture.createRoom(4, Gender.MALE, createdMember);
             Room savedRoom = roomRepository.save(room);
 
             // when
@@ -76,7 +100,16 @@ class RoomServiceTest extends serviceSliceTest {
         @DisplayName("모든 모임방 조회에 성공한다.")
         void successFindAllRooms() {
             // given
-            List<RoomCreateRequest> requests = RoomFixture.createRooms()
+            Member member = MemberFixture.createMember(
+                    "testNickname1",
+                    "202500001",
+                    "testLoginId1",
+                    "01012345678",
+                    Major.COMPUTER_SCIENCE
+            );
+            Member createdMember = memberRepository.save(member);
+
+            List<RoomCreateRequest> requests = RoomFixture.createRooms(createdMember)
                     .stream()
                     .map(room -> new RoomCreateRequest(
                                     room.getHeadCount(),
@@ -87,9 +120,9 @@ class RoomServiceTest extends serviceSliceTest {
                                     room.getContent()
                             )
                     ).toList();
+            requests.forEach(request -> roomService.createRoom(request, createdMember.getId()));
 
             // when
-            requests.forEach(roomService::createRoom);
             List<RoomResponse> findRoomResponses = roomService.findAllRooms();
 
             // then
@@ -106,7 +139,16 @@ class RoomServiceTest extends serviceSliceTest {
         @DisplayName("수정에 성공한다.")
         void successUpdateRoomById() {
             // given
-            Room room = RoomFixture.createRoom(4, Gender.MALE);
+            Member member = MemberFixture.createMember(
+                    "testNickname1",
+                    "202500001",
+                    "testLoginId1",
+                    "01012345678",
+                    Major.COMPUTER_SCIENCE
+            );
+            memberRepository.save(member);
+
+            Room room = RoomFixture.createRoom(4, Gender.MALE, member);
             roomRepository.save(room);
 
             int headCountToUpdate = 8;
@@ -121,7 +163,7 @@ class RoomServiceTest extends serviceSliceTest {
                     room.getTitle(),
                     room.getContent()
             );
-            roomService.updateRoomById(room.getId(), request);
+            roomService.updateRoomById(room.getId(), member.getId(), request);
 
             // then
             assertThat(room.getHeadCount()).isEqualTo(headCountToUpdate);
@@ -138,11 +180,20 @@ class RoomServiceTest extends serviceSliceTest {
         @DisplayName("모임방을 삭제에 성공한다.")
         void deleteRoomById() {
             // given
-            Room room = RoomFixture.createRoom(4, Gender.MALE);
+            Member member = MemberFixture.createMember(
+                    "testNickname1",
+                    "202500001",
+                    "testLoginId1",
+                    "01012345678",
+                    Major.COMPUTER_SCIENCE
+            );
+            memberRepository.save(member);
+
+            Room room = RoomFixture.createRoom(4, Gender.MALE, member);
             roomRepository.save(room);
 
             // when
-            roomService.deleteRoomById(room.getId());
+            roomService.deleteRoomById(room.getId(), member.getId());
 
             // then
             Long roomId = room.getId();
