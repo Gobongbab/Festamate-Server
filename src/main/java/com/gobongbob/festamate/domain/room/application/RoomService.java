@@ -69,12 +69,16 @@ public class RoomService {
     }
 
     @Transactional
-    public void deleteRoomById(Long roomId) {
+    public void deleteRoomById(Long roomId, Long memberId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+        validateIsHost(room, member);
 
         /*
-        요청한 사용자가 방장인지 확인하는 로직이 추후 추가되어야 합니다.
+        요청한 사용자가 방장인지 확인하는 로직이 추후 추가되어야 합니다. (완료)
+        방장이 모임방 구성원들의 동의 없이 모임방을 삭제할 수 있는지에 대한 논의가 필요합니다.
          */
 
         roomRepository.delete(room);
