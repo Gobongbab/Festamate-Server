@@ -11,6 +11,10 @@ public enum Major {
     BUSINESS_ADMINISTRATION("소프트웨어융합대학", "경영학부"),
     INDUSTRIAL_MANAGEMENT_INFORMATION("소프트웨어융합대학", "컴퓨터공학과");
 
+    /*
+    추후 더 다양한 학과가 추가될 예정입니다.
+     */
+
     private final String college;
     private final String department;
 
