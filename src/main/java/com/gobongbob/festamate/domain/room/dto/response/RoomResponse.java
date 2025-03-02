@@ -9,8 +9,10 @@ public record RoomResponse(
         String openChatLink,
         String meetingDateTime,
         String title,
-        String content
+        String content,
+        HostResponse host
 ) {
+
     public static RoomResponse toDto(Room room) {
         return new RoomResponse(
                 room.getId(),
@@ -19,7 +21,24 @@ public record RoomResponse(
                 room.getOpenChatLink(),
                 room.getMeetingDateTime().toString(),
                 room.getTitle(),
-                room.getContent()
+                room.getContent(),
+                new HostResponse(
+                        room.getHost().getId(),
+                        room.getHost().getNickname(),
+                        room.getHost().getStudentId(),
+                        room.getHost().getGender().name(),
+                        room.getHost().getMajor().getDepartment()
+                )
         );
+    }
+
+    public static record HostResponse(
+            Long id,
+            String nickname,
+            String studentId,
+            String gender,
+            String department
+    ) {
+
     }
 }
