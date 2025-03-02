@@ -22,8 +22,8 @@ public class RoomService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public Room createRoom(RoomCreateRequest request, Long userId) {
-        Member host = memberRepository.findById(userId)
+    public Room createRoom(RoomCreateRequest request, Long memberId) {
+        Member host = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
         Room room = request.toEntity(host);
 
