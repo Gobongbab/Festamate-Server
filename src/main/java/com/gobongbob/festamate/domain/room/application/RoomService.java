@@ -1,6 +1,8 @@
 package com.gobongbob.festamate.domain.room.application;
 
 import com.gobongbob.festamate.domain.member.domain.Gender;
+import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
@@ -17,10 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
-    public Room createRoom(RoomCreateRequest request) {
-        Room room = request.toEntity();
+    public Room createRoom(RoomCreateRequest request, Long userId) {
+        Member host = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+        Room room = request.toEntity(host);
 
         return roomRepository.save(room);
     }
