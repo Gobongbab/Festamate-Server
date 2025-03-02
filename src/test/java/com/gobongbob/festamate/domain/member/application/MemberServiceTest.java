@@ -2,10 +2,9 @@ package com.gobongbob.festamate.domain.member.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.gobongbob.festamate.domain.major.domain.Major;
+import com.gobongbob.festamate.common.fixture.MemberFixture;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
-import com.gobongbob.festamate.domain.member.fixture.MemberFixture;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.serviceSliceTest;
 import org.junit.jupiter.api.DisplayName;
@@ -31,13 +30,7 @@ class MemberServiceTest extends serviceSliceTest {
         @DisplayName("회원 생성에 성공한다.")
         void successCreateRoom() {
             // given
-            Member member = MemberFixture.createMember(
-                    "testNickname1",
-                    "202500001",
-                    "testLoginId1",
-                    "01012345678",
-                    Major.COMPUTER_SCIENCE
-            );
+            Member member = MemberFixture.MEMBER1();
             MemberCreateRequest request = new MemberCreateRequest(
                     member.getName(),
                     member.getNickname(),
