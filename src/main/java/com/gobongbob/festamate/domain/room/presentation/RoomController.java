@@ -24,8 +24,11 @@ public class RoomController {
     private final RoomService roomService;
 
     @PostMapping("")
-    public ResponseEntity<Void> createRoom(@RequestBody RoomCreateRequest request) {
-        roomService.createRoom(request);
+    public ResponseEntity<Void> createRoom(
+            @RequestBody RoomCreateRequest request,
+            Long userId // 추후 Spring Security를 활용하여 사용자 정보를 가져오도록 변경 필요 (변경 후 주석 삭제)
+    ) {
+        roomService.createRoom(request, userId);
 
         return ResponseEntity.ok().build();
     }
