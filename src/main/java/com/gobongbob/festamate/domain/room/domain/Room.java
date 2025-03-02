@@ -58,4 +58,8 @@ public class Room {
         this.title = title;
         this.content = content;
     }
+
+    public boolean isHost(Member member) {
+        return this.host.equals(member);
+    }
 }
