@@ -40,18 +40,10 @@ class RoomServiceTest extends serviceSliceTest {
         @DisplayName("모임방을 생성에 성공한다.")
         void successCreateRoom() {
             // given
-            Member member = MemberFixture.MEMBER1();
-            memberRepository.save(member);
+            Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
 
-            Room room = RoomFixture.createRoom(4, Gender.MALE, member);
-            RoomCreateRequest request = new RoomCreateRequest(
-                    room.getHeadCount(),
-                    room.getPreferredGender().getName(),
-                    room.getOpenChatLink(),
-                    room.getMeetingDateTime(),
-                    room.getTitle(),
-                    room.getContent()
-            );
+            Room room = testFixtureBuilder.buildRoom(RoomFixture.ROOM1(member));
+            RoomCreateRequest request = RoomFixture.createRoomCreateRequest(room);
 
             // when
             Room createdRoom = roomService.createRoom(request, member.getId());
@@ -70,44 +62,29 @@ class RoomServiceTest extends serviceSliceTest {
         @DisplayName("특정 모임방 단건 조회에 성공한다.")
         void successFindRoomById() {
             // given
-            Member member = MemberFixture.MEMBER1();
-            memberRepository.save(member);
-
-            Room room = RoomFixture.createRoom(4, Gender.MALE, member);
-            Room savedRoom = roomRepository.save(room);
+            Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
+            Room room = testFixtureBuilder.buildRoom(RoomFixture.ROOM1(member));
 
             // when
             RoomResponse findRoom = roomService.findRoomById(room.getId());
 
             // then
-            assertThat(savedRoom.getId()).isEqualTo(findRoom.id());
+            assertThat(room.getId()).isEqualTo(findRoom.id());
         }
 
         @Test
         @DisplayName("모든 모임방 조회에 성공한다.")
         void successFindAllRooms() {
             // given
-            Member member = MemberFixture.MEMBER1();
-            memberRepository.save(member);
-
-            List<RoomCreateRequest> requests = RoomFixture.createRooms(member)
-                    .stream()
-                    .map(room -> new RoomCreateRequest(
-                                    room.getHeadCount(),
-                                    room.getPreferredGender().getName(),
-                                    room.getOpenChatLink(),
-                                    room.getMeetingDateTime(),
-                                    room.getTitle(),
-                                    room.getContent()
-                            )
-                    ).toList();
-            requests.forEach(request -> roomService.createRoom(request, member.getId()));
+            Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
+            List<Room> rooms = RoomFixture.createRooms(member);
+            rooms.forEach(room -> testFixtureBuilder.buildRoom(room));
 
             // when
             List<RoomResponse> findRoomResponses = roomService.findAllRooms();
 
             // then
-            assertThat(findRoomResponses).hasSize(requests.size());
+            assertThat(findRoomResponses).hasSize(rooms.size());
         }
     }
 
@@ -120,14 +97,11 @@ class RoomServiceTest extends serviceSliceTest {
         @DisplayName("수정에 성공한다.")
         void successUpdateRoomById() {
             // given
-            Member member = MemberFixture.MEMBER1();
-            memberRepository.save(member);
+            Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
+            Room room = testFixtureBuilder.buildRoom(RoomFixture.ROOM1(member));
 
-            Room room = RoomFixture.createRoom(4, Gender.MALE, member);
-            roomRepository.save(room);
-
-            int headCountToUpdate = 8;
-            Gender preferredGenderToUpdate = Gender.FEMALE;
+            int headCountToUpdate = room.getHeadCount() + 4;
+            Gender preferredGenderToUpdate = room.getPreferredGender();
 
             // when
             RoomUpdateRequest request = new RoomUpdateRequest(
@@ -155,11 +129,8 @@ class RoomServiceTest extends serviceSliceTest {
         @DisplayName("모임방을 삭제에 성공한다.")
         void deleteRoomById() {
             // given
-            Member member = MemberFixture.MEMBER1();
-            memberRepository.save(member);
-
-            Room room = RoomFixture.createRoom(4, Gender.MALE, member);
-            roomRepository.save(room);
+            Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
+            Room room = testFixtureBuilder.buildRoom(RoomFixture.ROOM1(member));
 
             // when
             roomService.deleteRoomById(room.getId(), member.getId());
