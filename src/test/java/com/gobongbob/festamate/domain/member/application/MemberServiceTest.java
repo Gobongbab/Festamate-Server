@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.member.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.gobongbob.festamate.common.fixture.MemberFixture;
 import com.gobongbob.festamate.domain.member.domain.Member;
@@ -37,10 +38,13 @@ class MemberServiceTest extends serviceSliceTest {
             Member createdMember = memberService.createMember(request);
 
             // then
-            assertThat(createdMember.getNickname()).isEqualTo(member.getNickname());
-            assertThat(createdMember.getStudentId()).isEqualTo(member.getStudentId());
-            assertThat(createdMember.getLoginId()).isEqualTo(member.getLoginId());
-            assertThat(createdMember.getPhoneNumber()).isEqualTo(member.getPhoneNumber());
+            assertAll(
+                    () -> assertThat(createdMember.getId()).isNotNull(),
+                    () -> assertThat(createdMember.getNickname()).isEqualTo(member.getNickname()),
+                    () -> assertThat(createdMember.getStudentId()).isEqualTo(member.getStudentId()),
+                    () -> assertThat(createdMember.getLoginId()).isEqualTo(member.getLoginId()),
+                    () -> assertThat(createdMember.getPhoneNumber()).isEqualTo(member.getPhoneNumber())
+            );
         }
     }
 }
