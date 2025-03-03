@@ -31,17 +31,7 @@ class MemberServiceTest extends serviceSliceTest {
         void successCreateRoom() {
             // given
             Member member = MemberFixture.MEMBER1();
-            MemberCreateRequest request = new MemberCreateRequest(
-                    member.getName(),
-                    member.getNickname(),
-                    member.getStudentId(),
-                    member.getLoginId(),
-                    member.getLoginPassword(),
-                    member.getPhoneNumber(),
-                    member.getGender().getName(),
-                    member.getMajor().getCollege(),
-                    member.getMajor().getDepartment()
-            );
+            MemberCreateRequest request = MemberFixture.createMemberCreateRequest(member);
 
             // when
             Member createdMember = memberService.createMember(request);
