@@ -3,6 +3,7 @@ package com.gobongbob.festamate.common.fixture;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,6 +26,17 @@ public class RoomFixture {
                 ROOM1(member),
                 ROOM2(member),
                 ROOM3(member)
+        );
+    }
+
+    public static RoomCreateRequest createRoomCreateRequest(Room room) {
+        return new RoomCreateRequest(
+                room.getHeadCount(),
+                room.getPreferredGender().getName(),
+                room.getOpenChatLink(),
+                room.getMeetingDateTime(),
+                room.getTitle(),
+                room.getContent()
         );
     }
 
