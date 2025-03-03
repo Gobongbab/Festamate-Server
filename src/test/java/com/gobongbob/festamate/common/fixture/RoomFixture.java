@@ -4,7 +4,6 @@ import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class RoomFixture {
@@ -22,11 +21,22 @@ public class RoomFixture {
     }
 
     public static List<Room> createRooms(Member member) {
-        List<Room> rooms = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            rooms.add(createRoom(2 * (i + 1), Gender.MALE, member));
-        }
+        return List.of(
+                ROOM1(member),
+                ROOM2(member),
+                ROOM3(member)
+        );
+    }
 
-        return rooms;
+    public static Room ROOM1(Member member) {
+        return createRoom(4, Gender.MALE, member);
+    }
+
+    public static Room ROOM2(Member member) {
+        return createRoom(6, Gender.FEMALE, member);
+    }
+
+    public static Room ROOM3(Member member) {
+        return createRoom(6, Gender.MALE, member);
     }
 }
