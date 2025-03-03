@@ -2,6 +2,7 @@ package com.gobongbob.festamate.domain.room.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.gobongbob.festamate.common.fixture.MemberFixture;
 import com.gobongbob.festamate.common.fixture.RoomFixture;
@@ -42,15 +43,19 @@ class RoomServiceTest extends serviceSliceTest {
             // given
             Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
 
-            Room room = testFixtureBuilder.buildRoom(RoomFixture.ROOM1(member));
+            Room room = RoomFixture.ROOM1(member);
             RoomCreateRequest request = RoomFixture.createRoomCreateRequest(room);
 
             // when
             Room createdRoom = roomService.createRoom(request, member.getId());
 
             // then
-            assertThat(createdRoom.getHeadCount()).isEqualTo(room.getHeadCount());
-            assertThat(createdRoom.getPreferredGender()).isEqualTo(room.getPreferredGender());
+            assertAll(
+                    () -> assertThat(createdRoom.getId()).isNotNull(),
+                    () -> assertThat(createdRoom.getHeadCount()).isEqualTo(room.getHeadCount()),
+                    () -> assertThat(createdRoom.getPreferredGender()).isEqualTo(
+                            room.getPreferredGender())
+            );
         }
     }
 
@@ -115,8 +120,10 @@ class RoomServiceTest extends serviceSliceTest {
             roomService.updateRoomById(room.getId(), member.getId(), request);
 
             // then
-            assertThat(room.getHeadCount()).isEqualTo(headCountToUpdate);
-            assertThat(room.getPreferredGender()).isEqualTo(preferredGenderToUpdate);
+            assertAll(
+                    () -> assertThat(room.getHeadCount()).isEqualTo(headCountToUpdate),
+                    () -> assertThat(room.getPreferredGender()).isEqualTo(preferredGenderToUpdate)
+            );
         }
     }
 
