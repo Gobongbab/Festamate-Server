@@ -3,6 +3,7 @@ package com.gobongbob.festamate.common.fixture;
 import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import java.util.List;
 
 public class MemberFixture {
@@ -31,6 +32,20 @@ public class MemberFixture {
                 MEMBER1(),
                 MEMBER2(),
                 MEMBER3()
+        );
+    }
+
+    public static MemberCreateRequest createMemberCreateRequest(Member member) {
+        return new MemberCreateRequest(
+                member.getName(),
+                member.getNickname(),
+                member.getStudentId(),
+                member.getLoginId(),
+                member.getLoginPassword(),
+                member.getPhoneNumber(),
+                member.getGender().getName(),
+                member.getMajor().getCollege(),
+                member.getMajor().getDepartment()
         );
     }
 
