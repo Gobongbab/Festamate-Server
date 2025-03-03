@@ -77,6 +77,8 @@ jobs:
             
             # 환경 변수 파일 생성 (민감한 정보는 GitHub Secrets에서 가져옴)
             cat > .env << EOF
+            
+            DB_URL={{ secrets.DB_URL }}
             DB_HOST=${{ secrets.DB_HOST }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
@@ -99,6 +101,7 @@ jobs:
             
             # 컨테이너 시작
             docker run -d --name festamate -p 8080:8080 --env-file .env gobongbab/festamate:latest
+            
             
             # 사용하지 않는 이미지 정리
             docker image prune -af
