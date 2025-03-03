@@ -6,7 +6,7 @@ import com.gobongbob.festamate.domain.member.domain.Member;
 
 public class MemberFixture {
 
-    public static Member createMember(
+    private static Member createMember(
             String nickname,
             String studentId,
             String loginId,
@@ -26,7 +26,7 @@ public class MemberFixture {
     }
 
     public static Member MEMBER1() {
-        return MemberFixture.createMember(
+        return createMember(
                 "testNickname1",
                 "202500001",
                 "testLoginId1",
