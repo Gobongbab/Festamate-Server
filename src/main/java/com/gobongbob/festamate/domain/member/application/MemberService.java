@@ -35,4 +35,10 @@ public class MemberService {
                 .map(MemberResponse::fromEntity)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
     }
+
+    public MemberResponse findProfile(Long memberId) { // 로그인한 회원의 pk로 추후 수정 필요
+        return memberRepository.findById(memberId)
+                .map(MemberResponse::fromEntity)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+    }
 }
