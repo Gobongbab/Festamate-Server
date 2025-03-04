@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.gobongbob.festamate.common.fixture.MemberFixture;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
+import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.serviceSliceTest;
@@ -96,6 +97,31 @@ class MemberServiceTest extends serviceSliceTest {
                                             .map(Member::getId)
                                             .toList()
                             )
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("회원 프로필을 조회할 시")
+    class findMemberProfile {
+
+        @Test
+        @DisplayName("프로필 조회에 성공한다.")
+        void successGetProfile() {
+            // given
+            Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
+
+            // when
+            MemberProfileResponse response = memberService.findProfile(member.getId());
+
+            // then
+            assertAll(
+                    () -> assertThat(response.name()).isEqualTo(member.getName()),
+                    () -> assertThat(response.nickname()).isEqualTo(member.getNickname()),
+                    () -> assertThat(response.studentId()).isEqualTo(member.getStudentId()),
+                    () -> assertThat(response.phoneNumber()).isEqualTo(member.getPhoneNumber()),
+                    () -> assertThat(response.gender()).isEqualTo(member.getGender().getName()),
+                    () -> assertThat(response.major()).isEqualTo(member.getMajor().getDepartment())
             );
         }
     }
