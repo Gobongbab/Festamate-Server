@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.member.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.gobongbob.festamate.common.fixture.MemberFixture;
@@ -151,6 +152,27 @@ class MemberServiceTest extends serviceSliceTest {
                     () -> assertThat(updatedMember.getNickname()).isEqualTo(nicknameToUpdate),
                     () -> assertThat(updatedMember.getLoginPassword()).isEqualTo(loginPasswordToUpdate)
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("회원을 삭제할 시")
+    class deleteMember {
+
+        @Test
+        @DisplayName("삭제에 성공한다.")
+        void successDeleteMember() {
+            // given
+            Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
+
+            // when
+            memberService.deleteMemberById(member.getId());
+
+            // then
+            assertThatThrownBy(() -> memberRepository.findById(member.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다.")))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("사용자가 존재하지 않습니다.");
         }
     }
 }
