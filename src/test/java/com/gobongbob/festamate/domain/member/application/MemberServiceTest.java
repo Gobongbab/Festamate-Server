@@ -48,8 +48,7 @@ class MemberServiceTest extends serviceSliceTest {
                     () -> assertThat(createdMember.getNickname()).isEqualTo(member.getNickname()),
                     () -> assertThat(createdMember.getStudentId()).isEqualTo(member.getStudentId()),
                     () -> assertThat(createdMember.getLoginId()).isEqualTo(member.getLoginId()),
-                    () -> assertThat(createdMember.getPhoneNumber()).isEqualTo(
-                            member.getPhoneNumber())
+                    () -> assertThat(createdMember.getPhoneNumber()).isEqualTo(member.getPhoneNumber())
             );
         }
     }
