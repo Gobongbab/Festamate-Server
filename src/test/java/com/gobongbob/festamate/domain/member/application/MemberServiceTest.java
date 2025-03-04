@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.gobongbob.festamate.common.fixture.MemberFixture;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
+import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
@@ -122,6 +123,33 @@ class MemberServiceTest extends serviceSliceTest {
                     () -> assertThat(response.phoneNumber()).isEqualTo(member.getPhoneNumber()),
                     () -> assertThat(response.gender()).isEqualTo(member.getGender().getName()),
                     () -> assertThat(response.major()).isEqualTo(member.getMajor().getDepartment())
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("회원 프로필을 수정할 시")
+    class updateMemberProfile {
+
+        @Test
+        @DisplayName("프로필 수정에 성공한다.")
+        void successUpdateProfile() {
+            // given
+            Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
+            String nicknameToUpdate = "updatedNickname";
+            String loginPasswordToUpdate = "updatedLoginPassword";
+
+            // when
+            ProfileUpdateRequest request = new ProfileUpdateRequest(nicknameToUpdate, loginPasswordToUpdate);
+            memberService.updateMemberProfileById(member.getId(), request);
+
+            // then
+            Member updatedMember = memberRepository.findById(member.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+            assertAll(
+                    () -> assertThat(updatedMember.getNickname()).isEqualTo(nicknameToUpdate),
+                    () -> assertThat(updatedMember.getLoginPassword()).isEqualTo(loginPasswordToUpdate)
             );
         }
     }
