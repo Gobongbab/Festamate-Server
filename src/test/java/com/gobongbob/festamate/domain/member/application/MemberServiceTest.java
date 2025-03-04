@@ -55,11 +55,11 @@ class MemberServiceTest extends serviceSliceTest {
     }
 
     @Nested
-    @DisplayName("회원을 조회할 시")
+    @DisplayName("특정 회원을 단건으로 조회할 시")
     class findMember {
 
         @Test
-        @DisplayName("특정 회원 단건 조회에 성공한다.")
+        @DisplayName("단건 조회에 성공한다.")
         void successFindMemberById() {
             // given
             Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
@@ -80,9 +80,14 @@ class MemberServiceTest extends serviceSliceTest {
                     () -> assertThat(response.major()).isEqualTo(member.getMajor().getDepartment())
             );
         }
+    }
+
+    @Nested
+    @DisplayName("회원 전체를 조회할 시")
+    class findAllMembers {
 
         @Test
-        @DisplayName("회원 전체 조회에 성공한다.")
+        @DisplayName("전체 조회에 성공한다.")
         void successFindAllMembers() {
             // given
             List<Member> members = testFixtureBuilder.buildMembers(MemberFixture.createMembers());
