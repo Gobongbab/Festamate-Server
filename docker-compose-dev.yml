@@ -14,10 +14,8 @@ services:
     environment:
       # 여기 DB_HOST랑 DB_NAME이랑 나눈 이유가 뭐지???? 그냥 URL 한 번에 적으면 안되나??
       - USE_PROFILE=dev
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USERNAME=${DB_USERNAME}
+      - DB_URL=${DB_URL}
+      - DB_USER=${DB_USER}
       - DB_PASS=${DB_PASS}
     networks:
       - festamate-network
