@@ -77,20 +77,12 @@ jobs:
             
             # 환경 변수 파일 생성 (민감한 정보는 GitHub Secrets에서 가져옴)
             cat > .env << EOF
-            
-            DB_URL= ${{ secrets.DB_URL }}
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_URL=${{ secrets.DB_URL }}
+            DB_USER=${{ secrets.DB_USER }}
             DB_PASS=${{ secrets.DB_PASS }}
             EOF
             
             pwd
-            
-            ls -la
-            
-            docker ps
             
             # 이전 컨테이너 중지 및 제거
             docker stop festamate || true
