@@ -9,6 +9,7 @@ import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.serviceSliceTest;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -74,6 +75,27 @@ class MemberServiceTest extends serviceSliceTest {
                     () -> assertThat(response.phoneNumber()).isEqualTo(member.getPhoneNumber()),
                     () -> assertThat(response.gender()).isEqualTo(member.getGender().getName()),
                     () -> assertThat(response.major()).isEqualTo(member.getMajor().getDepartment())
+            );
+        }
+
+        @Test
+        @DisplayName("회원 전체 조회에 성공한다.")
+        void successFindAllMembers() {
+            // given
+            List<Member> members = testFixtureBuilder.buildMembers(MemberFixture.createMembers());
+
+            // when
+            List<MemberResponse> responses = memberService.findAllMembers();
+
+            // then
+            assertAll(
+                    () -> assertThat(responses).hasSameSizeAs(members),
+                    () -> assertThat(responses).extracting(MemberResponse::id)
+                            .containsExactlyElementsOf(
+                                    members.stream()
+                                            .map(Member::getId)
+                                            .toList()
+                            )
             );
         }
     }
