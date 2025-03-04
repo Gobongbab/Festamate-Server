@@ -3,6 +3,7 @@ package com.gobongbob.festamate.domain.member.application;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
+import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import java.util.List;
@@ -37,9 +38,9 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
     }
 
-    public MemberResponse findProfile(Long memberId) { // 로그인한 회원의 pk로 추후 수정 필요
+    public MemberProfileResponse findProfile(Long memberId) { // 로그인한 회원의 pk로 추후 수정 필요
         return memberRepository.findById(memberId)
-                .map(MemberResponse::fromEntity)
+                .map(MemberProfileResponse::fromEntity)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
     }
 
