@@ -9,6 +9,7 @@ import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,6 +52,13 @@ public class MemberController {
             @RequestBody ProfileUpdateRequest request
     ) {
         memberService.updateMemberProfileById(memberId, request);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/members/{memberId}")
+    public ResponseEntity<Void> deleteMemberById(@PathVariable Long memberId) {
+        memberService.deleteMemberById(memberId);
 
         return ResponseEntity.ok().build();
     }

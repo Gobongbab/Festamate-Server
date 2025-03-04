@@ -51,7 +51,7 @@ public class MemberService {
         member.updateProfile(request.nickname(), request.loginPassword());
     }
 
-    public void deleteMember(Long memberId) { // 추후 soft delete 적용이 필요합니다.
+    public void deleteMemberById(Long memberId) { // 추후 soft delete 적용이 필요합니다.
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
