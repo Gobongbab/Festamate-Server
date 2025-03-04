@@ -29,4 +29,10 @@ public class MemberService {
                 .map(MemberResponse::fromEntity)
                 .toList();
     }
+
+    public MemberResponse findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .map(MemberResponse::fromEntity)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+    }
 }
