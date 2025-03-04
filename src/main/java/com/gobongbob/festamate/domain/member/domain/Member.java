@@ -45,4 +45,9 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private Major major;
+
+    public void updateProfile(String nickname, String loginPassword) {
+        this.nickname = nickname;
+        this.loginPassword = loginPassword;
+    }
 }
