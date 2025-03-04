@@ -3,14 +3,13 @@ package com.gobongbob.festamate.domain.member.presentation;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
+import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,12 +40,18 @@ public class MemberController {
     }
 
     @GetMapping("/members/profile")
-    public ResponseEntity<MemberProfileResponse> getProfile(Long memberId) { // 추후 Spring Security를 활용하여 사용자 정보를 가져오도록 변경 필요
+    public ResponseEntity<MemberProfileResponse> getProfile(
+            Long memberId) { // 추후 Spring Security를 활용하여 사용자 정보를 가져오도록 변경 필요
         return ResponseEntity.ok(memberService.findProfile(memberId));
     }
 
     @PatchMapping("/members/profile")
-    public ResponseEntity<Void> updateProfile() {
+    public ResponseEntity<Void> updateProfile( // 추후 Spring Security를 활용하여 사용자 정보를 가져오도록 변경 필요
+            Long memberId,
+            @RequestBody ProfileUpdateRequest request
+    ) {
+        memberService.updateMemberProfileById(memberId, request);
 
+        return ResponseEntity.ok().build();
     }
 }
