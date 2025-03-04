@@ -41,6 +41,7 @@ public class Member {
     @Column(unique = true)
     private String phoneNumber;
 
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @Enumerated(EnumType.STRING)
