@@ -2,6 +2,7 @@ package com.gobongbob.festamate.domain.member.application;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
+import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import java.util.List;
@@ -40,5 +41,12 @@ public class MemberService {
         return memberRepository.findById(memberId)
                 .map(MemberResponse::fromEntity)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+    }
+
+    public void updateMemberProfileById(Long memberId, ProfileUpdateRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        member.updateProfile(request.nickname(), request.loginPassword());
     }
 }
