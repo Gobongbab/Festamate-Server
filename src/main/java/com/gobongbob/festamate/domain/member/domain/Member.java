@@ -41,8 +41,14 @@ public class Member {
     @Column(unique = true)
     private String phoneNumber;
 
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @Enumerated(EnumType.STRING)
     private Major major;
+
+    public void updateProfile(String nickname, String loginPassword) {
+        this.nickname = nickname;
+        this.loginPassword = loginPassword;
+    }
 }

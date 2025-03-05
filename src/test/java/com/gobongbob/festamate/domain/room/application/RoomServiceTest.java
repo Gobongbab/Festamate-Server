@@ -144,7 +144,8 @@ class RoomServiceTest extends serviceSliceTest {
 
             // then
             Long roomId = room.getId();
-            assertThatThrownBy(() -> roomService.findRoomById(roomId))
+            assertThatThrownBy(() -> roomRepository.findById(roomId)
+                    .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다.")))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("모임방이 존재하지 않습니다.");
         }

@@ -33,13 +33,13 @@ public class RoomService {
     public List<RoomResponse> findAllRooms() {
         return roomRepository.findAll()
                 .stream()
-                .map(RoomResponse::toDto)
+                .map(RoomResponse::fromEntity)
                 .toList();
     }
 
     public RoomResponse findRoomById(Long roomId) {
         return roomRepository.findById(roomId)
-                .map(RoomResponse::toDto)
+                .map(RoomResponse::fromEntity)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
     }
 

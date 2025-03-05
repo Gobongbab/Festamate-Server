@@ -13,7 +13,7 @@ public record RoomResponse(
         HostResponse host
 ) {
 
-    public static RoomResponse toDto(Room room) {
+    public static RoomResponse fromEntity(Room room) {
         return new RoomResponse(
                 room.getId(),
                 room.getHeadCount(),
