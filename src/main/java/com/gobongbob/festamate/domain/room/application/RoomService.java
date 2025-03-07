@@ -84,16 +84,10 @@ public class RoomService {
     public void updateRoomById(Long roomId, Long memberId, RoomUpdateRequest request) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
-
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
         validateIsHost(room, member);
-
-        /*
-        모임방 정보를 수정할 수 있는 조건인지 확인하는 로직이 추후 추가되어야 합니다.
-        1. 요청한 사용자가 방장인지 확인한다. (완료)
-        2. 방에 방장을 제외한 다른 사용자가 입장하지 않은 것을 확인한다.
-         */
+        validateAlone(room);
 
         room.updateRoom(
                 request.headCount(),
