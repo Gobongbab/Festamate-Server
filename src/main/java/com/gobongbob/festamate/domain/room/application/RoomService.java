@@ -29,14 +29,9 @@ public class RoomService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
         validateRoomParticipation(member.getId());
-
         Room createdRoom = roomRepository.save(request.toEntity(member));
 
-        RoomParticipant roomParticipant = RoomParticipant.builder()
-                .room(createdRoom)
-                .member(member)
-                .isHost(true)
-                .build();
+        RoomParticipant roomParticipant = RoomParticipant.createHost(createdRoom, member);
         roomParticipantRepository.save(roomParticipant);
 
         return createdRoom;
@@ -48,14 +43,11 @@ public class RoomService {
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
         validateRoomParticipation(member.getId());
         validateRoomFull(room.getId());
 
-        RoomParticipant roomParticipant = RoomParticipant.builder()
-                .room(room)
-                .member(member)
-                .isHost(false)
-                .build();
+        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member);
         roomParticipantRepository.save(roomParticipant);
     }
 
