@@ -28,9 +28,18 @@ public class RoomService {
     public Room createRoom(RoomCreateRequest request, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-        Room room = request.toEntity(member);
+        validateRoomParticipation(member.getId());
 
-        return roomRepository.save(room);
+        Room createdRoom = roomRepository.save(request.toEntity(member));
+
+        RoomParticipant roomParticipant = RoomParticipant.builder()
+                .room(createdRoom)
+                .member(member)
+                .isHost(true)
+                .build();
+        roomParticipantRepository.save(roomParticipant);
+
+        return createdRoom;
     }
 
     public List<RoomResponse> findAllRooms() {
@@ -103,7 +112,16 @@ public class RoomService {
         roomRepository.delete(room);
     }
 
-    private static void validateIsHost(Room room, Member member) {
+    private void validateRoomParticipation(Long memberId) {
+        roomParticipantRepository.findByMember_Id(memberId)
+                .stream()
+                .findFirst()
+                .ifPresent(roomParticipant -> {
+                    throw new IllegalArgumentException("이미 모임방에 참여하고 있습니다.");
+                });
+    }
+
+    private void validateIsHost(Room room, Member member) {
         if (!room.isHost(member)) {
             throw new IllegalArgumentException("방장만 모임방 정보를 수정할 수 있습니다.");
         }
