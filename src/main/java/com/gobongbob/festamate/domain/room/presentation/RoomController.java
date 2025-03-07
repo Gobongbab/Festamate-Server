@@ -44,7 +44,7 @@ public class RoomController {
     }
 
     @GetMapping("/participate")
-    public ResponseEntity<List<RoomResponse>> findParticipatingRooms(Long memberId) {
+    public ResponseEntity<RoomResponse> findParticipatingRooms(Long memberId) {
         return ResponseEntity.ok(roomService.findParticipatingRooms(memberId));
     }
 

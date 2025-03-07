@@ -36,22 +36,30 @@ public class RoomService {
     public List<RoomResponse> findAllRooms() {
         return roomRepository.findAll()
                 .stream()
-                .map(RoomResponse::fromEntity)
+                .map(room -> {
+                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
+                    return RoomResponse.fromEntity(room, roomParticipants);
+                })
                 .toList();
     }
 
     public RoomResponse findRoomById(Long roomId) {
         return roomRepository.findById(roomId)
-                .map(RoomResponse::fromEntity)
-                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+                .map(room -> {
+                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
+                    return RoomResponse.fromEntity(room, roomParticipants);
+                }).orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
     }
 
-    public List<RoomResponse> findParticipatingRooms(Long memberId) { //
-        return roomParticipantRepository.findByMember_Id(memberId)
+    public RoomResponse findParticipatingRooms(Long memberId) {
+        Room participatingRoom = roomParticipantRepository.findByRoom_Id(memberId)
                 .stream()
-                .map(RoomParticipant::getRoom)
-                .map(RoomResponse::fromEntity)
-                .toList();
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("참여중인 모임방이 존재하지 않습니다."))
+                .getRoom();
+        List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(participatingRoom.getId());
+
+        return RoomResponse.fromEntity(participatingRoom, roomParticipants);
     }
 
     @Transactional
