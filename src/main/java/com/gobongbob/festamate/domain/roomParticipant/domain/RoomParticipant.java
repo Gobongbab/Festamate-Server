@@ -14,6 +14,7 @@ import lombok.Getter;
 @Entity
 @Getter
 public class RoomParticipant {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,4 +26,6 @@ public class RoomParticipant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    private boolean isHost;
 }
