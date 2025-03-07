@@ -35,4 +35,20 @@ public class RoomParticipant {
     private Member member;
 
     private boolean isHost;
+
+    public static RoomParticipant createHost(Room room, Member member) {
+        return RoomParticipant.builder()
+                .room(room)
+                .member(member)
+                .isHost(true)
+                .build();
+    }
+
+    public static RoomParticipant createParticipant(Room room, Member member) {
+        return RoomParticipant.builder()
+                .room(room)
+                .member(member)
+                .isHost(false)
+                .build();
+    }
 }
