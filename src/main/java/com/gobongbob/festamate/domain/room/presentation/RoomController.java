@@ -33,6 +33,18 @@ public class RoomController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/participate")
+    public ResponseEntity<RoomResponse> findParticipatingRooms(Long memberId) {
+        return ResponseEntity.ok(roomService.findParticipatingRooms(memberId));
+    }
+
+    @PostMapping("/{roomId}/participate")
+    public ResponseEntity<Void> participateRoom(@PathVariable Long roomId, Long memberId) {
+        roomService.participateRoom(roomId, memberId);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("")
     public ResponseEntity<List<RoomResponse>> findAllRooms() {
         return ResponseEntity.ok(roomService.findAllRooms());
@@ -41,11 +53,6 @@ public class RoomController {
     @GetMapping("/{roomId}")
     public ResponseEntity<RoomResponse> findRoomById(@PathVariable Long roomId) {
         return ResponseEntity.ok(roomService.findRoomById(roomId));
-    }
-
-    @GetMapping("/participate")
-    public ResponseEntity<RoomResponse> findParticipatingRooms(Long memberId) {
-        return ResponseEntity.ok(roomService.findParticipatingRooms(memberId));
     }
 
     @PatchMapping("/{roomId}")
