@@ -100,6 +100,22 @@ public class RoomService {
     }
 
     @Transactional
+    public void leaveRoomById(Long roomId, Long memberId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        if (member.isHost(room)) {
+            roomParticipantRepository.deleteByRoom(room);
+            roomRepository.delete(room);
+        }
+        if (!member.isHost(room)) {
+            roomParticipantRepository.deleteByMember_Id(member.getId());
+        }
+    }
+
+    @Transactional
     public void deleteRoomById(Long roomId, Long memberId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
