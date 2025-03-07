@@ -122,7 +122,7 @@ public class RoomService {
     }
 
     private void validateIsHost(Room room, Member member) {
-        if (!room.isHost(member)) {
+        if (!member.isHost(room)) {
             throw new IllegalArgumentException("방장만 모임방 정보를 수정할 수 있습니다.");
         }
     }
