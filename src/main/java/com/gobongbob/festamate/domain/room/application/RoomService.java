@@ -121,6 +121,16 @@ public class RoomService {
                 });
     }
 
+    private void validateRoomFull(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+        int participantsCount = roomParticipantRepository.countByRoom_Id(roomId);
+
+        if (room.getHeadCount() == participantsCount) {
+            throw new IllegalArgumentException("모임방이 꽉 찼습니다.");
+        }
+    }
+
     private void validateIsHost(Room room, Member member) {
         if (!member.isHost(room)) {
             throw new IllegalArgumentException("방장만 모임방 정보를 수정할 수 있습니다.");
