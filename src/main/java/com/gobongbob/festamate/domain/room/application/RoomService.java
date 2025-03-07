@@ -42,6 +42,23 @@ public class RoomService {
         return createdRoom;
     }
 
+    @Transactional
+    public void participateRoom(Long roomId, Long memberId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+        validateRoomParticipation(member.getId());
+        validateRoomFull(room.getId());
+
+        RoomParticipant roomParticipant = RoomParticipant.builder()
+                .room(room)
+                .member(member)
+                .isHost(false)
+                .build();
+        roomParticipantRepository.save(roomParticipant);
+    }
+
     public List<RoomResponse> findAllRooms() {
         return roomRepository.findAll()
                 .stream()
