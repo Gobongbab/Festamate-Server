@@ -43,6 +43,11 @@ public class RoomController {
         return ResponseEntity.ok(roomService.findRoomById(roomId));
     }
 
+    @GetMapping("/participate")
+    public ResponseEntity<List<RoomResponse>> findParticipatingRooms(Long memberId) {
+        return ResponseEntity.ok(roomService.findParticipatingRooms(memberId));
+    }
+
     @PatchMapping("/{roomId}")
     public ResponseEntity<Void> updateRoomById(
             @PathVariable Long roomId,

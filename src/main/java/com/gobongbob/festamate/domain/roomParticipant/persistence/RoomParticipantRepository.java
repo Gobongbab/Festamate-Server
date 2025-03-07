@@ -4,13 +4,13 @@ import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.roomParticipant.domain.RoomParticipant;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.repository.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface RoomParticipantRepository extends Repository<RoomParticipant, Long> {
+public interface RoomParticipantRepository extends JpaRepository<RoomParticipant, Long> {
 
     RoomParticipant save(RoomParticipant roomParticipant);
 
-    List<RoomParticipant> saveAll(List<RoomParticipant> roomParticipants);
+    // saveAll() 메서드의 경우, JpaRepository 에 기본적으로 정의되어있음.
 
     Optional<RoomParticipant> findById(Long id);
 
