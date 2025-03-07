@@ -45,6 +45,13 @@ public class RoomController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{roomId}/leave")
+    public ResponseEntity<Void> leaveRoom(@PathVariable Long roomId, Long memberId) {
+        roomService.leaveRoomById(roomId, memberId);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("")
     public ResponseEntity<List<RoomResponse>> findAllRooms() {
         return ResponseEntity.ok(roomService.findAllRooms());
