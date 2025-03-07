@@ -8,6 +8,8 @@ import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
+import com.gobongbob.festamate.domain.roomParticipant.domain.RoomParticipant;
+import com.gobongbob.festamate.domain.roomParticipant.persistence.RoomParticipantRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final RoomParticipantRepository roomParticipantRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
@@ -41,6 +44,14 @@ public class RoomService {
         return roomRepository.findById(roomId)
                 .map(RoomResponse::fromEntity)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+    }
+
+    public List<RoomResponse> findParticipatingRooms(Long memberId) { //
+        return roomParticipantRepository.findByMember_Id(memberId)
+                .stream()
+                .map(RoomParticipant::getRoom)
+                .map(RoomResponse::fromEntity)
+                .toList();
     }
 
     @Transactional
