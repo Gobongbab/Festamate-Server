@@ -145,4 +145,11 @@ public class RoomService {
             throw new IllegalArgumentException("방장만 모임방 정보를 수정할 수 있습니다.");
         }
     }
+
+    private void validateAlone(Room room) {
+        int participantsCount = roomParticipantRepository.countByRoom_Id(room.getId());
+        if (participantsCount != 1) {
+            throw new IllegalArgumentException("방에 방장을 제외한 다른 사용자가 입장한 상태에서는 수정할 수 없습니다.");
+        }
+    }
 }
