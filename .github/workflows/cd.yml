@@ -75,15 +75,6 @@ jobs:
             # Docker Hub 로그인
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
             
-            # 환경 변수 파일 생성 (민감한 정보는 GitHub Secrets에서 가져옴)
-            cat > .env << EOF
-            DB_URL=${{ secrets.DB_URL }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASS=${{ secrets.DB_PASS }}
-            EOF
-            
-            pwd
-            
             # 이전 컨테이너 중지 및 제거
             docker stop festamate || true
             docker rm festamate || true
@@ -93,7 +84,6 @@ jobs:
             
             # 컨테이너 시작
             docker run -d --name festamate -p 8080:8080 --env-file .env gobongbab/festamate:latest
-            
             
             # 사용하지 않는 이미지 정리
             docker image prune -af
