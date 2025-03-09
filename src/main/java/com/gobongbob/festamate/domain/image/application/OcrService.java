@@ -3,6 +3,7 @@ package com.gobongbob.festamate.domain.image.application;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gobongbob.festamate.domain.image.dto.response.StudentInfoResponse;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class OcrService {
 
     private final MemberRepository memberRepository;
 
-    public Member checkStudentCard(MultipartFile file, Long memberId) throws IOException {
+    public StudentInfoResponse checkStudentCard(MultipartFile file, Long memberId) throws IOException {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
@@ -61,8 +62,9 @@ public class OcrService {
         Files.delete(tempFile);
 
         member.setStudentInfo(studentName, studentDepartment, studentId);
+        memberRepository.save(member);
 
-        return memberRepository.save(member);
+        return StudentInfoResponse.fromEntity(studentName, studentDepartment, studentId);
     }
     private String getValueAfterKeyword(String json, String keyword) {
         try {
