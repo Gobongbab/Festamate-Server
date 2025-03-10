@@ -39,6 +39,9 @@ public class Member {
 
     private String studentDepartment; // 임시 필드, 학생증 등록으로 학과 정보 기입을 할 예정이면 이 필드를 사용. 추후 의논해야 함.
 
+    @Column(unique = true)
+    private String token; // FcmToken
+
     public void updateProfile(String nickname, String loginPassword) {
         this.nickname = nickname;
         this.loginPassword = loginPassword;
