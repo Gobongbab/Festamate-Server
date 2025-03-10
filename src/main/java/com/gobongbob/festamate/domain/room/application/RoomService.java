@@ -95,6 +95,10 @@ public class RoomService {
 
         roomParticipantRepository.deleteByRoom(room);
         roomRepository.delete(room);
+
+        /*
+        추후 방 삭제 시, 방에 참여중인 사용자들에게 알림을 보내는 로직 추가 필요
+         */
     }
 
     private void validateRoomParticipation(Long memberId) {
