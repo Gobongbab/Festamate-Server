@@ -25,7 +25,8 @@ public class Report {
     @JoinColumn(name = "room_id")
     private Room room;
 
-    private String reason;
+    @Enumerated(EnumType.STRING)
+    private ReportReason reason;
 
     @Column(nullable = false)
     private LocalDateTime reportDate;
