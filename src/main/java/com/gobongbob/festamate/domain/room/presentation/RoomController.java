@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.room.presentation;
 
+import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoomController {
 
     private final RoomService roomService;
+    private final RoomParticipationService roomParticipationService;
 
     @PostMapping("")
     public ResponseEntity<Void> createRoom(
@@ -40,14 +42,14 @@ public class RoomController {
 
     @PostMapping("/{roomId}/participate")
     public ResponseEntity<Void> participateRoom(@PathVariable Long roomId, Long memberId) {
-        roomService.participateRoom(roomId, memberId);
+        roomParticipationService.participateRoom(roomId, memberId);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{roomId}/leave")
     public ResponseEntity<Void> leaveRoom(@PathVariable Long roomId, Long memberId) {
-        roomService.leaveRoomById(roomId, memberId);
+        roomParticipationService.leaveRoomById(roomId, memberId);
 
         return ResponseEntity.ok().build();
     }

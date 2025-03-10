@@ -37,20 +37,6 @@ public class RoomService {
         return createdRoom;
     }
 
-    @Transactional
-    public void participateRoom(Long roomId, Long memberId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-
-        validateRoomParticipation(member.getId());
-        validateRoomFull(room.getId());
-
-        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member);
-        roomParticipantRepository.save(roomParticipant);
-    }
-
     public List<RoomResponse> findAllRooms() {
         return roomRepository.findAll()
                 .stream()
@@ -59,14 +45,6 @@ public class RoomService {
                     return RoomResponse.fromEntity(room, roomParticipants);
                 })
                 .toList();
-    }
-
-    public RoomResponse findRoomById(Long roomId) {
-        return roomRepository.findById(roomId)
-                .map(room -> {
-                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
-                    return RoomResponse.fromEntity(room, roomParticipants);
-                }).orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
     }
 
     public RoomResponse findParticipatingRooms(Long memberId) {
@@ -78,6 +56,14 @@ public class RoomService {
         List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(participatingRoom.getId());
 
         return RoomResponse.fromEntity(participatingRoom, roomParticipants);
+    }
+
+    public RoomResponse findRoomById(Long roomId) {
+        return roomRepository.findById(roomId)
+                .map(room -> {
+                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
+                    return RoomResponse.fromEntity(room, roomParticipants);
+                }).orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
     }
 
     @Transactional
@@ -100,22 +86,6 @@ public class RoomService {
     }
 
     @Transactional
-    public void leaveRoomById(Long roomId, Long memberId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-
-        if (member.isHost(room)) {
-            roomParticipantRepository.deleteByRoom(room);
-            roomRepository.delete(room);
-        }
-        if (!member.isHost(room)) {
-            roomParticipantRepository.deleteByMember_Id(member.getId());
-        }
-    }
-
-    @Transactional
     public void deleteRoomById(Long roomId, Long memberId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
@@ -123,11 +93,7 @@ public class RoomService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
         validateIsHost(room, member);
 
-        /*
-        요청한 사용자가 방장인지 확인하는 로직이 추후 추가되어야 합니다. (완료)
-        방장이 모임방 구성원들의 동의 없이 모임방을 삭제할 수 있는지에 대한 논의가 필요합니다.
-         */
-
+        roomParticipantRepository.deleteByRoom(room);
         roomRepository.delete(room);
     }
 
@@ -140,19 +106,9 @@ public class RoomService {
                 });
     }
 
-    private void validateRoomFull(Long roomId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
-        int participantsCount = roomParticipantRepository.countByRoom_Id(roomId);
-
-        if (room.getHeadCount() == participantsCount) {
-            throw new IllegalArgumentException("모임방이 꽉 찼습니다.");
-        }
-    }
-
     private void validateIsHost(Room room, Member member) {
         if (!member.isHost(room)) {
-            throw new IllegalArgumentException("방장만 모임방 정보를 수정할 수 있습니다.");
+            throw new IllegalArgumentException("방장이어야 합니다.");
         }
     }
 
