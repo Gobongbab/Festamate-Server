@@ -44,6 +44,12 @@ public class RoomParticipationService {
         roomParticipantRepository.deleteByMember_Id(member.getId());
     }
 
+    public boolean isMemberHost(Long roomId, Long memberId) {
+        return roomParticipantRepository.findByRoom_IdAndMember_Id(roomId, memberId)
+                .orElseThrow(() -> new IllegalArgumentException("참여중인 모임방이 존재하지 않습니다."))
+                .isHost();
+    }
+
     private void validateRoomParticipation(Long memberId) {
         roomParticipantRepository.findByMember_Id(memberId)
                 .stream()

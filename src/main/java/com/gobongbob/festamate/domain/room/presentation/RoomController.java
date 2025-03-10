@@ -35,28 +35,14 @@ public class RoomController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/participate")
-    public ResponseEntity<RoomResponse> findParticipatingRooms(Long memberId) {
-        return ResponseEntity.ok(roomService.findParticipatingRooms(memberId));
-    }
-
-    @PostMapping("/{roomId}/participate")
-    public ResponseEntity<Void> participateRoom(@PathVariable Long roomId, Long memberId) {
-        roomParticipationService.participateRoom(roomId, memberId);
-
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/{roomId}/leave")
-    public ResponseEntity<Void> leaveRoom(@PathVariable Long roomId, Long memberId) {
-        roomParticipationService.leaveRoomById(roomId, memberId);
-
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("")
     public ResponseEntity<List<RoomResponse>> findAllRooms() {
         return ResponseEntity.ok(roomService.findAllRooms());
+    }
+
+    @GetMapping("/participate")
+    public ResponseEntity<RoomResponse> findParticipatingRooms(Long memberId) {
+        return ResponseEntity.ok(roomService.findParticipatingRooms(memberId));
     }
 
     @GetMapping("/{roomId}")
@@ -80,5 +66,24 @@ public class RoomController {
         roomService.deleteRoomById(roomId, memberId);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{roomId}/participate")
+    public ResponseEntity<Void> participateRoom(@PathVariable Long roomId, Long memberId) {
+        roomParticipationService.participateRoom(roomId, memberId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{roomId}/leave")
+    public ResponseEntity<Void> leaveRoom(@PathVariable Long roomId, Long memberId) {
+        roomParticipationService.leaveRoomById(roomId, memberId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{roomId}/isHost")
+    public ResponseEntity<Boolean> isMemberHost(@PathVariable Long roomId, Long memberId) {
+        return ResponseEntity.ok(roomParticipationService.isMemberHost(roomId, memberId));
     }
 }
