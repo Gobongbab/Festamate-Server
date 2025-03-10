@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.report.dto.response;
 
 import com.gobongbob.festamate.domain.report.domain.Report;
+import com.gobongbob.festamate.domain.report.domain.ReportReason;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +11,7 @@ public record ReportRoomResponse(
         String reporterName,
         Long roomId,
         String roomTitle,
-        String reason,
+        ReportReason reason,
         LocalDateTime reportDate,
         Boolean processed) {
 

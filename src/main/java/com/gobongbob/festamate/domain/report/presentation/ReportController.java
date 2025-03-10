@@ -19,9 +19,9 @@ public class ReportController {
     @PostMapping("/{roomId}")
     public ResponseEntity<Void> reportRoom(
             @RequestBody ReportRoomRequest request,
-            @PathVariable Long roomId
+            @PathVariable Long roomId,
+            @RequestHeader("reporterId") Long reporterId // 추후 Spring Security를 활용하여 사용자 정보를 가져오도록 변경 필요
     ) {
-        Long reporterId = 1L;  // 추후 Spring Security를 활용하여 사용자 정보를 가져오도록 변경 필요
         reportService.reportRoom(request, roomId, reporterId);
         return ResponseEntity.ok().build();
     }
