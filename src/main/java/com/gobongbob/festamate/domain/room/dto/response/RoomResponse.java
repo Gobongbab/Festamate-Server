@@ -1,7 +1,7 @@
 package com.gobongbob.festamate.domain.room.dto.response;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
-import com.gobongbob.festamate.domain.roomParticipant.domain.RoomParticipant;
+import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import java.util.List;
 
 public record RoomResponse(

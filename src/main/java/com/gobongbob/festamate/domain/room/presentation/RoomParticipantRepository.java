@@ -1,7 +1,7 @@
-package com.gobongbob.festamate.domain.roomParticipant.persistence;
+package com.gobongbob.festamate.domain.room.presentation;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
-import com.gobongbob.festamate.domain.roomParticipant.domain.RoomParticipant;
+import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

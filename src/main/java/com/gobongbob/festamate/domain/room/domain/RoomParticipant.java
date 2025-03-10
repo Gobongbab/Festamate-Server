@@ -1,7 +1,6 @@
-package com.gobongbob.festamate.domain.roomParticipant.domain;
+package com.gobongbob.festamate.domain.room.domain;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
-import com.gobongbob.festamate.domain.room.domain.Room;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
