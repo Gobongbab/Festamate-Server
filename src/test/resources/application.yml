@@ -10,3 +10,8 @@ spring:
 
 logging.level:
   org.hibernate.SQL: debug
+naver:
+  ocr:
+    api:
+      url: ${OCR_API_URL}
+      secret: ${OCR_API_SECRET}
