@@ -2,6 +2,7 @@ package com.gobongbob.festamate.common.builder;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,5 +33,13 @@ public class TestFixtureBuilder {
 
     public void deleteRoom(Room room) {
         bs.roomRepository().delete(room);
+    }
+
+    public RoomParticipant buildRoomParticipant(RoomParticipant roomParticipant) {
+        return bs.roomParticipantRepository().save(roomParticipant);
+    }
+
+    public void deleteRoomParticipant(RoomParticipant roomParticipant) {
+        bs.roomParticipantRepository().delete(roomParticipant);
     }
 }
