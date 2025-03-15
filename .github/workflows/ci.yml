@@ -1,5 +1,6 @@
 name: Java CI
 
+# Test
 # 워크플로우 트리거 조건 설정
 on:
   pull_request:
