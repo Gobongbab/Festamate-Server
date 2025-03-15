@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.gobongbob.festamate.common.fixture.MemberFixture;
 import com.gobongbob.festamate.common.fixture.RoomFixture;
+import com.gobongbob.festamate.common.fixture.RoomParticipantFixture;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
@@ -104,6 +105,7 @@ class RoomServiceTest extends serviceSliceTest {
             // given
             Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
             Room room = testFixtureBuilder.buildRoom(RoomFixture.ROOM1(member));
+            testFixtureBuilder.buildRoomParticipant(RoomParticipantFixture.createHost(room, member));
 
             int headCountToUpdate = room.getHeadCount() + 4;
             Gender preferredGenderToUpdate = room.getPreferredGender();
