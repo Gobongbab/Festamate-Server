@@ -56,5 +56,8 @@ jobs:
         env:
           OCR_API_URL: ${{ secrets.OCR_API_URL }}
           OCR_API_SECRET: ${{ secrets.OCR_API_SECRET }}
+          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+          KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: ./gradlew clean build
         shell: bash
