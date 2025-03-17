@@ -79,9 +79,20 @@ jobs:
             PRIVATE_EC2_USERNAME="${{ secrets.PROD_EC2_USERNAME }}" # Private EC2 인스턴스 접속 사용자 이름
             PRIVATE_KEY_PATH="~/.ssh/prod_ec2_private_key"  # Bastion Host에 있는 프라이빗 키 파일 경로
             
+            echo "현재 사용자의 홈 디렉토리:"
+            pwd
+            echo "홈 디렉토리 내용:"
+            ls -la ~
+            echo "~/.ssh 디렉토리 내용 (생성 전):"
+            ls -la ~/.ssh
+            echo "PRIVATE_KEY_PATH 변수 값: $PRIVATE_KEY_PATH"
+            
              # SSH 디렉토리 생성 및 권한 설정
             mkdir -p ~/.ssh
             chmod 700 ~/.ssh
+            
+            echo "~/.ssh 디렉토리 내용 (생성 후):"
+            ls -la ~/.ssh
 
             # Private Key 파일 생성 및 권한 설정
             echo "${{ secrets.PROD_EC2_PRIVATE_KEY }}" > "$PRIVATE_KEY_PATH"
