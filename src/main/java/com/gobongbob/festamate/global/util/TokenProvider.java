@@ -75,6 +75,7 @@ public class TokenProvider {
     }
 
     // 토큰 기반으로 인증 정보를 가져오는 메서드
+    // JWT 토큰에서 사용자 정보를 추출하여 Authentication 객체를 생성하며, 이를 통해 @AuthenticationPrincipal을 사용할 수 있음
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
         Set<SimpleGrantedAuthority> authorities = Collections.singleton(
@@ -109,5 +110,4 @@ public class TokenProvider {
         Claims claims = getClaims(token);
         return "refresh".equals(claims.get("type")); // 타입 검증
     }
-
 }
