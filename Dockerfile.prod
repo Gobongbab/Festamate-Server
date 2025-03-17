@@ -1,0 +1,12 @@
+# 운영용
+FROM openjdk:17-jdk-slim
+
+WORKDIR /app
+
+COPY build/libs/*SNAPSHOT.jar app.jar
+
+EXPOSE 8080
+
+# 개발 프로필 활성화
+ENV USE_PROFILE=prod
+ENTRYPOINT ["java", "-Dspring.profiles.active=${USE_PROFILE}", "-jar", "app.jar"]

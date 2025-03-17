@@ -1,4 +1,4 @@
-name: Java CD
+name: Java CD-Dev
 
 on:
   pull_request:
