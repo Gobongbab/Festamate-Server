@@ -1,0 +1,46 @@
+# 운영용
+version: '3.8'
+
+services:
+  app:
+    container_name: festamate
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: gobongbab/festamate:latest
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      - USE_PROFILE=prod
+      - DB_URL=${DB_URL}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    networks:
+      - festamate-network
+    depends_on:
+      - redis
+
+  # Redis 캐시 서버 설정
+  redis:
+    image: redis:6.2.4-alpine
+    container_name: redis-prod
+    restart: always
+    ports:
+      - "16379:6379"
+    environment:
+      - REDIS_HOST=localhost
+      - REDIS_PASSWORD=
+      - REDIS_PORT=16379
+      - TZ=Asia/Seoul
+    volumes:
+      - redis-dev-data:/data # Redis 데이터 영속성을 위한 볼륨
+    networks:
+      - festamate-network
+
+volumes:
+  redis-dev-data: # Redis 데이터 저장용 볼륨
+
+networks:
+  festamate-network: # 서비스 간 통신을 위한 브릿지 네트워크
+    driver: bridge
