@@ -19,6 +19,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private final static String TOKEN_PREFIX = "Bearer ";
 
     // 여기서 Refresh Token이 아닌 Access Token만 허용하도록 설정
+    // 검증된 토큰으로 SecurityContextHolder에 인증 정보를 저장함
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
@@ -26,8 +27,9 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         String requestUri = request.getRequestURI();
 
         // 로그인, 카카오 및 리프레시 엔드포인트는 필터를 건너뜀
-        if ("/api/auth/login".equals(requestUri) || "/api/auth/kakao".equals(requestUri)
-                || "/api/auth/refresh".equals(requestUri)) {
+        if ("/api/auth/login".equals(requestUri) || "/api/auth/refresh".equals(requestUri)
+                || "/login/oauth2/code/kakao".equals(
+                requestUri)) {
             filterChain.doFilter(request, response);
             return;
         }
