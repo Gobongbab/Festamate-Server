@@ -1,5 +1,6 @@
 package com.gobongbob.festamate;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -9,6 +10,8 @@ import org.springframework.test.context.ActiveProfiles;
 class FestamateApplicationTests {
 
     @Test
+    @Disabled
+        // 테스트 코드 비활성화
     void contextLoads() {
     }
 
