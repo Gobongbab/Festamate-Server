@@ -9,5 +9,6 @@ public class FestamateApplication {
     public static void main(String[] args) {
         SpringApplication.run(FestamateApplication.class, args);
     }
+    // test
 
 }

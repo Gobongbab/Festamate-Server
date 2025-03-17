@@ -1,0 +1,26 @@
+spring:
+  jackson:
+    time-zone: Asia/Seoul
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: never
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+        hbm2ddl:
+          auto: create
+        default_batch_fetch_size: 1000
+naver:
+  ocr:
+    api:
+      url: ${OCR_API_URL}
+      secret: ${OCR_API_SECRET}
