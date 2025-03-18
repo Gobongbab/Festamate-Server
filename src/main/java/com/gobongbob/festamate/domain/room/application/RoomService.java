@@ -6,10 +6,12 @@ import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
+import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
 
@@ -34,37 +37,53 @@ public class RoomService {
                 .room(room)
                 .build();
         chatRoomRepository.save(chatRoom);
+      
+        validateRoomParticipation(member.getId());
+        Room createdRoom = roomRepository.save(request.toEntity(member));
 
-        return roomRepository.save(room);
+        RoomParticipant roomParticipant = RoomParticipant.createHost(createdRoom, member);
+        roomParticipantRepository.save(roomParticipant);
+
+        return createdRoom;
     }
 
     public List<RoomResponse> findAllRooms() {
         return roomRepository.findAll()
                 .stream()
-                .map(RoomResponse::fromEntity)
+                .map(room -> {
+                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
+                    return RoomResponse.fromEntity(room, roomParticipants);
+                })
                 .toList();
+    }
+
+    public RoomResponse findParticipatingRooms(Long memberId) {
+        Room participatingRoom = roomParticipantRepository.findByRoom_Id(memberId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("참여중인 모임방이 존재하지 않습니다."))
+                .getRoom();
+        List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(participatingRoom.getId());
+
+        return RoomResponse.fromEntity(participatingRoom, roomParticipants);
     }
 
     public RoomResponse findRoomById(Long roomId) {
         return roomRepository.findById(roomId)
-                .map(RoomResponse::fromEntity)
-                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+                .map(room -> {
+                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
+                    return RoomResponse.fromEntity(room, roomParticipants);
+                }).orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
     }
 
     @Transactional
     public void updateRoomById(Long roomId, Long memberId, RoomUpdateRequest request) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
-
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
         validateIsHost(room, member);
-
-        /*
-        모임방 정보를 수정할 수 있는 조건인지 확인하는 로직이 추후 추가되어야 합니다.
-        1. 요청한 사용자가 방장인지 확인한다. (완료)
-        2. 방에 방장을 제외한 다른 사용자가 입장하지 않은 것을 확인한다.
-         */
+        validateAlone(room);
 
         room.updateRoom(
                 request.headCount(),
@@ -84,17 +103,33 @@ public class RoomService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
         validateIsHost(room, member);
 
-        /*
-        요청한 사용자가 방장인지 확인하는 로직이 추후 추가되어야 합니다. (완료)
-        방장이 모임방 구성원들의 동의 없이 모임방을 삭제할 수 있는지에 대한 논의가 필요합니다.
-         */
-
+        roomParticipantRepository.deleteByRoom(room);
         roomRepository.delete(room);
+
+        /*
+        추후 방 삭제 시, 방에 참여중인 사용자들에게 알림을 보내는 로직 추가 필요
+         */
     }
 
-    private static void validateIsHost(Room room, Member member) {
-        if (!room.isHost(member)) {
-            throw new IllegalArgumentException("방장만 모임방 정보를 수정할 수 있습니다.");
+    private void validateRoomParticipation(Long memberId) {
+        roomParticipantRepository.findByMember_Id(memberId)
+                .stream()
+                .findFirst()
+                .ifPresent(roomParticipant -> {
+                    throw new IllegalArgumentException("이미 모임방에 참여하고 있습니다.");
+                });
+    }
+
+    private void validateIsHost(Room room, Member member) {
+        if (!member.isHost(room)) {
+            throw new IllegalArgumentException("방장이어야 합니다.");
+        }
+    }
+
+    private void validateAlone(Room room) {
+        int participantsCount = roomParticipantRepository.countByRoom_Id(room.getId());
+        if (participantsCount > 1) {
+            throw new IllegalArgumentException("방에 방장을 제외한 다른 사용자가 입장한 상태에서는 수정할 수 없습니다.");
         }
     }
 }
