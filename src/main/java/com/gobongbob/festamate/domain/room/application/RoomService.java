@@ -31,15 +31,14 @@ public class RoomService {
     public Room createRoom(RoomCreateRequest request, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-        Room room = request.toEntity(member);
-        ChatRoom chatRoom = ChatRoom.builder()
-                .name(room.getTitle())
-                .room(room)
-                .build();
-        chatRoomRepository.save(chatRoom);
-      
         validateRoomParticipation(member.getId());
         Room createdRoom = roomRepository.save(request.toEntity(member));
+
+        ChatRoom chatRoom = ChatRoom.builder()
+                .name(createdRoom.getTitle())
+                .room(createdRoom)
+                .build();
+        chatRoomRepository.save(chatRoom);
 
         RoomParticipant roomParticipant = RoomParticipant.createHost(createdRoom, member);
         roomParticipantRepository.save(roomParticipant);
