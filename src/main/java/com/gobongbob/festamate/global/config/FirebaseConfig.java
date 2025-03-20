@@ -1,4 +1,4 @@
-package com.gobongbob.festamate.global;
+package com.gobongbob.festamate.global.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
