@@ -44,13 +44,19 @@ jobs:
       # 4) .build시작 >> 리눅스 명령어다.
       # 빌드와 테스트를 함께 실행
       - name: Build and Test with Gradle
-        env:
-          OCR_API_URL: ${{ secrets.OCR_API_URL }}
-          OCR_API_SECRET: ${{ secrets.OCR_API_SECRET }}
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASS: ${{ secrets.DB_PASS }}
+#        env:
+#          OCR_API_URL: ${{ secrets.OCR_API_URL }}
+#          OCR_API_SECRET: ${{ secrets.OCR_API_SECRET }}
+#          DB_URL: ${{ secrets.DB_URL }}
+#          DB_USER: ${{ secrets.DB_USER }}
+#          DB_PASS: ${{ secrets.DB_PASS }}
         run:
+          # .env 파일 생성 및 환경 변수 추가
+          echo "OCR_API_URL=${{ secrets.OCR_API_URL }}" > .env
+          echo "OCR_API_SECRET=${{ secrets.OCR_API_SECRET }}" >> .env
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
           # Firebase 키 파일 생성
           echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
           ./gradlew clean build
