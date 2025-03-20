@@ -1,5 +1,6 @@
 name: Java CI
 
+# Test
 # 워크플로우 트리거 조건 설정
 on:
   pull_request:
@@ -56,5 +57,7 @@ jobs:
         env:
           OCR_API_URL: ${{ secrets.OCR_API_URL }}
           OCR_API_SECRET: ${{ secrets.OCR_API_SECRET }}
-        run: ./gradlew clean build
+        run:
+          echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
+          ./gradlew clean build
         shell: bash
