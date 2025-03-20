@@ -71,8 +71,6 @@ jobs:
           # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시 (운영 환경에 맞는 docker-compose 파일 사용)
           docker compose -f docker-compose-prod.yml build
           docker compose -f docker-compose-prod.yml push
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
       # 8) EC2에 배포 (Bastion Host 경유)
       - name: Deploy to EC2 (via Bastion Host)
