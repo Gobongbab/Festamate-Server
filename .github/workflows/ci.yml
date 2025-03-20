@@ -1,5 +1,6 @@
 name: Java CI
 
+# Test
 # 워크플로우 트리거 조건 설정
 on:
   pull_request:
@@ -59,5 +60,7 @@ jobs:
           KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
           KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        run: ./gradlew clean build
+        run:
+          echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
+          ./gradlew clean build
         shell: bash
