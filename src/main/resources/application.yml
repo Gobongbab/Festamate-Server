@@ -1,4 +1,10 @@
 spring:
+  profiles:
+    active: dev  # 기본적으로 dev 프로파일을 활성화
+---
+# dev 프로파일 설정
+spring:
+  profiles: dev
   jackson:
     time-zone: Asia/Seoul
   datasource:
