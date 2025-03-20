@@ -1,8 +1,6 @@
 # 운영용
 services:
   app:
-    env_file:
-      - .env
     container_name: festamate
     build:
       context: .
