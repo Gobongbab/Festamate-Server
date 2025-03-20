@@ -59,4 +59,11 @@ public class MemberService {
 
         memberRepository.delete(member);
     }
+
+    // 아래부터는 oauth2를 위한 메서드
+    public Member findById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Unexpected member"));
+    }
+
 }
