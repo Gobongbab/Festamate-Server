@@ -46,7 +46,11 @@ jobs:
         env:
           OCR_API_URL: ${{ secrets.OCR_API_URL }}
           OCR_API_SECRET: ${{ secrets.OCR_API_SECRET }}
-        run:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+        run: |
+          # Firebase 키 파일 생성
           echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
           ./gradlew clean build
         shell: bash
