@@ -47,7 +47,9 @@ jobs:
         env:
           OCR_API_URL: ${{ secrets.OCR_API_URL }}
           OCR_API_SECRET: ${{ secrets.OCR_API_SECRET }}
-        run: ./gradlew clean build
+        run:
+          echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
+          ./gradlew clean build
         shell: bash
 
       # 6) Docker Hub 로그인
