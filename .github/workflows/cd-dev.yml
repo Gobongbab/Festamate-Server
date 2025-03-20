@@ -50,9 +50,6 @@ jobs:
       # 5) .build시작 >> 리눅스 명령어다.
       # 빌드와 테스트를 함께 실행
       - name: Build and Test with Gradle
-        env:
-          OCR_API_URL: ${{ secrets.OCR_API_URL }}
-          OCR_API_SECRET: ${{ secrets.OCR_API_SECRET }}
         run:
           # Firebase 키 파일 생성
           echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
