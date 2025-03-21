@@ -69,8 +69,6 @@ jobs:
           # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시
           docker compose -f docker-compose-dev.yml build
           docker compose -f docker-compose-dev.yml push
-        env:
-          DB_URL: ${{ secrets.DB_URL }}
 
       # 9) EC2에 배포
       - name: Deploy to EC2
