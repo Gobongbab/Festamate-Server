@@ -59,7 +59,6 @@ jobs:
       # 빌드와 테스트를 함께 실행
       - name: Build and Test with Gradle
         run: |
-          echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
           ./gradlew clean build -x test
         shell: bash
 
@@ -96,7 +95,7 @@ jobs:
             docker pull gobongbab/festamate:latest
             
             # 컨테이너 시작
-            docker run -d --name festamate -p 8080:8080 --env-file .env gobongbab/festamate:latest
+            docker run -d --name festamate -p 8080:8080 --env-file .env -v /home/ubuntu/festamate-firebase-key.json:/festamate-firebase-key.json gobongbab/festamate:latest
             
             # 사용하지 않는 이미지 정리
             docker image prune -af
