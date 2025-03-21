@@ -72,7 +72,6 @@ jobs:
       # 8) Docker Compose 빌드 및 푸시
       - name: Build and push with Docker Compose
         run: |
-          pwd
           # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시
           docker compose -f docker-compose-dev.yml build
           docker compose -f docker-compose-dev.yml push
