@@ -15,7 +15,7 @@ public class FirebaseConfig {
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
         // 프로젝트 루트 경로에서 serviceAccountKey.json 파일을 읽어옴
-        FileInputStream serviceAccount = new FileInputStream("festamate-firebase-key.json");
+        FileInputStream serviceAccount = new FileInputStream("/festamate-firebase-key.json");
 
         // Firebase 옵션 설정
         FirebaseOptions options = FirebaseOptions.builder()
