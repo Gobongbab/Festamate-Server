@@ -61,7 +61,7 @@ jobs:
       - name: Build and Test with Gradle
         run: |
           echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
-          ls
+          ls -la
           ./gradlew clean build
         shell: bash
 
