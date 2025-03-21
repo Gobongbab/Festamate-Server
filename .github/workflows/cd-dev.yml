@@ -53,7 +53,10 @@ jobs:
 #          echo "OCR_API_SECRET=${{ secrets.OCR_API_SECRET }}" >> .env
 #          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
 #          echo "KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}" >> .env
-#          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+#          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env      # 4) .env 파일 생성
+      - name: Make .env file
+        run: |
+          echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
 
       # 5) .build시작 >> 리눅스 명령어다.
       # 빌드와 테스트를 함께 실행
