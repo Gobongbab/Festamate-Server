@@ -46,7 +46,6 @@ jobs:
         run: |
           # .env 파일 생성 및 환경 변수 추가
           echo "ENV=${{ secrets.ENV }}" > .env
-          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
 
       # 5) .build시작 >> 리눅스 명령어다.
       # 빌드와 테스트를 함께 실행
