@@ -54,7 +54,6 @@ jobs:
 #          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
 #          echo "KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}" >> .env
 #          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-          
 
       # 5) .build시작 >> 리눅스 명령어다.
       # 빌드와 테스트를 함께 실행
