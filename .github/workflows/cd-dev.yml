@@ -44,6 +44,7 @@ jobs:
       # 4) .env 파일 생성
       - name: Make .env file
         run: |
+          pwd
           # .env 파일 생성 및 환경 변수 추가
           echo "DB_URL=${{ secrets.DB_URL }}" >> .env
           echo "DB_USER=${{ secrets.DB_USER }}" >> .env
@@ -59,7 +60,7 @@ jobs:
       # 빌드와 테스트를 함께 실행
       - name: Build and Test with Gradle
         run: |
-          
+          pwd
           echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
           ./gradlew clean build
         shell: bash
@@ -74,6 +75,7 @@ jobs:
       # 8) Docker Compose 빌드 및 푸시
       - name: Build and push with Docker Compose
         run: |
+          pwd
           # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시
           docker compose -f docker-compose-dev.yml build
           docker compose -f docker-compose-dev.yml push
