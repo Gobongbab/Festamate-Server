@@ -60,8 +60,8 @@ jobs:
       # 빌드와 테스트를 함께 실행
       - name: Build and Test with Gradle
         run: |
-          ls
           echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
+          ls
           ./gradlew clean build
         shell: bash
 
