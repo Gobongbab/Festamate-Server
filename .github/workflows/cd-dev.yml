@@ -55,23 +55,23 @@ jobs:
 #          echo "KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}" >> .env
 #          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
 
-      # 5) .build시작 >> 리눅스 명령어다.
-      # 빌드와 테스트를 함께 실행
-      - name: Build and Test with Gradle
-        env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASS: ${{ secrets.DB_PASS }}
-          OCR_API_URL: ${{ secrets.OCR_API_URL }}
-          OCR_API_SECRET: ${{ secrets.OCR_API_SECRET }}
-          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
-          KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        run: |
-          echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
-          ls -la
-          ./gradlew clean build
-        shell: bash
+#      # 5) .build시작 >> 리눅스 명령어다.
+#      # 빌드와 테스트를 함께 실행
+#      - name: Build and Test with Gradle
+#        env:
+#          DB_URL: ${{ secrets.DB_URL }}
+#          DB_USER: ${{ secrets.DB_USER }}
+#          DB_PASS: ${{ secrets.DB_PASS }}
+#          OCR_API_URL: ${{ secrets.OCR_API_URL }}
+#          OCR_API_SECRET: ${{ secrets.OCR_API_SECRET }}
+#          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+#          KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
+#          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+#        run: |
+#          echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
+#          ls -la
+#          ./gradlew clean build
+#        shell: bash
 
       # 6) Docker Hub 로그인
       - name: Login to Docker Hub
