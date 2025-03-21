@@ -41,19 +41,19 @@ jobs:
         run: chmod +x gradlew
         shell: bash
 
-#      # 4) .env 파일 생성
-#      - name: Make .env file
-#        run: |
-#          pwd
-#          # .env 파일 생성 및 환경 변수 추가
-#          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
-#          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-#          echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
-#          echo "OCR_API_URL=${{ secrets.OCR_API_URL }}" >> .env
-#          echo "OCR_API_SECRET=${{ secrets.OCR_API_SECRET }}" >> .env
-#          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
-#          echo "KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}" >> .env
-#          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env      # 4) .env 파일 생성
+      # 4) .env 파일 생성
+      - name: Make .env file
+        run: |
+          pwd
+          # .env 파일 생성 및 환경 변수 추가
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+          echo "OCR_API_URL=${{ secrets.OCR_API_URL }}" >> .env
+          echo "OCR_API_SECRET=${{ secrets.OCR_API_SECRET }}" >> .env
+          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
+          echo "KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env 
 
       # 5) .build시작 >> 리눅스 명령어다.
       # 빌드와 테스트를 함께 실행
