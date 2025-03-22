@@ -41,7 +41,10 @@ jobs:
         run: chmod +x gradlew
         shell: bash
 
-      # 4) .env 파일 생성
+      # 4) .env 파일 생성, 생성하는 이유는 Docker Compose 빌드할 때 환경 변수를 사용하기 위해서다. 즉, runner에 .env파일을 만들어주는 것
+      # 이렇게 한 이유는, build와 테스트를 할 때 환경 변수를 사용하기 위해서다.
+      # 그러나, 테스트 관련 에러가 발생하여 테스트를 하지 않기로 했다. (추후 해결 예정 )
+      # 때문에 Docker Compose step에서만 사용하도록 해당 step에서 환경 변수를 따로 지정할 수도 있다.
       - name: Make .env file
         run: |
           pwd
@@ -94,7 +97,7 @@ jobs:
             # 최신 이미지 pull
             docker pull gobongbab/festamate:latest
             
-            # 컨테이너 시작
+            # 컨테이너 시작, 시작할 때 파이어베이스 키의 위치를 지정하여 환경 변수로 설정
             docker run -d --name festamate -p 8080:8080 --env-file .env -v /home/ubuntu/festamate-firebase-key.json:/festamate-firebase-key.json gobongbab/festamate:latest
             
             # 사용하지 않는 이미지 정리
