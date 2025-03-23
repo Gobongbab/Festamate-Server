@@ -74,11 +74,9 @@ public class RoomService {
     }
 
     @Transactional
-    public void updateRoomById(Long roomId, Long memberId, RoomUpdateRequest request) {
+    public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
         validateIsHost(room, member);
         validateAlone(room);
 
