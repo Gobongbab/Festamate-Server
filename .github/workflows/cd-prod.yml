@@ -75,30 +75,24 @@ jobs:
           username: ${{ secrets.BASTION_USERNAME }} # Bastion Host 접속 사용자 이름
           key: ${{ secrets.BASTION_PRIVATE_KEY }} # Bastion Host 접속 Private Key
           script: |
-            # Private EC2 인스턴스 정보
-            export  PRIVATE_EC2_HOST_1="${{ secrets.PROD_EC2_HOST_1 }}" # 첫 번째 운영용 EC2 Private IP
-            export  PRIVATE_EC2_HOST_2="${{ secrets.PROD_EC2_HOST_2 }}" # 두 번째 운영용 EC2 Private IP
-            export  PRIVATE_EC2_USERNAME="${{ secrets.PROD_EC2_USERNAME }}" # Private EC2 인스턴스 접속 사용자 이름
-            export  PROD_EC2_PRIVATE_KEY_PATH="${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}" # Bastion Host에 있어야 함
-
             # --- 첫 번째 운영용 EC2 배포 ---
             echo "Deploying to Host1..."
 
             # Docker Hub 로그인 (Private EC2 - 첫 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_1 }}' "echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin"
 
             # 이전 컨테이너 중지 및 제거 (Private EC2 - 첫 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker stop festamate || true"
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker rm festamate || true"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_1 }}' "docker stop festamate || true"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_1 }}' "docker rm festamate || true"
 
             # 최신 이미지 pull (Private EC2 - 첫 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker pull gobongbab/festamate:latest"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_1 }}' "docker pull gobongbab/festamate:latest"
 
             # 컨테이너 시작 (Private EC2 - 첫 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker run -d --name festamate -p 80:8080 --env-file .env.prod gobongbab/festamate:latest"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_1 }}' "docker run -d --name festamate -p 80:8080 --env-file .env.prod gobongbab/festamate:latest"
 
             # 사용하지 않는 이미지 정리 (Private EC2 - 첫 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker image prune -af"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_1 }}' "docker image prune -af"
 
             echo "Deployment to Host1 complete."
 
@@ -110,19 +104,20 @@ jobs:
             echo "Deploying to Host2..."
 
             # Docker Hub 로그인 (Private EC2 - 두 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_2 }}' "echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin"
 
             # 이전 컨테이너 중지 및 제거 (Private EC2 - 두 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker stop festamate || true"
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker rm festamate || true"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_2 }}' "docker stop festamate || true"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_2 }}' "docker rm festamate || true"
 
             # 최신 이미지 pull (Private EC2 - 두 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker pull gobongbab/festamate:latest"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_2 }}' "docker pull gobongbab/festamate:latest"
 
             # 컨테이너 시작 (Private EC2 - 두 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker run -d --name festamate -p 80:8080 --env-file .env.prod gobongbab/festamate:latest"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_2 }}' "docker run -d --name festamate -p 80:8080 --env-file .env.prod gobongbab/festamate:latest"
 
             # 사용하지 않는 이미지 정리 (Private EC2 - 두 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker image prune -af"
+            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' '${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST_2 }}' "docker image prune -af"
 
             echo "Deployment to Host2 complete."
+          
