@@ -76,10 +76,10 @@ jobs:
           key: ${{ secrets.BASTION_PRIVATE_KEY }} # Bastion Host 접속 Private Key
           script: |
             # Private EC2 인스턴스 정보
-            PRIVATE_EC2_HOST_1="${{ secrets.PROD_EC2_HOST_1 }}" # 첫 번째 운영용 EC2 Private IP
-            PRIVATE_EC2_HOST_2="${{ secrets.PROD_EC2_HOST_2 }}" # 두 번째 운영용 EC2 Private IP
-            PRIVATE_EC2_USERNAME="${{ secrets.PROD_EC2_USERNAME }}" # Private EC2 인스턴스 접속 사용자 이름
-            PROD_EC2_PRIVATE_KEY_PATH="${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}" # Bastion Host에 있어야 함
+            export  PRIVATE_EC2_HOST_1="${{ secrets.PROD_EC2_HOST_1 }}" # 첫 번째 운영용 EC2 Private IP
+            export  PRIVATE_EC2_HOST_2="${{ secrets.PROD_EC2_HOST_2 }}" # 두 번째 운영용 EC2 Private IP
+            export  PRIVATE_EC2_USERNAME="${{ secrets.PROD_EC2_USERNAME }}" # Private EC2 인스턴스 접속 사용자 이름
+            export  PROD_EC2_PRIVATE_KEY_PATH="${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}" # Bastion Host에 있어야 함
 
             # --- 첫 번째 운영용 EC2 배포 ---
             echo "Deploying to Host1..."
