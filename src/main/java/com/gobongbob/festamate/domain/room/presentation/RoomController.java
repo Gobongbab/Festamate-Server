@@ -84,8 +84,11 @@ public class RoomController {
     }
 
     @PostMapping("/{roomId}/leave")
-    public ResponseEntity<Void> leaveRoom(@PathVariable Long roomId, Long memberId) {
-        roomParticipationService.leaveRoomById(roomId, memberId);
+    public ResponseEntity<Void> leaveRoom(
+            @AuthenticationPrincipal Member member,
+            @PathVariable Long roomId
+    ) {
+        roomParticipationService.leaveRoomById(member, roomId);
 
         return ResponseEntity.ok().build();
     }

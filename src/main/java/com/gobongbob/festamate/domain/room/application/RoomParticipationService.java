@@ -32,11 +32,9 @@ public class RoomParticipationService {
     }
 
     @Transactional
-    public void leaveRoomById(Long roomId, Long memberId) {
+    public void leaveRoomById(Member member, Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
         validateNotHost(room, member);
 
         roomParticipantRepository.deleteByMember_Id(member.getId());
