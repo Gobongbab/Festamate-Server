@@ -64,8 +64,11 @@ public class RoomController {
     }
 
     @DeleteMapping("/{roomId}")
-    public ResponseEntity<Void> deleteRoomById(@PathVariable Long roomId, Long memberId) {
-        roomService.deleteRoomById(roomId, memberId);
+    public ResponseEntity<Void> deleteRoomById(
+            @AuthenticationPrincipal Member member,
+            @PathVariable Long roomId
+    ) {
+        roomService.deleteRoomById(member, roomId);
 
         return ResponseEntity.ok().build();
     }
