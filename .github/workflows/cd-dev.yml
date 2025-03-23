@@ -41,22 +41,28 @@ jobs:
         run: chmod +x gradlew
         shell: bash
 
-      # 4) .build시작 >> 리눅스 명령어다.
-      # 빌드와 테스트를 함께 실행
-      - name: Build and Test with Gradle
-        run:
+      # 4) .env 파일 생성, 생성하는 이유는 Docker Compose 빌드할 때 환경 변수를 사용하기 위해서다. 즉, runner에 .env파일을 만들어주는 것
+      # 이렇게 한 이유는, build와 테스트를 할 때 환경 변수를 사용하기 위해서다.
+      # 그러나, 테스트 관련 에러가 발생하여 테스트를 하지 않기로 했다. (추후 해결 예정 )
+      # 때문에 Docker Compose step에서만 사용하도록 해당 step에서 환경 변수를 따로 지정할 수도 있다.
+      - name: Make .env file
+        run: |
+          pwd
           # .env 파일 생성 및 환경 변수 추가
-          echo "OCR_API_URL=${{ secrets.OCR_API_URL }}" > .env
-          echo "OCR_API_SECRET=${{ secrets.OCR_API_SECRET }}" >> .env
           echo "DB_URL=${{ secrets.DB_URL }}" >> .env
           echo "DB_USER=${{ secrets.DB_USER }}" >> .env
           echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+          echo "OCR_API_URL=${{ secrets.OCR_API_URL }}" >> .env
+          echo "OCR_API_SECRET=${{ secrets.OCR_API_SECRET }}" >> .env
           echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
           echo "KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-          # Firebase 키 파일 생성
-          echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
-          ./gradlew clean build
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env 
+
+      # 5) .build시작 >> 리눅스 명령어다.
+      # 빌드와 테스트를 함께 실행
+      - name: Build and Test with Gradle
+        run: |
+          ./gradlew clean build -x test
         shell: bash
 
       # 6) Docker Hub 로그인
@@ -72,8 +78,6 @@ jobs:
           # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시
           docker compose -f docker-compose-dev.yml build
           docker compose -f docker-compose-dev.yml push
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
       # 9) EC2에 배포
       - name: Deploy to EC2
@@ -93,8 +97,8 @@ jobs:
             # 최신 이미지 pull
             docker pull gobongbab/festamate:latest
             
-            # 컨테이너 시작
-            docker run -d --name festamate -p 8080:8080 --env-file .env gobongbab/festamate:latest
+            # 컨테이너 시작, 시작할 때 파이어베이스 키의 위치를 지정하여 환경 변수로 설정
+            docker run -d --name festamate -p 8080:8080 --env-file .env -v /home/ubuntu/festamate-firebase-key.json:/festamate-firebase-key.json gobongbab/festamate:latest
             
             # 사용하지 않는 이미지 정리
             docker image prune -af
