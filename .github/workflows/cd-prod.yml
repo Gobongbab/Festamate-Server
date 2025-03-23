@@ -95,7 +95,7 @@ jobs:
             ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker pull gobongbab/festamate:latest"
 
             # 컨테이너 시작 (Private EC2 - 첫 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker run -d --name festamate -p 80:8080 --env-file .env.prod gobongbab/festamate:latest"
+            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker run -d --name festamate -p 80:8080 --env-file .env gobongbab/festamate:latest"
 
             # 사용하지 않는 이미지 정리 (Private EC2 - 첫 번째 서버)
             ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker image prune -af"
