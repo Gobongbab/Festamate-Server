@@ -6,6 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gobongbob.festamate.domain.image.dto.response.StudentInfoResponse;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -18,11 +22,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 @Service
 @Transactional
@@ -37,10 +36,7 @@ public class OcrService {
 
     private final MemberRepository memberRepository;
 
-    public StudentInfoResponse checkStudentCard(MultipartFile file, Long memberId) throws IOException {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-
+    public StudentInfoResponse checkStudentCard(MultipartFile file, Member member) throws IOException {
         // 파일이 비어있거나 null인 경우 예외 처리
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("파일이 비어있습니다.");
@@ -66,6 +62,7 @@ public class OcrService {
 
         return StudentInfoResponse.fromEntity(studentName, studentDepartment, studentId);
     }
+
     private String getValueAfterKeyword(String json, String keyword) {
         try {
             // ObjectMapper는 JSON 데이터를 Java 객체로 변환하거나, Java 객체를 JSON으로 변환하는 기능을 제공
