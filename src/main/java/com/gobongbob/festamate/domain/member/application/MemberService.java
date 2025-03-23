@@ -44,10 +44,7 @@ public class MemberService {
     }
 
     @Transactional
-    public void updateMemberProfileById(Long memberId, ProfileUpdateRequest request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-
+    public void updateMemberProfileById(Member member, ProfileUpdateRequest request) {
         member.updateProfile(request.nickname(), request.loginPassword());
     }
 

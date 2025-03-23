@@ -48,11 +48,11 @@ public class MemberController {
     }
 
     @PatchMapping("/members/profile")
-    public ResponseEntity<Void> updateProfile( // 추후 Spring Security를 활용하여 사용자 정보를 가져오도록 변경 필요
-            Long memberId,
+    public ResponseEntity<Void> updateProfile(
+            @AuthenticationPrincipal Member member,
             @RequestBody ProfileUpdateRequest request
     ) {
-        memberService.updateMemberProfileById(memberId, request);
+        memberService.updateMemberProfileById(member, request);
 
         return ResponseEntity.ok().build();
     }
