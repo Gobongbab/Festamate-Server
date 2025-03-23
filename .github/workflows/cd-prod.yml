@@ -88,7 +88,7 @@ jobs:
             ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin"
 
             # .env 파일 생성 및 환경 변수 추가
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "echo "${{ secrets.ENV }}" > /home/$PRIVATE_EC2_USERNAME/.env"
+            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "echo "${{ secrets.ENV }}" > /home/$PRIVATE_EC2_USERNAME/.env"
             
             # 이전 컨테이너 중지 및 제거 (Private EC2 - 첫 번째 서버)
             ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker stop festamate || true"
