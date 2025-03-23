@@ -88,7 +88,7 @@ jobs:
             ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin"
 
             # .env 파일 생성 및 환경 변수 추가
-            cat > /home/ubuntu/.env << EOF
+            cat > /home/$PRIVATE_EC2_USERNAME/.env << EOF
             DB_URL=${{ secrets.DB_URL }}
             DB_USER=${{ secrets.DB_USER }}
             DB_PASS=${{ secrets.DB_PASS }}
@@ -125,7 +125,7 @@ jobs:
             ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin"
 
             # .env 파일 생성 및 환경 변수 추가
-            cat > /home/ubuntu/.env << EOF
+            cat > /home/$PRIVATE_EC2_USERNAME/.env << EOF
             DB_URL=${{ secrets.DB_URL }}
             DB_USER=${{ secrets.DB_USER }}
             DB_PASS=${{ secrets.DB_PASS }}
