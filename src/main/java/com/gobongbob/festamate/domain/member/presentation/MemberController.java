@@ -42,9 +42,8 @@ public class MemberController {
     }
 
     @GetMapping("/api/auth/members/profile")
-    public ResponseEntity<MemberProfileResponse> getProfile(
-            @AuthenticationPrincipal Member member) { // @AuthenticationPrincipal을 통해 사용자 정보를 가져옴
-        return ResponseEntity.ok(memberService.findProfile(member.getId()));
+    public ResponseEntity<MemberProfileResponse> getProfile(@AuthenticationPrincipal Member member) {
+        return ResponseEntity.ok(memberService.findProfile(member));
     }
 
     @PatchMapping("/members/profile")
