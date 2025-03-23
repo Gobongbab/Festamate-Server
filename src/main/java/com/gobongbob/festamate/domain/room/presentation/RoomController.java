@@ -94,7 +94,10 @@ public class RoomController {
     }
 
     @GetMapping("/{roomId}/isHost")
-    public ResponseEntity<Boolean> isMemberHost(@PathVariable Long roomId, Long memberId) {
-        return ResponseEntity.ok(roomParticipationService.isMemberHost(roomId, memberId));
+    public ResponseEntity<Boolean> isMemberHost(
+            @AuthenticationPrincipal Member member,
+            @PathVariable Long roomId
+    ) {
+        return ResponseEntity.ok(roomParticipationService.isMemberHost(member.getId(), roomId));
     }
 }
