@@ -39,7 +39,7 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS)) // 세션을 생성하지 않고, 토큰 기반 인증을 사용
                 .authorizeHttpRequests(authorize -> authorize // 요청에 대한 인증 및 인가 설정 시작
-                        .requestMatchers("/api/auth/**", "/login/oauth2/code/kakao")
+                        .requestMatchers("/api/auth/**", "/login/oauth2/code/kakao", "/health")
                         .permitAll() // 경로에 대한 요청은 인증 없이 접근 가능
                         .anyRequest().authenticated() // 나머지 요청은 인증이 필요
                 )
