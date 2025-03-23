@@ -23,11 +23,9 @@ public class ChatService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public ChatResponse createChat(ChatRequest request, Long roomId) {
+    public ChatResponse createChat(Long roomId, Member member, ChatRequest request) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
-        Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
         Chat chat = Chat.builder()
                 .room(chatRoom)

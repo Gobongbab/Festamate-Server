@@ -1,13 +1,20 @@
 package com.gobongbob.festamate.domain.report.presentation;
 
+import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.report.application.ReportService;
 import com.gobongbob.festamate.domain.report.dto.request.ReportRoomRequest;
 import com.gobongbob.festamate.domain.report.dto.response.ReportRoomResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,11 +25,11 @@ public class ReportController {
 
     @PostMapping("/{roomId}")
     public ResponseEntity<Void> reportRoom(
-            @RequestBody ReportRoomRequest request,
+            @AuthenticationPrincipal Member member,
             @PathVariable Long roomId,
-            @RequestHeader("reporterId") Long reporterId // 추후 Spring Security를 활용하여 사용자 정보를 가져오도록 변경 필요
+            @RequestBody ReportRoomRequest request
     ) {
-        reportService.reportRoom(request, roomId, reporterId);
+        reportService.reportRoom(member, roomId, request);
         return ResponseEntity.ok().build();
     }
 

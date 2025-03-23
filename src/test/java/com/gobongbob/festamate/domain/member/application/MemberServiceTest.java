@@ -118,7 +118,7 @@ class MemberServiceTest extends serviceSliceTest {
             Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
 
             // when
-            MemberProfileResponse response = memberService.findProfile(member.getId());
+            MemberProfileResponse response = memberService.findProfile(member);
 
             // then
             assertAll(
@@ -146,7 +146,7 @@ class MemberServiceTest extends serviceSliceTest {
 
             // when
             ProfileUpdateRequest request = new ProfileUpdateRequest(nicknameToUpdate, loginPasswordToUpdate);
-            memberService.updateMemberProfileById(member.getId(), request);
+            memberService.updateMemberProfileById(member, request);
 
             // then
             Member updatedMember = memberRepository.findById(member.getId())

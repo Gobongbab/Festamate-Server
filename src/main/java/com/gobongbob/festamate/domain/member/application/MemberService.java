@@ -38,24 +38,26 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
     }
 
-    public MemberProfileResponse findProfile(Long memberId) { // 로그인한 회원의 pk로 추후 수정 필요
-        return memberRepository.findById(memberId)
-                .map(MemberProfileResponse::fromEntity)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+    public MemberProfileResponse findProfile(Member member) {
+        return MemberProfileResponse.fromEntity(member);
     }
 
     @Transactional
-    public void updateMemberProfileById(Long memberId, ProfileUpdateRequest request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-
+    public void updateMemberProfileById(Member member, ProfileUpdateRequest request) {
         member.updateProfile(request.nickname(), request.loginPassword());
     }
 
     @Transactional
-    public void deleteMemberById(Long memberId) { // 추후 soft delete 적용이 필요합니다.
+    public void deleteMemberById(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        /**
+         * 1. 삭제하려는 사용자가 로그인한 사용자와 같은지 확인하는 로직 필요
+         * 2. 삭제하려는 사용자가 관리자인지 확인하는 로직 필요
+         * 3. 삭제하려는 사용자를 참여중인 방에서 추방시키는 로직 필요
+         * 4. 삭제하려는 사용자가 방장이라면 방을 폭파시키는 로직 필요
+         */
 
         memberRepository.delete(member);
     }
