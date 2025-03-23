@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.room.presentation;
 
+import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
@@ -8,6 +9,7 @@ import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -52,11 +54,11 @@ public class RoomController {
 
     @PatchMapping("/{roomId}")
     public ResponseEntity<Void> updateRoomById(
+            @AuthenticationPrincipal Member member,
             @PathVariable Long roomId,
-            @RequestBody RoomUpdateRequest request,
-            Long memberId
+            @RequestBody RoomUpdateRequest request
     ) {
-        roomService.updateRoomById(roomId, memberId, request);
+        roomService.updateRoomById(member, roomId, request);
 
         return ResponseEntity.ok().build();
     }
@@ -69,8 +71,11 @@ public class RoomController {
     }
 
     @PostMapping("/{roomId}/participate")
-    public ResponseEntity<Void> participateRoom(@PathVariable Long roomId, Long memberId) {
-        roomParticipationService.participateRoom(roomId, memberId);
+    public ResponseEntity<Void> participateRoom(
+            @AuthenticationPrincipal Member member,
+            @PathVariable Long roomId
+    ) {
+        roomParticipationService.participateRoom(member, roomId);
 
         return ResponseEntity.ok().build();
     }
