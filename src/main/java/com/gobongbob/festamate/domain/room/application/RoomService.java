@@ -28,9 +28,7 @@ public class RoomService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public Room createRoom(RoomCreateRequest request, Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+    public Room createRoom(Member member, RoomCreateRequest request) {
         validateRoomParticipation(member.getId());
         Room createdRoom = roomRepository.save(request.toEntity(member));
 
