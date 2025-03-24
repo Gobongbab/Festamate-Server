@@ -43,9 +43,9 @@ public class Member {
     private String studentId;
 
     @Column(unique = true)
-    private String loginId;
+    private String loginId; // 관리자 일반 로그인 관련 필드
 
-    private String loginPassword;
+    private String loginPassword; // 관리자 일반 로그인 관련 필드
 
     @Column(unique = true)
     private String phoneNumber;
