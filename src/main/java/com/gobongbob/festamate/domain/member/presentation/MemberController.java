@@ -3,6 +3,7 @@ package com.gobongbob.festamate.domain.member.presentation;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
+import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
@@ -61,6 +62,15 @@ public class MemberController {
     public ResponseEntity<Void> deleteMemberById(@PathVariable Long memberId) {
         memberService.deleteMemberById(memberId);
 
+        return ResponseEntity.ok().build();
+    }
+
+    // 프로필 등록 API
+    @PostMapping("/api/auth/register/profile") // 추후 /api/auth를 상위 경로에 작성하도록 변경 필요
+    public ResponseEntity<Void> registerProfile(@RequestBody ProfileRegisterRequest request,
+            @AuthenticationPrincipal Member member) {
+        Long userId = member.getId();
+        memberService.registerProfile(request, userId);
         return ResponseEntity.ok().build();
     }
 }

@@ -2,6 +2,7 @@ package com.gobongbob.festamate.domain.member.application;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
+import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
@@ -58,6 +59,16 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
         memberRepository.delete(member);
+    }
+
+    // 프로필 등록 API
+    @Transactional
+    public void registerProfile(ProfileRegisterRequest request, Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자 ID입니다."));
+
+        Member registeredMember = request.toEntity(member); // 기존 Member 정보 그대로 사용
+        memberRepository.save(registeredMember);
     }
 
     // 아래부터는 oauth2를 위한 메서드
