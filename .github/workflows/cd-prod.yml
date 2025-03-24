@@ -1,7 +1,8 @@
 name: Java CD-Prod
 
 on:
-  pull_request:
+  pull_request: # 테스트할 때 편하고자 PR 날렸을 때 이벤트가 발생하도록 했다.
+    # 실제 운영할 때는 push로 바꿔줘야 함
     branches: [ main ] # 운영 브랜치 (main)
     paths-ignore:
       - '**.md'
