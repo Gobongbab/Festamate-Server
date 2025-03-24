@@ -17,8 +17,8 @@ public record MemberProfileResponse(
                 member.getNickname(),
                 member.getStudentId(),
                 member.getPhoneNumber(),
-                member.getGender().getName(),
-                member.getMajor().getDepartment()
+                member.getGender() != null ? member.getGender().getName() : "Unknown",
+                member.getMajor() != null ? member.getMajor().getDepartment() : "Unknown"
         );
     }
 }

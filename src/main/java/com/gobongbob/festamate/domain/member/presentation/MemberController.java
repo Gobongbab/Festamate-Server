@@ -9,6 +9,7 @@ import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -40,10 +41,10 @@ public class MemberController {
         return ResponseEntity.ok(memberService.findMemberById(memberId));
     }
 
-    @GetMapping("/members/profile")
+    @GetMapping("/api/auth/members/profile")
     public ResponseEntity<MemberProfileResponse> getProfile(
-            Long memberId) { // 추후 Spring Security를 활용하여 사용자 정보를 가져오도록 변경 필요
-        return ResponseEntity.ok(memberService.findProfile(memberId));
+            @AuthenticationPrincipal Member member) { // @AuthenticationPrincipal을 통해 사용자 정보를 가져옴
+        return ResponseEntity.ok(memberService.findProfile(member.getId()));
     }
 
     @PatchMapping("/members/profile")
