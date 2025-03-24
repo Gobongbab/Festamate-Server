@@ -87,15 +87,12 @@ jobs:
             # Docker Hub 로그인 (Private EC2 - 첫 번째 서버)
             ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin"
 
-            # .env 파일 생성 (ssh를 통해 직접 EC2에 명령 전달)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "echo 'DB_URL=${{ secrets.DB_URL }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASS=${{ secrets.DB_PASS }}
-            OCR_API_URL=${{ secrets.OCR_API_URL }}
-            OCR_API_SECRET=${{ secrets.OCR_API_SECRET }}
-            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
-            KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}' > ~/.env"
+            # .env 파일 생성 및 권한 설정 (첫 번째 서버)
+            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "
+            echo "ENV=${{ secrets.ENV }}" > ./.env &&
+            chmod 600 ./.env &&
+            chown $PRIVATE_EC2_USERNAME:$PRIVATE_EC2_USERNAME ./.env
+            "
             
             # 이전 컨테이너 중지 및 제거 (Private EC2 - 첫 번째 서버)
             ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker stop festamate || true"
@@ -122,15 +119,12 @@ jobs:
             # Docker Hub 로그인 (Private EC2 - 두 번째 서버)
             ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin"
 
-            # .env 파일 생성 (ssh를 통해 직접 EC2에 명령 전달)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "echo 'DB_URL=${{ secrets.DB_URL }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASS=${{ secrets.DB_PASS }}
-            OCR_API_URL=${{ secrets.OCR_API_URL }}
-            OCR_API_SECRET=${{ secrets.OCR_API_SECRET }}
-            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
-            KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}' > ~/.env"
+            # .env 파일 생성 및 권한 설정 (두 번째 서버)
+            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "
+            echo "ENV=${{ secrets.ENV }}" > ./.env &&
+            chmod 600 ./.env &&
+            chown $PRIVATE_EC2_USERNAME:$PRIVATE_EC2_USERNAME ./.env
+            "
             
             # 이전 컨테이너 중지 및 제거 (Private EC2 - 두 번째 서버)
             ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker stop festamate || true"
