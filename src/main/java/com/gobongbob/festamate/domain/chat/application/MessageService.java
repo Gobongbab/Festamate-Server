@@ -1,11 +1,11 @@
 package com.gobongbob.festamate.domain.chat.application;
 
-import com.gobongbob.festamate.domain.chat.domain.Chat;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
-import com.gobongbob.festamate.domain.chat.dto.request.ChatRequest;
-import com.gobongbob.festamate.domain.chat.dto.response.ChatResponse;
-import com.gobongbob.festamate.domain.chat.persistence.ChatRepository;
+import com.gobongbob.festamate.domain.chat.domain.Message;
+import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
+import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
+import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import java.util.List;
@@ -16,31 +16,31 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class ChatService {
+public class MessageService {
 
-    private final ChatRepository chatRepository;
+    private final MessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
-    public ChatResponse createChat(Long roomId, Member member, ChatRequest request) {
+    public MessageResponse send(Long roomId, Member member, MessageRequest request) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
-        Chat chat = Chat.builder()
+        Message message = Message.builder()
                 .room(chatRoom)
                 .nickname(member.getNickname())
                 .message(request.message())
                 .build();
-        Chat savedChat = chatRepository.save(chat);
+        Message savedMessage = messageRepository.save(message);
 
-        return ChatResponse.fromEntity(savedChat);
+        return MessageResponse.fromEntity(savedMessage);
     }
 
-    public List<ChatResponse> getChatsByRoomId(Long roomId) {
-        return chatRepository.findByRoomId(roomId)
+    public List<MessageResponse> findMessagesByRoomId(Long roomId) {
+        return messageRepository.findByRoomId(roomId)
                 .stream()
-                .map(ChatResponse::fromEntity)
+                .map(MessageResponse::fromEntity)
                 .toList();
     }
 }
