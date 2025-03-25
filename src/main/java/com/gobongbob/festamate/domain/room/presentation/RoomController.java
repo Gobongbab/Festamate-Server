@@ -1,6 +1,6 @@
 package com.gobongbob.festamate.domain.room.presentation;
 
-import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
@@ -29,10 +29,10 @@ public class RoomController {
 
     @PostMapping("")
     public ResponseEntity<Void> createRoom(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestBody RoomCreateRequest request
     ) {
-        roomService.createRoom(member, request);
+        roomService.createRoom(memberDetails.getMember(), request);
 
         return ResponseEntity.ok().build();
     }
@@ -43,8 +43,10 @@ public class RoomController {
     }
 
     @GetMapping("/participate")
-    public ResponseEntity<RoomResponse> findParticipatingRooms(@AuthenticationPrincipal Member member) {
-        return ResponseEntity.ok(roomService.findParticipatingRooms(member.getId()));
+    public ResponseEntity<RoomResponse> findParticipatingRooms(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
+    ) {
+        return ResponseEntity.ok(roomService.findParticipatingRooms(memberDetails.getMember().getId()));
     }
 
     @GetMapping("/{roomId}")
@@ -54,50 +56,50 @@ public class RoomController {
 
     @PatchMapping("/{roomId}")
     public ResponseEntity<Void> updateRoomById(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId,
             @RequestBody RoomUpdateRequest request
     ) {
-        roomService.updateRoomById(member, roomId, request);
+        roomService.updateRoomById(memberDetails.getMember(), roomId, request);
 
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{roomId}")
     public ResponseEntity<Void> deleteRoomById(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId
     ) {
-        roomService.deleteRoomById(member, roomId);
+        roomService.deleteRoomById(memberDetails.getMember(), roomId);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{roomId}/participate")
     public ResponseEntity<Void> participateRoom(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId
     ) {
-        roomParticipationService.participateRoom(member, roomId);
+        roomParticipationService.participateRoom(memberDetails.getMember(), roomId);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{roomId}/leave")
     public ResponseEntity<Void> leaveRoom(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId
     ) {
-        roomParticipationService.leaveRoomById(member, roomId);
+        roomParticipationService.leaveRoomById(memberDetails.getMember(), roomId);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{roomId}/isHost")
     public ResponseEntity<Boolean> isMemberHost(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId
     ) {
-        return ResponseEntity.ok(roomParticipationService.isMemberHost(member.getId(), roomId));
+        return ResponseEntity.ok(roomParticipationService.isMemberHost(memberDetails.getMember().getId(), roomId));
     }
 }
