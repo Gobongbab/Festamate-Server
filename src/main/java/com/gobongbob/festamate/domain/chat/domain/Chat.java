@@ -1,6 +1,5 @@
 package com.gobongbob.festamate.domain.chat.domain;
 
-import com.gobongbob.festamate.domain.chatRoom.domain.ChatRoom;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

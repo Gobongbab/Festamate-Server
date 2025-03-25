@@ -1,7 +1,7 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import com.gobongbob.festamate.domain.chatRoom.domain.ChatRoom;
-import com.gobongbob.festamate.domain.chatRoom.repository.ChatRoomRepository;
+import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
+import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;

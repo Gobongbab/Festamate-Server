@@ -1,4 +1,4 @@
-package com.gobongbob.festamate.domain.chatRoom.domain;
+package com.gobongbob.festamate.domain.chat.domain;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
 import jakarta.persistence.Column;
