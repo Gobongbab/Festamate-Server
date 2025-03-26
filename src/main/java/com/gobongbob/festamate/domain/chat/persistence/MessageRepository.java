@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    @Query("select m from Message m where m.room.id = ?1")
+    @Query("select m from Message m where m.charRoom.room.id = ?1")
     Slice<Message> findByRoomId(Long id, Pageable pageable);
 }

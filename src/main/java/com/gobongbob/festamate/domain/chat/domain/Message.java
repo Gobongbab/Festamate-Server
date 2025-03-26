@@ -30,7 +30,7 @@ public class Message {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "room_id")
-    private ChatRoom room;
+    private ChatRoom charRoom;
 
     private String nickname;
 
@@ -42,8 +42,8 @@ public class Message {
     private LocalDateTime sendDate;
 
     @Builder
-    public Message(ChatRoom room, String nickname, String message) {
-        this.room = room;
+    public Message(ChatRoom charRoom, String nickname, String message) {
+        this.charRoom = charRoom;
         this.nickname = nickname;
         this.message = message;
         this.sendDate = LocalDateTime.now();

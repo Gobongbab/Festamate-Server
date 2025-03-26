@@ -29,7 +29,7 @@ public class MessageService {
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
         Message message = Message.builder()
-                .room(chatRoom)
+                .charRoom(chatRoom)
                 .nickname(member.getNickname())
                 .message(request.message())
                 .build();
