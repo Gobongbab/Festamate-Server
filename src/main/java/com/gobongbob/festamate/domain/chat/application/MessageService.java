@@ -43,4 +43,10 @@ public class MessageService {
                 .map(MessageResponse::fromEntity)
                 .toList();
     }
+
+    private void validateRoomParticipation(Long memberId, Long roomId) {
+        if (roomParticipantRepository.findByRoom_IdAndMember_Id(memberId, roomId).isEmpty()) {
+            throw new IllegalArgumentException("채팅방을 조회할 수 있는 권한이 없습니다.");
+        }
+    }
 }
