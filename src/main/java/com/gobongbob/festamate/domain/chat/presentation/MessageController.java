@@ -16,10 +16,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class MessageController {
 
     private final MessageService messageService;
+    private final SimpMessageSendingOperations messagingTemplate;
 
     @MessageMapping("/room/{roomId}") // Spring App 을 거쳐서 메시지 전송. 앞에 "app" prefix 를 붙여야 함
-    public ResponseEntity<MessageResponse> sendMessage(
+    public ResponseEntity<Void> sendMessage(
             @DestinationVariable Long roomId,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            MessageRequest request
+    ) {
+        MessageResponse messageResponse = messageService.createMessage(roomId, memberDetails.getMember(), request);
+        messagingTemplate.convertAndSend("/topic/room/" + roomId, messageResponse);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("api/room/{roomId}/messages")
+    public ResponseEntity<Slice<MessageResponse>> findMessages(
             @AuthenticationPrincipal Member member,
             MessageRequest request
     ) {
