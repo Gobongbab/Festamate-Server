@@ -48,7 +48,7 @@ class RoomServiceTest extends serviceSliceTest {
             RoomCreateRequest request = RoomFixture.createRoomCreateRequest(room);
 
             // when
-            Room createdRoom = roomService.createRoom(request, member.getId());
+            Room createdRoom = roomService.createRoom(member, request);
 
             // then
             assertAll(
@@ -119,7 +119,7 @@ class RoomServiceTest extends serviceSliceTest {
                     room.getTitle(),
                     room.getContent()
             );
-            roomService.updateRoomById(room.getId(), member.getId(), request);
+            roomService.updateRoomById(member, room.getId(), request);
 
             // then
             assertAll(
@@ -142,7 +142,7 @@ class RoomServiceTest extends serviceSliceTest {
             Room room = testFixtureBuilder.buildRoom(RoomFixture.ROOM1(member));
 
             // when
-            roomService.deleteRoomById(room.getId(), member.getId());
+            roomService.deleteRoomById(member, room.getId());
 
             // then
             Long roomId = room.getId();
