@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.member.presentation;
 
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
@@ -42,16 +43,17 @@ public class MemberController {
     }
 
     @GetMapping("/api/auth/members/profile")
-    public ResponseEntity<MemberProfileResponse> getProfile(@AuthenticationPrincipal Member member) {
-        return ResponseEntity.ok(memberService.findProfile(member));
+    public ResponseEntity<MemberProfileResponse> getProfile(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails) {
+        return ResponseEntity.ok(memberService.findProfile(memberDetails.getMember()));
     }
 
     @PatchMapping("/members/profile")
     public ResponseEntity<Void> updateProfile(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestBody ProfileUpdateRequest request
     ) {
-        memberService.updateMemberProfileById(member, request);
+        memberService.updateMemberProfileById(memberDetails.getMember(), request);
 
         return ResponseEntity.ok().build();
     }
