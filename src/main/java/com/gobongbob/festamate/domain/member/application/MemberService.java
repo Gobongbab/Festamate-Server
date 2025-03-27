@@ -64,7 +64,7 @@ public class MemberService {
     // 프로필 등록 API
     @Transactional
     public void registerProfile(ProfileRegisterRequest request, Long userId) {
-        checkNicknameDuplication(request.getNickname()); // 프로필 등록 중 닉네임 중복 확인 필요함
+        checkNicknameDuplication(request.nickname()); // 프로필 등록 중 닉네임 중복 확인 필요함
 
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자 ID입니다."));
