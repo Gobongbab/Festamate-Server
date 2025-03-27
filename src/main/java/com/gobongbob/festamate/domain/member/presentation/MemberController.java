@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.member.presentation;
 
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
@@ -45,16 +46,16 @@ public class MemberController {
 
     @GetMapping("/api/auth/members/profile")
     public ResponseEntity<MemberProfileResponse> getProfile(
-            @AuthenticationPrincipal Member member) { // @AuthenticationPrincipal을 통해 사용자 정보를 가져옴
-        return ResponseEntity.ok(memberService.findProfile(member.getId()));
+            @AuthenticationPrincipal CustomMemberDetails memberDetails) {
+        return ResponseEntity.ok(memberService.findProfile(memberDetails.getMember()));
     }
 
     @PatchMapping("/members/profile")
-    public ResponseEntity<Void> updateProfile( // 추후 Spring Security를 활용하여 사용자 정보를 가져오도록 변경 필요
-            Long memberId,
+    public ResponseEntity<Void> updateProfile(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestBody ProfileUpdateRequest request
     ) {
-        memberService.updateMemberProfileById(memberId, request);
+        memberService.updateMemberProfileById(memberDetails.getMember(), request);
 
         return ResponseEntity.ok().build();
     }

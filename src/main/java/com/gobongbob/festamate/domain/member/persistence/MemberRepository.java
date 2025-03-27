@@ -19,4 +19,6 @@ public interface MemberRepository extends Repository<Member, Long> {
     Optional<Member> findByOauthInfo(OauthInfo oauthInfo);
 
     boolean existsByNickname(String nickname); // 닉네임 중복 확인
+
+    Optional<Member> findByLoginId(String loginId);
 }
