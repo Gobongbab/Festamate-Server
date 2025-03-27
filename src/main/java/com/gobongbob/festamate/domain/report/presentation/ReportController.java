@@ -1,6 +1,6 @@
 package com.gobongbob.festamate.domain.report.presentation;
 
-import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.report.application.ReportService;
 import com.gobongbob.festamate.domain.report.dto.request.ReportRoomRequest;
 import com.gobongbob.festamate.domain.report.dto.response.ReportRoomResponse;
@@ -25,11 +25,11 @@ public class ReportController {
 
     @PostMapping("/{roomId}")
     public ResponseEntity<Void> reportRoom(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId,
             @RequestBody ReportRoomRequest request
     ) {
-        reportService.reportRoom(member, roomId, request);
+        reportService.reportRoom(memberDetails.getMember(), roomId, request);
         return ResponseEntity.ok().build();
     }
 
