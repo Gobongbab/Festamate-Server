@@ -17,4 +17,6 @@ public interface MemberRepository extends Repository<Member, Long> {
     void delete(Member room);
 
     Optional<Member> findByOauthInfo(OauthInfo oauthInfo);
+
+    boolean existsByNickname(String nickname); // 닉네임 중복 확인
 }
