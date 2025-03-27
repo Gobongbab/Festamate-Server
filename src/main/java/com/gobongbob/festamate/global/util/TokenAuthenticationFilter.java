@@ -25,10 +25,10 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         /** 테스트를 위해 임시 비활성화
          String requestUri = request.getRequestURI();
 
-         // 로그인, 카카오 및 리프레시 엔드포인트는 필터를 건너뜀
+         // 로그인, 카카오 및 리프레시, 닉네임 중복 확인 엔드포인트는 필터를 건너뜀
          if ("/api/auth/login".equals(requestUri) || "/api/auth/refresh".equals(requestUri)
-         || "/login/oauth2/code/kakao".equals(
-         requestUri)) {
+         || "/login/oauth2/code/kakao".equals(requestUri)
+         || "/api/auth/register/check/nickname".equals(requestUri)) {
          filterChain.doFilter(request, response);
          return;
          }
