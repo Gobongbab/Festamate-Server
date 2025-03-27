@@ -95,8 +95,7 @@ jobs:
             sudo -s
             touch .env
             echo '${{ secrets.ENV }}' > .env
-            touch festamate-firebase-key.json
-            echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > festamate-firebase-key.json"
+            "
             
             # 이전 컨테이너 중지 및 제거 (Private EC2 - 첫 번째 서버)
             ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker stop festamate || true"
@@ -128,8 +127,7 @@ jobs:
             sudo -s
             touch .env
             echo '${{ secrets.ENV }}' > .env
-            touch festamate-firebase-key.json
-            echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > festamate-firebase-key.json"
+            "
             
             # 이전 컨테이너 중지 및 제거 (Private EC2 - 두 번째 서버)
             ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker stop festamate || true"
