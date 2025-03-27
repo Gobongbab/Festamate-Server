@@ -96,7 +96,7 @@ jobs:
             touch .env
             echo '${{ secrets.ENV }}' > .env
             touch festamate-firebase-key.json
-            echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
+            echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > festamate-firebase-key.json
             "
             
             # 이전 컨테이너 중지 및 제거 (Private EC2 - 첫 번째 서버)
@@ -130,7 +130,7 @@ jobs:
             touch .env
             echo '${{ secrets.ENV }}' > .env
             touch festamate-firebase-key.json
-            echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
+            echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > festamate-firebase-key.json
             "
             
             # 이전 컨테이너 중지 및 제거 (Private EC2 - 두 번째 서버)
