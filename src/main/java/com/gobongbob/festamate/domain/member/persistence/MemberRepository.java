@@ -17,4 +17,6 @@ public interface MemberRepository extends Repository<Member, Long> {
     void delete(Member room);
 
     Optional<Member> findByOauthInfo(OauthInfo oauthInfo);
+
+    Optional<Member> findByLoginId(String loginId);
 }

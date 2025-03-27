@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.room.presentation;
 
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
@@ -8,6 +9,7 @@ import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,10 +29,10 @@ public class RoomController {
 
     @PostMapping("")
     public ResponseEntity<Void> createRoom(
-            @RequestBody RoomCreateRequest request,
-            Long memberId // 추후 Spring Security를 활용하여 사용자 정보를 가져오도록 변경 필요 (변경 후 주석 삭제)
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @RequestBody RoomCreateRequest request
     ) {
-        roomService.createRoom(request, memberId);
+        roomService.createRoom(memberDetails.getMember(), request);
 
         return ResponseEntity.ok().build();
     }
@@ -41,8 +43,9 @@ public class RoomController {
     }
 
     @GetMapping("/participate")
-    public ResponseEntity<RoomResponse> findParticipatingRooms(Long memberId) {
-        return ResponseEntity.ok(roomService.findParticipatingRooms(memberId));
+    public ResponseEntity<RoomResponse> findParticipatingRooms(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails) {
+        return ResponseEntity.ok(roomService.findParticipatingRooms(memberDetails.getMember().getId()));
     }
 
     @GetMapping("/{roomId}")
@@ -52,38 +55,50 @@ public class RoomController {
 
     @PatchMapping("/{roomId}")
     public ResponseEntity<Void> updateRoomById(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId,
-            @RequestBody RoomUpdateRequest request,
-            Long memberId
+            @RequestBody RoomUpdateRequest request
     ) {
-        roomService.updateRoomById(roomId, memberId, request);
+        roomService.updateRoomById(memberDetails.getMember(), roomId, request);
 
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{roomId}")
-    public ResponseEntity<Void> deleteRoomById(@PathVariable Long roomId, Long memberId) {
-        roomService.deleteRoomById(roomId, memberId);
+    public ResponseEntity<Void> deleteRoomById(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @PathVariable Long roomId
+    ) {
+        roomService.deleteRoomById(memberDetails.getMember(), roomId);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{roomId}/participate")
-    public ResponseEntity<Void> participateRoom(@PathVariable Long roomId, Long memberId) {
-        roomParticipationService.participateRoom(roomId, memberId);
+    public ResponseEntity<Void> participateRoom(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @PathVariable Long roomId
+    ) {
+        roomParticipationService.participateRoom(memberDetails.getMember(), roomId);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{roomId}/leave")
-    public ResponseEntity<Void> leaveRoom(@PathVariable Long roomId, Long memberId) {
-        roomParticipationService.leaveRoomById(roomId, memberId);
+    public ResponseEntity<Void> leaveRoom(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @PathVariable Long roomId
+    ) {
+        roomParticipationService.leaveRoomById(memberDetails.getMember(), roomId);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{roomId}/isHost")
-    public ResponseEntity<Boolean> isMemberHost(@PathVariable Long roomId, Long memberId) {
-        return ResponseEntity.ok(roomParticipationService.isMemberHost(roomId, memberId));
+    public ResponseEntity<Boolean> isMemberHost(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @PathVariable Long roomId
+    ) {
+        return ResponseEntity.ok(roomParticipationService.isMemberHost(memberDetails.getMember().getId(), roomId));
     }
 }
