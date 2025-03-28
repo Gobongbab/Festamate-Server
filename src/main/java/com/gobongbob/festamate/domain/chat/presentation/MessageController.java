@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,10 +30,11 @@ public class MessageController {
     @MessageMapping("/room/{roomId}") // Spring App 을 거쳐서 메시지 전송. 앞에 "app" prefix 를 붙여야 함
     public ResponseEntity<Void> sendMessage(
             @DestinationVariable Long roomId,
-            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            Authentication authentication,
             MessageRequest request
     ) {
-        MessageResponse messageResponse = messageService.createMessage(roomId, memberDetails.getMember(), request);
+        Member member = ((CustomMemberDetails) authentication.getPrincipal()).getMember();
+        MessageResponse messageResponse = messageService.createMessage(roomId, member, request);
         messagingTemplate.convertAndSend("/topic/room/" + roomId, messageResponse);
 
         return ResponseEntity.noContent().build();
