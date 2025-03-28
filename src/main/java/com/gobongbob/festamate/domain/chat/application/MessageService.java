@@ -30,7 +30,7 @@ public class MessageService {
 
         Message message = Message.builder()
                 .charRoom(chatRoom)
-                .nickname(member.getNickname())
+                .sender(member)
                 .message(request.message())
                 .build();
         Message savedMessage = messageRepository.save(message);

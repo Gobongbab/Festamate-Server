@@ -13,7 +13,7 @@ public record MessageResponse(
     public static MessageResponse fromEntity(Message message) {
         return new MessageResponse(
                 message.getId(),
-                message.getNickname(),
+                message.getSender().getNickname(),
                 message.getMessage(),
                 message.getSendDate()
         );

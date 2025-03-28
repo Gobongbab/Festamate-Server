@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.chat.domain;
 
+import com.gobongbob.festamate.domain.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,11 +29,13 @@ public class Message {
     @Column(name = "chat_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     private ChatRoom charRoom;
 
-    private String nickname;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member sender;
 
     @Column(columnDefinition = "TEXT")
     private String message;
@@ -42,9 +45,9 @@ public class Message {
     private LocalDateTime sendDate;
 
     @Builder
-    public Message(ChatRoom charRoom, String nickname, String message) {
+    public Message(ChatRoom charRoom, Member sender, String message) {
         this.charRoom = charRoom;
-        this.nickname = nickname;
+        this.sender = sender;
         this.message = message;
         this.sendDate = LocalDateTime.now();
     }
