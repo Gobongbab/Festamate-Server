@@ -8,6 +8,7 @@ import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -32,6 +33,7 @@ public class MessageService {
                 .charRoom(chatRoom)
                 .sender(member)
                 .message(request.message())
+                .sendDate(LocalDateTime.now())
                 .build();
         Message savedMessage = messageRepository.save(message);
 
