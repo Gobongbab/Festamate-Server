@@ -7,7 +7,7 @@ public enum ReportReason {
     SPLASH("낚시/놀람/도배"),
     POLITICS("정당/정치인 비하 및 선거운동"),
     IMPERSONATION("유출/사칭/사기"),
-    IILLEGAL("불법촬영물 등의 유통");
+    ILLEGAL("불법촬영물 등의 유통");
 
     private final String name;
 
