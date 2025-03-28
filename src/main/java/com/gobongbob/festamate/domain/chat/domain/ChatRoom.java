@@ -1,7 +1,6 @@
 package com.gobongbob.festamate.domain.chat.domain;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -24,7 +23,6 @@ public class ChatRoom {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "chatRoom_id")
     private Long id;
 
     private String name;
