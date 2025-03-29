@@ -1,0 +1,61 @@
+spring:
+  jackson:
+    time-zone: Asia/Seoul
+  datasource:
+    # 마스터-슬레이브 구성을 위한 데이터소스 설정
+    master:
+      url: ${MASTER_DB_URL}
+      username: ${PROD_DB_USER}
+      password: ${PROD_DB_PASS}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    slave:
+      url: ${SLAVE_DB_URL}
+      username: ${PROD_DB_USER}
+      password: ${PROD_DB_PASS}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: never
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        show_sql: false  # 운영환경에서는 SQL 로깅 비활성화
+        format_sql: false
+        use_sql_comments: false
+        hbm2ddl:
+          auto: create
+        default_batch_fetch_size: 1000
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
+            redirect-uri: ${KAKAO_REDIRECT_URI}
+            authorization-grant-type: authorization_code
+            scope: profile
+            client-name: Kakao
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+jwt:
+  header: Authorization
+  secret: ${JWT_SECRET}
+  access-token-validity-in-seconds: 3600 # 1시간
+  refresh-token-validity-in-seconds: 604800 # 7일
+naver:
+  ocr:
+    api:
+      url: ${OCR_API_URL}
+      secret: ${OCR_API_SECRET}
+
+# 로깅 설정
+logging:
+  level:
+    root: WARN
+    com.gobongbob.festamate: INFO
+    org.hibernate.SQL: WARN
