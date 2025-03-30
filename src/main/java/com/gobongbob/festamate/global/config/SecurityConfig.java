@@ -39,11 +39,10 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS)) // 세션을 생성하지 않고, 토큰 기반 인증을 사용
                 .authorizeHttpRequests(authorize -> authorize // 요청에 대한 인증 및 인가 설정 시작
-                                /*** 테스트를 위해 임시 비활성화
-                                 //                        .requestMatchers("/api/auth/**", "/login/oauth2/code/kakao", "/health")
-                                 //                        .permitAll() // 경로에 대한 요청은 인증 없이 접근 가능 */
-                                .anyRequest().permitAll() // 모든 요청 허용
-                        /**.anyRequest().authenticated() // 나머지 요청은 인증이 필요*/
+                        .requestMatchers("/api/auth/**", "/login/oauth2/code/kakao", "/health")
+                        .permitAll() // 인증 없이 접근 가능한 경로 설정
+                        .requestMatchers("/test/**").permitAll() // 테스트용 경로 허용
+                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )
                 .cors(withDefaults())
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider),
@@ -54,10 +53,5 @@ public class SecurityConfig {
                                 new JwtAuthenticationEntryPoint()) // 인증 실패 시 예외 처리
                         .accessDeniedHandler(new JwtAccessDeniedHandler())); // 인가 실패 시 예외 처리
         return http.build();
-    }
-
-    @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(tokenProvider);
     }
 }
