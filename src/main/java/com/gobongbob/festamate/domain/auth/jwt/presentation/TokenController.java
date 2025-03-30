@@ -21,10 +21,28 @@ public class TokenController {
     private final TokenService tokenService;
     private final TokenProvider tokenProvider;
 
-    @PostMapping("/refresh") // refresh jwt로 access jwt 받아옴
+    @PostMapping("/refresh") // 초기 refresh jwt로 access jwt 받아옴
     public ResponseEntity<CreateAccessTokenResponse> createNewAccessToken(
             @RequestBody CreateAccessTokenRequest request) {
-        String newAccessToken = tokenService.createNewAccessToken(request.getRefreshToken());
+        String newAccessToken = tokenService.createNewInitialAccessToken(request.getRefreshToken());
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new CreateAccessTokenResponse(newAccessToken));
+    }
+
+    @PostMapping("/refresh/final") // 최종 refresh jwt로 access jwt 받아옴
+    public ResponseEntity<CreateAccessTokenResponse> createNewFinalAccessToken(
+            @RequestBody CreateAccessTokenRequest request) {
+        String newAccessToken = tokenService.createNewFinalAccessToken(request.getRefreshToken());
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new CreateAccessTokenResponse(newAccessToken));
+    }
+
+    @PostMapping("/refresh/test") // 테스트용 refresh jwt로 access jwt 받아옴
+    public ResponseEntity<CreateAccessTokenResponse> createNewTestAccessToken(
+            @RequestBody CreateAccessTokenRequest request) {
+        String newAccessToken = tokenService.createNewTestAccessToken(request.getRefreshToken());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new CreateAccessTokenResponse(newAccessToken));
