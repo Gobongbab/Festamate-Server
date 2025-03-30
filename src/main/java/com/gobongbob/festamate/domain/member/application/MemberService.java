@@ -39,6 +39,11 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
     }
 
+    public Member findMembersById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+    }
+
     public MemberProfileResponse findProfile(Member member) {
         return MemberProfileResponse.fromEntity(member);
     }
