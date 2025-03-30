@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class RoomService {
 
@@ -44,6 +43,7 @@ public class RoomService {
         return createdRoom;
     }
 
+    @Transactional(readOnly = true)
     public List<RoomResponse> findAllRooms() {
         return roomRepository.findAll()
                 .stream()
@@ -54,6 +54,7 @@ public class RoomService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public RoomResponse findParticipatingRooms(Long memberId) {
         Room participatingRoom = roomParticipantRepository.findByRoom_Id(memberId)
                 .stream()
@@ -65,6 +66,7 @@ public class RoomService {
         return RoomResponse.fromEntity(participatingRoom, roomParticipants);
     }
 
+    @Transactional(readOnly = true)
     public RoomResponse findRoomById(Long roomId) {
         return roomRepository.findById(roomId)
                 .map(room -> {
