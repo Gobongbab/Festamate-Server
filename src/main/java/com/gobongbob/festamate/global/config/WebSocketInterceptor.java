@@ -53,4 +53,23 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 
         return message;
     }
+//
+//    @Override
+//    public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
+//        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+//        String sessionId = accessor.getSessionId();
+//
+//        switch (Objects.requireNonNull(accessor.getCommand())) {
+//            case CONNECT -> log.info("CONNECT: " + message);
+//            case CONNECTED -> log.info("CONNECTED: " + message);
+//            case DISCONNECT -> log.info("DISCONNECT: " + message);
+//            case SUBSCRIBE -> log.info("SUBSCRIBE: " + message);
+//            case UNSUBSCRIBE -> log.info("UNSUBSCRIBE: " + sessionId);
+//            case SEND -> log.info("SEND: " + sessionId);
+//            case MESSAGE -> log.info("MESSAGE: " + sessionId);
+//            case ERROR -> log.info("ERROR: " + sessionId);
+//            default -> log.info("UNKNOWN: " + sessionId);
+//        }
+//
+//    }
 }
