@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class MessageService {
+public class ChatService {
 
     private final MessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;

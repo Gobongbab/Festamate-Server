@@ -1,11 +1,12 @@
 package com.gobongbob.festamate.global.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 import com.gobongbob.festamate.global.util.JwtAccessDeniedHandler;
 import com.gobongbob.festamate.global.util.JwtAuthenticationEntryPoint;
 import com.gobongbob.festamate.global.util.TokenAuthenticationFilter;
 import com.gobongbob.festamate.global.util.TokenProvider;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @RequiredArgsConstructor
@@ -32,6 +34,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors((cors) -> cors
+                        .configurationSource(request -> {
+                            CorsConfiguration configuration = new CorsConfiguration();
+                            configuration.setAllowedOrigins(Arrays.asList(
+                                    "http://localhost:3000",
+                                    "http://localhost:5173",
+                                    "http://localhost:8080",
+                                    "https://festamate-web.vercel.app"
+                            ));
+                            configuration.setAllowedMethods(
+                                    List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+                            configuration.setAllowCredentials(true);
+                            configuration.setAllowedHeaders(
+                                    Collections.singletonList("*"));
+                            configuration.setMaxAge(3600L);
+                            configuration.setExposedHeaders(
+                                    List.of(
+                                            "Authorization",
+                                            "Set-Cookie"
+                                    )
+                            );
+                            return configuration;
+                        }))
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic 인증 비활성화
                 .formLogin(formLogin -> formLogin.disable()) // 폼 기반 로그인 비활성화
@@ -39,13 +64,11 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS)) // 세션을 생성하지 않고, 토큰 기반 인증을 사용
                 .authorizeHttpRequests(authorize -> authorize // 요청에 대한 인증 및 인가 설정 시작
-                                /*** 테스트를 위해 임시 비활성화
-                                 //                        .requestMatchers("/api/auth/**", "/login/oauth2/code/kakao", "/health")
-                                 //                        .permitAll() // 경로에 대한 요청은 인증 없이 접근 가능 */
-                                .anyRequest().permitAll() // 모든 요청 허용
-                        /**.anyRequest().authenticated() // 나머지 요청은 인증이 필요*/
+                        .requestMatchers("/api/auth/**", "/login/oauth2/code/kakao", "/health")
+                        .permitAll() // 인증 없이 접근 가능한 경로 설정
+                        .requestMatchers("/test/**").permitAll() // 테스트용 경로 허용
+                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )
-                .cors(withDefaults())
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider),
                         // JWT 토큰을 통해 인증된 사용자 정보 가져옴
                         UsernamePasswordAuthenticationFilter.class) // 헤더를 확인할 커스텀 필터 추가
@@ -54,10 +77,5 @@ public class SecurityConfig {
                                 new JwtAuthenticationEntryPoint()) // 인증 실패 시 예외 처리
                         .accessDeniedHandler(new JwtAccessDeniedHandler())); // 인가 실패 시 예외 처리
         return http.build();
-    }
-
-    @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(tokenProvider);
     }
 }

@@ -1,7 +1,7 @@
 package com.gobongbob.festamate.domain.room.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
-import com.gobongbob.festamate.domain.chat.application.MessageService;
+import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -28,7 +28,7 @@ public class RoomController {
 
     private final RoomService roomService;
     private final RoomParticipationService roomParticipationService;
-    private final MessageService messageService;
+    private final ChatService chatService;
 
     @PostMapping("")
     public ResponseEntity<Void> createRoom(
@@ -36,7 +36,7 @@ public class RoomController {
             @RequestBody RoomCreateRequest request
     ) {
         Room createdRoom = roomService.createRoom(memberDetails.getMember(), request);
-        messageService.sendMessage(
+        chatService.sendMessage(
                 createdRoom.getId(),
                 memberDetails.getMember(),
                 "안녕하세요! " + createdRoom.getTitle() + "에 오신 것을 환영합니다!"
@@ -89,7 +89,7 @@ public class RoomController {
             @PathVariable Long roomId
     ) {
         roomParticipationService.participateRoom(memberDetails.getMember(), roomId);
-        messageService.sendMessage(
+        chatService.sendMessage(
                 roomId,
                 memberDetails.getMember(),
                 memberDetails.getMember().getNickname() + "님이 들어왔습니다."
@@ -104,7 +104,7 @@ public class RoomController {
             @PathVariable Long roomId
     ) {
         roomParticipationService.leaveRoomById(memberDetails.getMember(), roomId);
-        messageService.sendMessage(
+        chatService.sendMessage(
                 roomId,
                 memberDetails.getMember(),
                 memberDetails.getMember().getNickname() + "님이 나갔습니다."

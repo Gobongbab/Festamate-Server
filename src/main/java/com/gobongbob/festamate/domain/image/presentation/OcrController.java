@@ -1,8 +1,8 @@
 package com.gobongbob.festamate.domain.image.presentation;
 
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.image.application.OcrService;
 import com.gobongbob.festamate.domain.image.dto.response.StudentInfoResponse;
-import com.gobongbob.festamate.domain.member.domain.Member;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +22,9 @@ public class OcrController {
 
     @PostMapping("/api/check/student-card")
     public ResponseEntity<StudentInfoResponse> checkStudentCard(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestParam("file") MultipartFile file
     ) throws IOException {
-        return ResponseEntity.ok(ocrService.checkStudentCard(file, member));
+        return ResponseEntity.ok(ocrService.checkStudentCard(file, memberDetails.getMember()));
     }
 }

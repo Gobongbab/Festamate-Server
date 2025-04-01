@@ -1,13 +1,17 @@
 package com.gobongbob.festamate.domain.member.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
+import com.gobongbob.festamate.domain.auth.jwt.domain.MinimalMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
+import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberService memberService;
+    private final TokenService tokenService;
 
     @PostMapping("/auth/signup")
     public ResponseEntity<Void> signUp(@RequestBody MemberCreateRequest request) {
@@ -51,10 +57,10 @@ public class MemberController {
 
     @PatchMapping("/members/profile")
     public ResponseEntity<Void> updateProfile(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestBody ProfileUpdateRequest request
     ) {
-        memberService.updateMemberProfileById(member, request);
+        memberService.updateMemberProfileById(memberDetails.getMember(), request);
 
         return ResponseEntity.ok().build();
     }
@@ -63,6 +69,29 @@ public class MemberController {
     public ResponseEntity<Void> deleteMemberById(@PathVariable Long memberId) {
         memberService.deleteMemberById(memberId);
 
+        return ResponseEntity.ok().build();
+    }
+
+    // 프로필 등록 API
+    @PostMapping("/api/auth/register/profile") // 추후 /api/auth를 상위 경로에 작성하도록 변경 필요
+    public ResponseEntity<Map<String, String>> registerProfile(
+            @RequestBody ProfileRegisterRequest request,
+            @AuthenticationPrincipal MinimalMemberDetails memberDetails) { // 최소 JWT 정보
+
+        Long userId = memberDetails.getId();
+        memberService.registerProfile(request, userId);
+
+        // TokenService를 이용하여 최종 JWT(access, refresh) 생성
+        Map<String, String> tokens = tokenService.generateTokens(userId);
+
+        // 최종 JWT 반환
+        return ResponseEntity.ok(tokens);
+    }
+
+    // 닉네임 중복 확인 API
+    @GetMapping("/api/auth/register/check/nickname")
+    public ResponseEntity<String> checkNickname(@RequestParam String nickname) {
+        memberService.checkNicknameDuplication(nickname);
         return ResponseEntity.ok().build();
     }
 }

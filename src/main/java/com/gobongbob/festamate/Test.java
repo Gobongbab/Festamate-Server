@@ -19,4 +19,10 @@ public class Test {
   public ResponseEntity<String> healthCheck() {
     return ResponseEntity.ok("Health Check");
   }
+
+  @GetMapping("/sentry")
+  public String testSentry() {
+    throw new RuntimeException("Sentry 연동 테스트를 위한 고의적인 예외 발생!");
+  }
+
 }

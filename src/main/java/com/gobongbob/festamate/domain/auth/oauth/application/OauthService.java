@@ -73,8 +73,8 @@ public class OauthService {
             // 3. 사용자 정보 저장 또는 업데이트
             Member member = registerKakaoUser(userInfo, oauthAccessToken);
 
-            // 4. JWT 생성 및 저장
-            Map<String, String> tokens = generateJwtTokens(member, request, response);
+            // 4. 초기 JWT 생성 및 저장
+            Map<String, String> tokens = generateInitialJwtTokens(member, request, response);
 
             return tokens;
 
@@ -83,14 +83,50 @@ public class OauthService {
         }
     }
 
-    private Map<String, String> generateJwtTokens(Member member, HttpServletRequest request,
+    private Map<String, String> generateInitialJwtTokens(Member member, HttpServletRequest request,
             HttpServletResponse response) {
-        // JWT 액세스 토큰 생성
-        String accessToken = tokenProvider.generateAccessToken(member);
+        // 초기 JWT 액세스 토큰 생성
+        String accessToken = tokenProvider.generateInitialAccessToken(member);
         response.setHeader(ACCESS_HEADER, accessToken);
 
-        // JWT 리프레시 토큰 생성 및 저장
-        String refreshToken = tokenProvider.generateRefreshToken(member);
+        // 초기 JWT 리프레시 토큰 생성 및 저장
+        String refreshToken = tokenProvider.generateInitialRefreshToken(member);
+        saveRefreshToken(member.getId(), refreshToken);
+        addRefreshTokenToCookie(request, response, refreshToken);
+
+        // 응답 데이터 구성
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("access_token", accessToken);
+        tokens.put("refresh_token", refreshToken);
+        return tokens;
+    }
+
+    private Map<String, String> generateFinalJwtTokens(Member member, HttpServletRequest request,
+            HttpServletResponse response) {
+        // 최종 JWT 액세스 토큰 생성
+        String accessToken = tokenProvider.generateFinalAccessToken(member);
+        response.setHeader(ACCESS_HEADER, accessToken);
+
+        // 최종 JWT 리프레시 토큰 생성 및 저장
+        String refreshToken = tokenProvider.generateFinalRefreshToken(member);
+        saveRefreshToken(member.getId(), refreshToken);
+        addRefreshTokenToCookie(request, response, refreshToken);
+
+        // 응답 데이터 구성
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("access_token", accessToken);
+        tokens.put("refresh_token", refreshToken);
+        return tokens;
+    }
+
+    private Map<String, String> generateTestJwtTokens(Member member, HttpServletRequest request,
+            HttpServletResponse response) {
+        // 테스트용 JWT 액세스 토큰 생성
+        String accessToken = tokenProvider.generateTestAccessToken(member);
+        response.setHeader(ACCESS_HEADER, accessToken);
+
+        // 테스트용 JWT 리프레시 토큰 생성 및 저장
+        String refreshToken = tokenProvider.generateTestRefreshToken(member);
         saveRefreshToken(member.getId(), refreshToken);
         addRefreshTokenToCookie(request, response, refreshToken);
 
