@@ -40,7 +40,8 @@ public class SecurityConfig {
                             configuration.setAllowedOrigins(Arrays.asList(
                                     "http://localhost:3000",
                                     "http://localhost:5173",
-                                    "http://localhost:8080"
+                                    "http://localhost:8080",
+                                    "https://festamate-web.vercel.app"
                             ));
                             configuration.setAllowedMethods(
                                     List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
