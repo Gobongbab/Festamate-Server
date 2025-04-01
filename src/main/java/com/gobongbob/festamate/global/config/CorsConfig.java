@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.global.config;
 
+import java.util.Collections;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,10 +24,14 @@ public class CorsConfig {
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowCredentials(true);
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowedHeaders(Collections.singletonList("*")); // 모든 요청 헤더 허용
         config.setMaxAge(3600L);
-        config.setExposedHeaders(List.of("Authorization"));
-
+        config.setExposedHeaders(
+                List.of(
+                        "Authorization",
+                        "Set-Cookie"
+                )
+        );
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
