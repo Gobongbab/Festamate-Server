@@ -30,7 +30,7 @@ public class Message {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id")
-    private ChatRoom charRoom;
+    private ChatRoom chatRoom;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -44,8 +44,8 @@ public class Message {
     private LocalDateTime sendDate;
 
     @Builder
-    public Message(ChatRoom charRoom, Member sender, String message) {
-        this.charRoom = charRoom;
+    public Message(ChatRoom chatRoom, Member sender, String message) {
+        this.chatRoom = chatRoom;
         this.sender = sender;
         this.message = message;
         this.sendDate = LocalDateTime.now();

@@ -32,7 +32,7 @@ public class ChatService {
 
         Message savedMessage = messageRepository.save(
                 Message.builder()
-                        .charRoom(chatRoom)
+                        .chatRoom(chatRoom)
                         .sender(member)
                         .message(message)
                         .sendDate(LocalDateTime.now())
