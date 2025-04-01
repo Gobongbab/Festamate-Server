@@ -5,6 +5,7 @@ import com.gobongbob.festamate.global.util.JwtAuthenticationEntryPoint;
 import com.gobongbob.festamate.global.util.TokenAuthenticationFilter;
 import com.gobongbob.festamate.global.util.TokenProvider;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -46,9 +47,14 @@ public class SecurityConfig {
                                     List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                             configuration.setAllowCredentials(true);
                             configuration.setAllowedHeaders(
-                                    List.of("Authorization", "Content-Type"));
+                                    Collections.singletonList("*"));
                             configuration.setMaxAge(3600L);
-                            configuration.setExposedHeaders(List.of("Authorization"));
+                            configuration.setExposedHeaders(
+                                    List.of(
+                                            "Authorization",
+                                            "Set-Cookie"
+                                    )
+                            );
                             return configuration;
                         }))
                 .csrf(csrf -> csrf.disable())
