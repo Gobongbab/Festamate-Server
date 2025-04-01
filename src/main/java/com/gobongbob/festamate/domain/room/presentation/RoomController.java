@@ -87,6 +87,11 @@ public class RoomController {
             @PathVariable Long roomId
     ) {
         roomParticipationService.participateRoom(memberDetails.getMember(), roomId);
+        messageService.sendMessage(
+                roomId,
+                memberDetails.getMember(),
+                memberDetails.getMember().getNickname() + "님이 들어왔습니다."
+        );
 
         return ResponseEntity.ok().build();
     }
