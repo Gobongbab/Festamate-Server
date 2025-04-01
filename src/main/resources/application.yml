@@ -43,3 +43,7 @@ naver:
     api:
       url: ${OCR_API_URL}
       secret: ${OCR_API_SECRET}
+sentry:
+  dsn: ${SENTRY_DSN}
+  send-default-pii: true
+  max-request-body-size: small
