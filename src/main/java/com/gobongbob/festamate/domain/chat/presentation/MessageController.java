@@ -13,7 +13,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,22 +24,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class MessageController {
 
     private final MessageService messageService;
-    private final SimpMessageSendingOperations messagingTemplate;
 
-    @MessageMapping("/room/{roomId}") // Spring App 을 거쳐서 메시지 전송. 앞에 "app" prefix 를 붙여야 함
+
+    @MessageMapping("/chat/room/{roomId}") // Spring App 을 거쳐서 메시지 전송. 앞에 "app" prefix 를 붙여야 함
     public ResponseEntity<Void> sendMessage(
             @DestinationVariable Long roomId,
             Authentication authentication,
             MessageRequest request
     ) {
         Member member = ((CustomMemberDetails) authentication.getPrincipal()).getMember();
-        MessageResponse messageResponse = messageService.createMessage(roomId, member, request);
-        messagingTemplate.convertAndSend("/topic/room/" + roomId, messageResponse);
+        messageService.sendMessage(roomId, member, request.message());
 
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("api/room/{roomId}/messages")
+    @GetMapping("api/messages/room/{roomId}")
     public ResponseEntity<Slice<MessageResponse>> findMessages(
             @AuthenticationPrincipal Member member,
             @PathVariable Long roomId,

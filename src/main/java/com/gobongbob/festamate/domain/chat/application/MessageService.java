@@ -2,7 +2,6 @@ package com.gobongbob.festamate.domain.chat.application;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.domain.Message;
-import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
@@ -12,6 +11,7 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,21 +23,24 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final RoomParticipantRepository roomParticipantRepository;
+    private final SimpMessageSendingOperations messagingTemplate;
 
     @Transactional
-    public MessageResponse createMessage(Long roomId, Member member, MessageRequest request) {
+    public void sendMessage(Long roomId, Member member, String message) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
-        Message message = Message.builder()
-                .charRoom(chatRoom)
-                .sender(member)
-                .message(request.message())
-                .sendDate(LocalDateTime.now())
-                .build();
-        Message savedMessage = messageRepository.save(message);
+        Message savedMessage = messageRepository.save(
+                Message.builder()
+                        .charRoom(chatRoom)
+                        .sender(member)
+                        .message(message)
+                        .sendDate(LocalDateTime.now())
+                        .build()
+        );
+        MessageResponse response = MessageResponse.fromEntity(savedMessage);
 
-        return MessageResponse.fromEntity(savedMessage);
+        messagingTemplate.convertAndSend("/topic/room/" + roomId, response);
     }
 
     public Slice<MessageResponse> findMessagesByRoomId(Long memberId, Long roomId, Pageable pageable) {
