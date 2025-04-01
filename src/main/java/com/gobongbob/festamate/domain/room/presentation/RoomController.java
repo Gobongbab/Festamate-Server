@@ -1,8 +1,10 @@
 package com.gobongbob.festamate.domain.room.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.chat.application.MessageService;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
+import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
@@ -102,6 +104,11 @@ public class RoomController {
             @PathVariable Long roomId
     ) {
         roomParticipationService.leaveRoomById(memberDetails.getMember(), roomId);
+        messageService.sendMessage(
+                roomId,
+                memberDetails.getMember(),
+                memberDetails.getMember().getNickname() + "님이 나갔습니다."
+        );
 
         return ResponseEntity.ok().build();
     }
