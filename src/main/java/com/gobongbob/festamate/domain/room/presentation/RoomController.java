@@ -26,13 +26,19 @@ public class RoomController {
 
     private final RoomService roomService;
     private final RoomParticipationService roomParticipationService;
+    private final MessageService messageService;
 
     @PostMapping("")
     public ResponseEntity<Void> createRoom(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestBody RoomCreateRequest request
     ) {
-        roomService.createRoom(memberDetails.getMember(), request);
+        Room createdRoom = roomService.createRoom(memberDetails.getMember(), request);
+        messageService.sendMessage(
+                createdRoom.getId(),
+                memberDetails.getMember(),
+                "안녕하세요! " + createdRoom.getTitle() + "에 오신 것을 환영합니다!"
+        );
 
         return ResponseEntity.ok().build();
     }
