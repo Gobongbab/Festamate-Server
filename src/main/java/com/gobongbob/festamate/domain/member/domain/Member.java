@@ -88,8 +88,8 @@ public class Member {
         this.remainingTicket = maximumTicket;
     }
 
-    public void setMaximumTicket(int maximumTicket) {
-        this.maximumTicket = maximumTicket;
+    public void increaseMaximumTicket() {
+        this.maximumTicket++;
     }
 
     public boolean isHost(Room room) {
