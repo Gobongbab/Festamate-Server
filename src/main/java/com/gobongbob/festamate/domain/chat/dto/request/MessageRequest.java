@@ -1,6 +1,6 @@
 package com.gobongbob.festamate.domain.chat.dto.request;
 
-public record ChatRequest(
+public record MessageRequest(
         String message
 ) {
 

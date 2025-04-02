@@ -1,7 +1,7 @@
 package com.gobongbob.festamate.domain.member.presentation;
 
-import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
 import com.gobongbob.festamate.domain.auth.jwt.domain.MinimalMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.domain.Member;
@@ -48,9 +48,10 @@ public class MemberController {
         return ResponseEntity.ok(memberService.findMemberById(memberId));
     }
 
-    @GetMapping("/api/members/profile")
+    @GetMapping("/api/auth/members/profile")
     public ResponseEntity<MemberProfileResponse> getProfile(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails) {
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
+    ) {
         return ResponseEntity.ok(memberService.findProfile(memberDetails.getMember()));
     }
 

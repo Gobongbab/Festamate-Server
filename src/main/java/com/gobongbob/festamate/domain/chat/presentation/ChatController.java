@@ -2,14 +2,21 @@ package com.gobongbob.festamate.domain.chat.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
-import com.gobongbob.festamate.domain.chat.dto.request.ChatRequest;
-import com.gobongbob.festamate.domain.chat.dto.response.ChatResponse;
+import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
+import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
+import com.gobongbob.festamate.domain.member.domain.Member;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -18,13 +25,27 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    @MessageMapping("/chat/room/{roomId}") // 이거 쓸라면 /publish/chat/{roomId} 엔드포인트 필요
-    @SendTo("/subscribe/room/{roomId}")   //구독하고 있는 장소로 메시지 전송 (목적지)  -> WebSocketConfig Broker 에서 적용한건 앞에 붙어줘야됨
-    public ResponseEntity<ChatResponse> chat(
+
+    @MessageMapping("/chat/room/{roomId}") // Spring App 을 거쳐서 메시지 전송. 앞에 "app" prefix 를 붙여야 함
+    public ResponseEntity<Void> sendMessage(
             @DestinationVariable Long roomId,
-            @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            ChatRequest request
+            Authentication authentication,
+            MessageRequest request
     ) {
-        return ResponseEntity.ok(chatService.createChat(roomId, memberDetails.getMember(), request));
+        Member member = ((CustomMemberDetails) authentication.getPrincipal()).getMember();
+        chatService.sendMessage(roomId, member, request.message());
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("api/messages/room/{roomId}")
+    public ResponseEntity<Slice<MessageResponse>> findMessages(
+            @AuthenticationPrincipal Member member,
+            @PathVariable Long roomId,
+            @PageableDefault(size = 100, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Slice<MessageResponse> messages = chatService.findMessagesByRoomId(member.getId(), roomId, pageable);
+
+        return ResponseEntity.ok(messages);
     }
 }

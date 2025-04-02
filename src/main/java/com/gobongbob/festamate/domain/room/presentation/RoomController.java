@@ -1,8 +1,10 @@
 package com.gobongbob.festamate.domain.room.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
+import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
@@ -26,13 +28,19 @@ public class RoomController {
 
     private final RoomService roomService;
     private final RoomParticipationService roomParticipationService;
+    private final ChatService chatService;
 
     @PostMapping("")
     public ResponseEntity<Void> createRoom(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestBody RoomCreateRequest request
     ) {
-        roomService.createRoom(memberDetails.getMember(), request);
+        Room createdRoom = roomService.createRoom(memberDetails.getMember(), request);
+        chatService.sendMessage(
+                createdRoom.getId(),
+                memberDetails.getMember(),
+                "안녕하세요! " + createdRoom.getTitle() + "에 오신 것을 환영합니다!"
+        );
 
         return ResponseEntity.ok().build();
     }
@@ -44,7 +52,8 @@ public class RoomController {
 
     @GetMapping("/participate")
     public ResponseEntity<RoomResponse> findParticipatingRooms(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails) {
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
+    ) {
         return ResponseEntity.ok(roomService.findParticipatingRooms(memberDetails.getMember().getId()));
     }
 
@@ -80,6 +89,11 @@ public class RoomController {
             @PathVariable Long roomId
     ) {
         roomParticipationService.participateRoom(memberDetails.getMember(), roomId);
+        chatService.sendMessage(
+                roomId,
+                memberDetails.getMember(),
+                memberDetails.getMember().getNickname() + "님이 들어왔습니다."
+        );
 
         return ResponseEntity.ok().build();
     }
@@ -90,6 +104,11 @@ public class RoomController {
             @PathVariable Long roomId
     ) {
         roomParticipationService.leaveRoomById(memberDetails.getMember(), roomId);
+        chatService.sendMessage(
+                roomId,
+                memberDetails.getMember(),
+                memberDetails.getMember().getNickname() + "님이 나갔습니다."
+        );
 
         return ResponseEntity.ok().build();
     }
