@@ -27,4 +27,13 @@ public class CouponController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/init")
+    public ResponseEntity<Void> initializeCoupons(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
+    ) {
+        couponService.initializeCoupons(memberDetails.getMember());
+
+        return ResponseEntity.ok().build();
+    }
 }
