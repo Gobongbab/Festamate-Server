@@ -61,6 +61,10 @@ public class Member {
     @Column(unique = true)
     private String token; // FcmToken
 
+    private int maximumTicket;
+
+    private int remainingTicket;
+
     public void updateProfile(String nickname, String loginPassword) {
         this.nickname = nickname;
         this.loginPassword = loginPassword;
@@ -70,6 +74,18 @@ public class Member {
         this.name = studentName;
         this.studentDepartment = studentDepartment;
         this.studentId = studentId;
+    }
+
+    public void setMaximumTicket(int maximumTicket) {
+        this.maximumTicket = maximumTicket;
+    }
+
+    public void useTicket() {
+        if (this.remainingTicket > 0) {
+            this.remainingTicket--;
+        } else {
+            throw new IllegalStateException("티켓이 부족합니다.");
+        }
     }
 
     public boolean isHost(Room room) {
