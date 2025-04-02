@@ -29,6 +29,7 @@ public class RoomParticipationService {
 
         RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member);
         roomParticipantRepository.save(roomParticipant);
+        member.useTicket();
     }
 
     @Transactional
