@@ -37,6 +37,10 @@ public class Coupon {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    public void assignToMember(Member member) {
+        this.member = member;
+    }
+
     public void useCoupon() {
         if (this.used) {
             throw new IllegalStateException("이미 사용된 쿠폰입니다.");

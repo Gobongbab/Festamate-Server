@@ -28,6 +28,7 @@ public class CouponService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 쿠폰입니다."));
 
         coupon.useCoupon();
+        coupon.assignToMember(member);
         member.setMaximumTicket(3);
         member.setRemainingTicket(member.getMaximumTicket());
     }
