@@ -76,16 +76,20 @@ public class Member {
         this.studentId = studentId;
     }
 
-    public void setMaximumTicket(int maximumTicket) {
-        this.maximumTicket = maximumTicket;
-    }
-
     public void useTicket() {
         if (this.remainingTicket > 0) {
             this.remainingTicket--;
         } else {
             throw new IllegalStateException("티켓이 부족합니다.");
         }
+    }
+
+    public void initTicket() {
+        this.remainingTicket = maximumTicket;
+    }
+
+    public void setMaximumTicket(int maximumTicket) {
+        this.maximumTicket = maximumTicket;
     }
 
     public boolean isHost(Room room) {
