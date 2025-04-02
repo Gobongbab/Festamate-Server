@@ -24,7 +24,7 @@ public class RoomParticipationService {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
 
-        validateRoomParticipation(member.getId());
+//        validateRoomParticipation(member.getId());
         validateRoomFull(room.getId());
 
         RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member);

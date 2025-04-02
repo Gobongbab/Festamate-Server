@@ -29,7 +29,7 @@ public class RoomService {
 
     @Transactional
     public Room createRoom(Member member, RoomCreateRequest request) {
-        validateRoomParticipation(member.getId());
+//        validateRoomParticipation(member.getId());
         Room createdRoom = roomRepository.save(request.toEntity(member));
 
         ChatRoom chatRoom = ChatRoom.builder()
