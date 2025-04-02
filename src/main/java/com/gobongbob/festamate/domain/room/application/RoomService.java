@@ -40,6 +40,7 @@ public class RoomService {
 
         RoomParticipant roomParticipant = RoomParticipant.createHost(createdRoom, member);
         roomParticipantRepository.save(roomParticipant);
+        member.useTicket();
 
         return createdRoom;
     }
