@@ -32,7 +32,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 || "/login/oauth2/code/kakao".equals(requestUri)
                 || requestUri.startsWith("/api/auth/") && !"/api/auth/register/profile".equals(
                 requestUri)
-                || "/health".equals(requestUri)) {
+                || "/health".equals(requestUri) || "/sentry".equals(requestUri) || "/error".equals(
+                requestUri) || "/api/".equals(requestUri)) {
             filterChain.doFilter(request, response);
             return;
         }

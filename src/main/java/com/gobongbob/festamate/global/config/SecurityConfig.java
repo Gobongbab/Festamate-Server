@@ -5,18 +5,20 @@ import com.gobongbob.festamate.global.util.JwtAuthenticationEntryPoint;
 import com.gobongbob.festamate.global.util.TokenAuthenticationFilter;
 import com.gobongbob.festamate.global.util.TokenProvider;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsUtils;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @RequiredArgsConstructor
@@ -34,40 +36,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors((cors) -> cors
-                        .configurationSource(request -> {
-                            CorsConfiguration configuration = new CorsConfiguration();
-                            configuration.setAllowedOrigins(Arrays.asList(
-                                    "http://localhost:3000",
-                                    "http://localhost:5173",
-                                    "http://localhost:8080",
-                                    "https://festamate-web.vercel.app"
-                            ));
-                            configuration.setAllowedMethods(
-                                    List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-                            configuration.setAllowCredentials(true);
-                            configuration.setAllowedHeaders(
-                                    Collections.singletonList("*"));
-                            configuration.setMaxAge(3600L);
-                            configuration.setExposedHeaders(
-                                    List.of(
-                                            "Authorization",
-                                            "Set-Cookie"
-                                    )
-                            );
-                            return configuration;
-                        }))
-                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 참조
+                .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic 인증 비활성화
                 .formLogin(formLogin -> formLogin.disable()) // 폼 기반 로그인 비활성화
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS)) // 세션을 생성하지 않고, 토큰 기반 인증을 사용
                 .authorizeHttpRequests(authorize -> authorize // 요청에 대한 인증 및 인가 설정 시작
-                        .requestMatchers("/api/auth/**", "/login/oauth2/code/kakao", "/health")
-                        .permitAll() // 인증 없이 접근 가능한 경로 설정
-                        .requestMatchers("/test/**").permitAll() // 테스트용 경로 허용
-                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
+                        .requestMatchers(CorsUtils::isPreFlightRequest)
+                        .permitAll() // Preflight 요청 허용 (OPTIONS 메서드)
+                        .anyRequest().permitAll() // 모든 요청 허용
                 )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider),
                         // JWT 토큰을 통해 인증된 사용자 정보 가져옴
@@ -77,5 +56,37 @@ public class SecurityConfig {
                                 new JwtAuthenticationEntryPoint()) // 인증 실패 시 예외 처리
                         .accessDeniedHandler(new JwtAccessDeniedHandler())); // 인가 실패 시 예외 처리
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // 모든 출처 허용 (*)
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+
+        // 모든 HTTP 메서드 허용 (*)
+        configuration.setAllowedMethods(Arrays.asList("*"));
+
+        // 허용할 헤더 설정
+        configuration.setAllowedHeaders(Arrays.asList(
+                "X-Requested-With",
+                "Content-Type",
+                "Authorization",
+                "X-XSRF-token",
+                "Accept"
+        ));
+
+        // 인증 정보 포함 여부
+        configuration.setAllowCredentials(false);
+
+        // CORS 캐싱 시간 설정 (초 단위)
+        configuration.setMaxAge(3600L);
+
+        // URL 기반으로 CORS 설정 등록
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 }
