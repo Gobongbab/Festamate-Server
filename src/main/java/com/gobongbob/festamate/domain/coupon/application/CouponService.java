@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CouponService {
 
     private final CouponRepository couponRepository;
-    private static final int COUPON_COUNT = 100;
+    private static final int COUPON_COUNT = 1000;
     private static final int COUPON_LENGTH = 6;
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
