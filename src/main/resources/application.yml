@@ -49,3 +49,15 @@ sentry:
   max-request-body-size: small
 server:
   forward-headers-strategy: framework
+
+# AWS S3
+cloud:
+  aws:
+    s3: ${S3_BUCKET_NAME}
+    credentials:
+      access-key: ${IAM_USER_ACCESS_KEY}
+      secret-key: ${IAM_USER_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
