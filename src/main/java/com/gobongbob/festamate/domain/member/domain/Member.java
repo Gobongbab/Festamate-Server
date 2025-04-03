@@ -74,6 +74,12 @@ public class Member {
     @Builder.Default
     private ProfileImage profileImage = ProfileImage.getDefaultProfileImage();
 
+    // 연관관계 편의 메서드
+    public void setProfileImage(ProfileImage profileImage) {
+        this.profileImage = profileImage;
+        profileImage.setMember(this);
+    }
+
     public void updateProfile(String nickname, String loginPassword) {
         this.nickname = nickname;
         this.loginPassword = loginPassword;

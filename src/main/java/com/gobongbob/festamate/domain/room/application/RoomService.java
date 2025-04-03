@@ -2,9 +2,9 @@ package com.gobongbob.festamate.domain.room.application;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
+import com.gobongbob.festamate.domain.image.infrastructure.ImageUploadService;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
-import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
@@ -16,6 +16,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,12 +26,13 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final MemberRepository memberRepository;
+    private final ImageUploadService imageUploadService;
 
     @Transactional
-    public Room createRoom(Member member, RoomCreateRequest request) {
+    public Room createRoom(Member member, RoomCreateRequest request, List<MultipartFile> imageFiles) {
 //        validateRoomParticipation(member.getId());
         Room createdRoom = roomRepository.save(request.toEntity(member));
+        List<String> imageUrls = imageUploadService.uploadImages(imageFiles);
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(createdRoom.getTitle())
