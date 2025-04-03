@@ -22,7 +22,6 @@ public class MemberService {
     @Transactional
     public Member createMember(MemberCreateRequest request) {
         Member member = request.toEntity(2, 2);
-        member.initDefaultProfileImage();
 
         return memberRepository.save(member);
     }

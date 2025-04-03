@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,4 +32,18 @@ public class ProfileImage {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Transient
+    private static final ProfileImage DEFAULT_PROFILE_IMAGE = ProfileImage.builder()
+            .image(Image.builder()
+                    .url("https://w7.pngwing.com/pngs/665/132/png-transparent-user-defult-avatar.png")
+                    .storeName("default_profile_image.png")
+                    .uploadName("default_profile_image.png")
+                    .build())
+            .member(null) // 기본 이미지라 특정 유저와 연결되지 않음
+            .build();
+
+    public static ProfileImage getDefaultProfileImage() {
+        return DEFAULT_PROFILE_IMAGE;
+    }
 }
