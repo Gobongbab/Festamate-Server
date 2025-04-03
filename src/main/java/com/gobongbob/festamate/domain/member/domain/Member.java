@@ -23,12 +23,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Entity
 @Getter
-@Setter // 테스트 용으로 추후 삭제 바람
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
