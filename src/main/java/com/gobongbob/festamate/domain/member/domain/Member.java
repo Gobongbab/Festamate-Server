@@ -78,6 +78,22 @@ public class Member {
         profileImage.setMember(this);
     }
 
+    public void registerProfile(
+            String name,
+            String nickname,
+            String studentId,
+            String phoneNumber,
+            Gender gender,
+            Major major
+    ) {
+        this.name = name;
+        this.nickname = nickname;
+        this.studentId = studentId;
+        this.phoneNumber = phoneNumber;
+        this.gender = gender;
+        this.major = major;
+    }
+
     public void updateProfile(String nickname, String loginPassword) {
         this.nickname = nickname;
         this.loginPassword = loginPassword;
@@ -87,6 +103,10 @@ public class Member {
         this.name = studentName;
         this.studentDepartment = studentDepartment;
         this.studentId = studentId;
+    }
+
+    public void initializeRemainingTicket(int ticketCount) {
+        this.remainingTicket = ticketCount;
     }
 
     public void useTicket() {
@@ -134,9 +154,9 @@ public class Member {
     }
 
     public static Member createTestMember(Long id) {
-        Member member = new Member();
-        member.setId(id);
-        return member;
+        return Member.builder()
+                .id(id)
+                .build();
     }
 
 }
