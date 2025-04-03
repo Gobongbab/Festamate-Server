@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.member.application;
 
+import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
@@ -22,6 +23,7 @@ public class MemberService {
     @Transactional
     public Member createMember(MemberCreateRequest request) {
         Member member = request.toEntity(2, 2);
+        member.setProfileImage(ProfileImage.getDefaultProfileImage());
 
         return memberRepository.save(member);
     }

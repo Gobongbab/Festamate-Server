@@ -69,8 +69,7 @@ public class Member {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "profile_image_id")
-    @Builder.Default
-    private ProfileImage profileImage = ProfileImage.getDefaultProfileImage();
+    private ProfileImage profileImage;
 
     // 연관관계 편의 메서드
     public void setProfileImage(ProfileImage profileImage) {
