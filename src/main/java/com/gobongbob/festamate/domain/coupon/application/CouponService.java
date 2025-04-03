@@ -30,7 +30,7 @@ public class CouponService {
         coupon.useCoupon();
         coupon.assignToMember(member);
         member.increaseMaximumTicket();
-        member.setRemainingTicket(member.getMaximumTicket());
+        member.initializeRemainingTicket(member.getMaximumTicket());
     }
 
     @Transactional
