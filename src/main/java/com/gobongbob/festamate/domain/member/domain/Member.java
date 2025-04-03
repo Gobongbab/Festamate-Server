@@ -1,8 +1,10 @@
 package com.gobongbob.festamate.domain.member.domain;
 
 import com.gobongbob.festamate.domain.auth.oauth.domain.OauthInfo;
+import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
@@ -13,6 +15,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import java.util.Set;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -64,6 +68,10 @@ public class Member {
     private int maximumTicket;
 
     private int remainingTicket;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinColumn(name = "profile_image_id")
+    private ProfileImage profileImage;
 
     public void updateProfile(String nickname, String loginPassword) {
         this.nickname = nickname;
