@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.member.domain;
 
 import com.gobongbob.festamate.domain.auth.oauth.domain.OauthInfo;
+import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -121,6 +122,17 @@ public class Member {
         this.id = Long.parseLong(id);
         this.nickname = nickname;
         this.authorities = authorities;
+    }
+
+    public void initDefaultProfileImage() {
+        this.profileImage = ProfileImage.builder()
+                .image(Image.builder()
+                        .url("https://w7.pngwing.com/pngs/665/132/png-transparent-user-defult-avatar.png")
+                        .storeName("default_profile_image.png")
+                        .uploadName("default_profile_image.png")
+                        .build())
+                .member(this)
+                .build();
     }
 
     public Member update(String accessToken) {
