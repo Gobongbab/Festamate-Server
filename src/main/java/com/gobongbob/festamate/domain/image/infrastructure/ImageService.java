@@ -33,7 +33,6 @@ public class ImageService {
 
     private Image uploadImageFile(MultipartFile multipartFile, StoreImageDto storeImageDto) {
         try {
-
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentType(multipartFile.getContentType());
             objectMetadata.setContentLength(multipartFile.getSize());
