@@ -2,7 +2,8 @@ package com.gobongbob.festamate.domain.room.application;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
-import com.gobongbob.festamate.domain.image.infrastructure.ImageUploadService;
+import com.gobongbob.festamate.domain.image.domain.RoomImage;
+import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -26,13 +27,18 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final ImageUploadService imageUploadService;
+    private final ImageService imageService;
 
     @Transactional
     public Room createRoom(Member member, RoomCreateRequest request, List<MultipartFile> imageFiles) {
 //        validateRoomParticipation(member.getId());
+
+        List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
+                .stream()
+                .map(RoomImage::fromEntity)
+                .toList();
         Room createdRoom = roomRepository.save(request.toEntity(member));
-        List<String> imageUrls = imageUploadService.uploadImages(imageFiles);
+        createdRoom.assignImages(roomImages);
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(createdRoom.getTitle())
