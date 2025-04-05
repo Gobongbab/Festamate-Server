@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.room.dto.response;
 
+import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import java.util.List;
@@ -12,12 +13,17 @@ public record RoomResponse(
         String meetingDateTime,
         String title,
         String content,
-        List<ParticipantResponse> participants
+        List<ParticipantResponse> participants,
+        List<ImageResponse> images
 ) {
 
     public static RoomResponse fromEntity(Room room, List<RoomParticipant> participants) {
         List<ParticipantResponse> participantResponses = participants.stream()
                 .map(participant -> ParticipantResponse.fromEntity(participant, participant.isHost()))
+                .toList();
+        List<ImageResponse> imageResponses = room.getImages()
+                .stream()
+                .map(roomImage -> ImageResponse.fromEntity(roomImage.getImage()))
                 .toList();
 
         return new RoomResponse(
@@ -28,7 +34,8 @@ public record RoomResponse(
                 room.getMeetingDateTime().toString(),
                 room.getTitle(),
                 room.getContent(),
-                participantResponses
+                participantResponses,
+                imageResponses
         );
     }
 
