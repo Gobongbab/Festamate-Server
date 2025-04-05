@@ -36,7 +36,7 @@ public class RoomController {
     public ResponseEntity<Void> createRoom(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestPart("request") RoomCreateRequest request,
-            @RequestPart("imageFiles") List<MultipartFile> multipartFiles
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
         Room createdRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
         chatService.sendMessage(
