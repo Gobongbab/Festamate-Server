@@ -13,6 +13,7 @@ import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,10 +34,14 @@ public class RoomService {
     public Room createRoom(Member member, RoomCreateRequest request, List<MultipartFile> imageFiles) {
 //        validateRoomParticipation(member.getId());
 
-        List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
-                .stream()
-                .map(RoomImage::fromEntity)
-                .toList();
+        List<RoomImage> roomImages = new ArrayList<>();
+        if (!imageFiles.isEmpty()) {
+            roomImages = imageService.uploadImages(imageFiles)
+                    .stream()
+                    .map(RoomImage::fromEntity)
+                    .toList();
+        }
+
         Room createdRoom = roomRepository.save(request.toEntity(member));
         createdRoom.assignImages(roomImages);
 
