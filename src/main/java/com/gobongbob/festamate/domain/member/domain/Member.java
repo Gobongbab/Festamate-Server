@@ -63,19 +63,16 @@ public class Member {
     @Column(unique = true)
     private String token; // FcmToken
 
-    private int maximumTicket;
+    @Builder.Default
+    private int maximumTicket = 2;
 
-    private int remainingTicket;
+    @Builder.Default
+    private int remainingTicket = 2;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "profile_image_id")
-    private ProfileImage profileImage;
-
-    // 연관관계 편의 메서드
-    public void setProfileImage(ProfileImage profileImage) {
-        this.profileImage = profileImage;
-        profileImage.setMember(this);
-    }
+    @Builder.Default
+    private ProfileImage profileImage = ProfileImage.getDefaultProfileImage();
 
     public void registerProfile(
             String name,
