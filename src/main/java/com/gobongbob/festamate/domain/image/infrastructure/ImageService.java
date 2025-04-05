@@ -21,7 +21,7 @@ public class ImageService {
     private final ImageStoreProcessor imageStoreProcessor;
     private final AmazonS3 amazonS3Client;
 
-    @Value("${cloud.aws.s3.bucket}")
+    @Value("${cloud.aws.s3}")
     private String bucket;
 
     public List<Image> uploadImages(List<MultipartFile> imageFiles) {
