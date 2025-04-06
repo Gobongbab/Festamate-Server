@@ -3,13 +3,14 @@ package com.gobongbob.festamate.domain.room.dto.response;
 import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record RoomResponse(
         Long id,
         int headCount,
         String preferredGender,
-        String meetingDateTime,
+        LocalDateTime meetingDateTime,
         String title,
         String content,
         List<ParticipantResponse> participants,
@@ -29,7 +30,7 @@ public record RoomResponse(
                 room.getId(),
                 room.getHeadCount(),
                 room.getPreferredGender().name(),
-                room.getMeetingDateTime().toString(),
+                room.getMeetingDateTime(),
                 room.getTitle(),
                 room.getContent(),
                 participantResponses,
@@ -50,7 +51,7 @@ public record RoomResponse(
             return new ParticipantResponse(
                     participant.getId(),
                     participant.getMember().getNickname(),
-                    participant.getMember().getStudentId(),
+                    participant.getMember().getStudentId().substring(2, 4),
                     participant.getMember().getGender().name(),
                     participant.getMember().getMajor().getDepartment(),
                     isHost
