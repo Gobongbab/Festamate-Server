@@ -23,7 +23,6 @@ class RoomTest {
         room.updateRoom(
                 6,
                 Gender.FEMALE,
-                room.getOpenChatLink(),
                 room.getMeetingDateTime(),
                 room.getTitle(),
                 room.getContent()
