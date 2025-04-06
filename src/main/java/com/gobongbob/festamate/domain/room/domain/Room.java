@@ -32,15 +32,16 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int headCount;
+    private String title;
+
+    private String content;
+
+    private int maxParticipants;
 
     private Gender preferredGender;
 
     private LocalDateTime meetingDateTime;
 
-    private String title;
-
-    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host_id")
@@ -56,16 +57,16 @@ public class Room {
     }
 
     public void updateRoom(
-            int headCount,
+            String title,
+            String content,
             Gender preferredGender,
             LocalDateTime meetingDateTime,
-            String title,
-            String content
+            int maxParticipants
     ) {
-        this.headCount = headCount;
-        this.preferredGender = preferredGender;
-        this.meetingDateTime = meetingDateTime;
         this.title = title;
         this.content = content;
+        this.preferredGender = preferredGender;
+        this.meetingDateTime = meetingDateTime;
+        this.maxParticipants = maxParticipants;
     }
 }

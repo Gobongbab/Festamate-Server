@@ -7,21 +7,21 @@ import com.gobongbob.festamate.domain.room.domain.Room;
 import java.time.LocalDateTime;
 
 public record RoomCreateRequest(
-        int headCount,
+        String title,
+        String content,
         String preferredGender,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime meetingDateTime,
-        String title,
-        String content
+        int maxParticipants
 ) {
 
     public Room toEntity(Member member) {
         return Room.builder()
-                .headCount(headCount)
-                .preferredGender(Gender.findByName(preferredGender))
-                .meetingDateTime(meetingDateTime)
                 .title(title)
                 .content(content)
+                .preferredGender(Gender.findByName(preferredGender))
+                .meetingDateTime(meetingDateTime)
+                .maxParticipants(maxParticipants)
                 .host(member)
                 .build();
     }
