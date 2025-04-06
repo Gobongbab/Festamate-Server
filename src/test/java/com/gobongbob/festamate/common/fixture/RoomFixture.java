@@ -11,7 +11,7 @@ public class RoomFixture {
 
     public static Room createRoom(int headCount, Gender gender, Member member) {
         return Room.builder()
-                .headCount(headCount)
+                .maxParticipants(headCount)
                 .preferredGender(gender)
                 .meetingDateTime(LocalDateTime.now())
                 .title("test title")
@@ -30,11 +30,11 @@ public class RoomFixture {
 
     public static RoomCreateRequest createRoomCreateRequest(Room room) {
         return new RoomCreateRequest(
-                room.getHeadCount(),
+                room.getTitle(),
+                room.getContent(),
                 room.getPreferredGender().getName(),
                 room.getMeetingDateTime(),
-                room.getTitle(),
-                room.getContent()
+                room.getMaxParticipants()
         );
     }
 

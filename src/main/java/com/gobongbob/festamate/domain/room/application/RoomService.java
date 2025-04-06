@@ -95,11 +95,11 @@ public class RoomService {
         validateAlone(room);
 
         room.updateRoom(
-                request.headCount(),
+                request.title(),
+                request.content(),
                 Gender.findByName(request.preferredGender()),
                 request.meetingDateTime(),
-                request.title(),
-                request.content()
+                request.maxParticipants()
         );
     }
 

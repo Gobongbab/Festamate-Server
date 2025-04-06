@@ -61,7 +61,7 @@ public class RoomParticipationService {
                 .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
         int participantsCount = roomParticipantRepository.countByRoom_Id(roomId);
 
-        if (room.getHeadCount() == participantsCount) {
+        if (room.getMaxParticipants() == participantsCount) {
             throw new IllegalArgumentException("모임방이 꽉 찼습니다.");
         }
     }

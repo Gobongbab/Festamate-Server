@@ -8,11 +8,11 @@ import java.util.List;
 
 public record RoomResponse(
         Long id,
-        int headCount,
-        String preferredGender,
-        LocalDateTime meetingDateTime,
         String title,
         String content,
+        String preferredGender,
+        LocalDateTime meetingDateTime,
+        int maxParticipants,
         List<ParticipantResponse> participants,
         List<ImageResponse> images
 ) {
@@ -28,11 +28,11 @@ public record RoomResponse(
 
         return new RoomResponse(
                 room.getId(),
-                room.getHeadCount(),
-                room.getPreferredGender().name(),
-                room.getMeetingDateTime(),
                 room.getTitle(),
                 room.getContent(),
+                room.getPreferredGender().name(),
+                room.getMeetingDateTime(),
+                room.getMaxParticipants(),
                 participantResponses,
                 imageResponses
         );
