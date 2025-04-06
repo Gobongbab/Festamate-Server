@@ -10,6 +10,7 @@ import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
+import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
@@ -58,13 +59,13 @@ public class RoomService {
         return createdRoom;
     }
 
-    public List<RoomResponse> findAllRooms() {
+    public List<RoomListResponse> findAllRooms() {
         return roomRepository.findAll()
                 .stream()
-                .map(room -> {
-                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
-                    return RoomResponse.fromEntity(room, roomParticipants);
-                })
+                .map(room -> RoomListResponse.fromEntity(
+                        room,
+                        roomParticipantRepository.countByRoom_Id(room.getId())
+                ))
                 .toList();
     }
 

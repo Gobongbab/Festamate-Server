@@ -18,6 +18,7 @@ import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
+import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.serviceSliceTest;
@@ -119,7 +120,7 @@ class RoomServiceTest extends serviceSliceTest {
             rooms.forEach(room -> testFixtureBuilder.buildRoom(room));
 
             // when
-            List<RoomResponse> findRoomResponses = roomService.findAllRooms();
+            List<RoomListResponse> findRoomResponses = roomService.findAllRooms();
 
             // then
             assertThat(findRoomResponses).hasSize(rooms.size());
