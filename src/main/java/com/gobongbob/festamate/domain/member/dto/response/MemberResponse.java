@@ -24,7 +24,7 @@ public record MemberResponse(
                 member.getId(),
                 member.getName(),
                 member.getNickname(),
-                member.getStudentId(),
+                member.getStudentId().substring(2, 4),
                 member.getLoginId(),
                 member.getLoginPassword(),
                 member.getPhoneNumber(),
