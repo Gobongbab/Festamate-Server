@@ -17,6 +17,8 @@ import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepositor
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,14 +61,12 @@ public class RoomService {
         return createdRoom;
     }
 
-    public List<RoomListResponse> findAllRooms() {
-        return roomRepository.findAll()
-                .stream()
+    public Page<RoomListResponse> findAllRooms(Pageable pageable) {
+        return roomRepository.findAll(pageable)
                 .map(room -> RoomListResponse.fromEntity(
                         room,
                         roomParticipantRepository.countByRoom_Id(room.getId())
-                ))
-                .toList();
+                ));
     }
 
     public RoomResponse findParticipatingRooms(Long memberId) {

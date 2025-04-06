@@ -11,6 +11,10 @@ import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -50,8 +54,10 @@ public class RoomController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<RoomListResponse>> findAllRooms() {
-        return ResponseEntity.ok(roomService.findAllRooms());
+    public ResponseEntity<Page<RoomListResponse>> findAllRooms(
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(roomService.findAllRooms(pageable));
     }
 
     @GetMapping("/participate")
