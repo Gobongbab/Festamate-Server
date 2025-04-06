@@ -36,8 +36,6 @@ public class Room {
 
     private Gender preferredGender;
 
-    private String openChatLink;
-
     private LocalDateTime meetingDateTime;
 
     private String title;
@@ -60,14 +58,12 @@ public class Room {
     public void updateRoom(
             int headCount,
             Gender preferredGender,
-            String openChatLink,
             LocalDateTime meetingDateTime,
             String title,
             String content
     ) {
         this.headCount = headCount;
         this.preferredGender = preferredGender;
-        this.openChatLink = openChatLink;
         this.meetingDateTime = meetingDateTime;
         this.title = title;
         this.content = content;
