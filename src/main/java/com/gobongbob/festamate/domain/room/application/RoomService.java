@@ -69,15 +69,13 @@ public class RoomService {
                 ));
     }
 
-    public RoomResponse findParticipatingRooms(Long memberId) {
-        Room participatingRoom = roomParticipantRepository.findByRoom_Id(memberId)
+    public List<RoomListResponse> findParticipatingRooms(Long memberId) {
+        return roomParticipantRepository.findByRoom_Id(memberId)
                 .stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("참여중인 모임방이 존재하지 않습니다."))
-                .getRoom();
-        List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(participatingRoom.getId());
-
-        return RoomResponse.fromEntity(participatingRoom, roomParticipants);
+                .map(roomParticipant -> RoomListResponse.fromEntity(
+                        roomParticipant.getRoom(),
+                        roomParticipantRepository.countByRoom_Id(roomParticipant.getRoom().getId())
+                )).toList();
     }
 
     public RoomResponse findRoomById(Long roomId) {

@@ -61,7 +61,7 @@ public class RoomController {
     }
 
     @GetMapping("/participate")
-    public ResponseEntity<RoomResponse> findParticipatingRooms(
+    public ResponseEntity<List<RoomListResponse>> findParticipatingRooms(
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
         return ResponseEntity.ok(roomService.findParticipatingRooms(memberDetails.getMember().getId()));
