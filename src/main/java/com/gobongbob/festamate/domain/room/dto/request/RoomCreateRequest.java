@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 public record RoomCreateRequest(
         int headCount,
         String preferredGender,
-        String openChatLink,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime meetingDateTime,
         String title,
@@ -20,7 +19,6 @@ public record RoomCreateRequest(
         return Room.builder()
                 .headCount(headCount)
                 .preferredGender(Gender.findByName(preferredGender))
-                .openChatLink(openChatLink)
                 .meetingDateTime(meetingDateTime)
                 .title(title)
                 .content(content)

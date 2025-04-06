@@ -97,7 +97,6 @@ public class RoomService {
         room.updateRoom(
                 request.headCount(),
                 Gender.findByName(request.preferredGender()),
-                request.openChatLink(),
                 request.meetingDateTime(),
                 request.title(),
                 request.content()

@@ -13,7 +13,6 @@ public class RoomFixture {
         return Room.builder()
                 .headCount(headCount)
                 .preferredGender(gender)
-                .openChatLink("https://open.kakao.com/o/test")
                 .meetingDateTime(LocalDateTime.now())
                 .title("test title")
                 .content("test content")
@@ -33,7 +32,6 @@ public class RoomFixture {
         return new RoomCreateRequest(
                 room.getHeadCount(),
                 room.getPreferredGender().getName(),
-                room.getOpenChatLink(),
                 room.getMeetingDateTime(),
                 room.getTitle(),
                 room.getContent()
