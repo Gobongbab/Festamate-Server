@@ -7,6 +7,7 @@ import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
+import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +50,7 @@ public class RoomController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<RoomResponse>> findAllRooms() {
+    public ResponseEntity<List<RoomListResponse>> findAllRooms() {
         return ResponseEntity.ok(roomService.findAllRooms());
     }
 
