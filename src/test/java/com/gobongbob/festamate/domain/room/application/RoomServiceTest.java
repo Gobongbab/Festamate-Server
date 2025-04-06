@@ -31,6 +31,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -119,8 +122,10 @@ class RoomServiceTest extends serviceSliceTest {
             List<Room> rooms = RoomFixture.createRooms(member);
             rooms.forEach(room -> testFixtureBuilder.buildRoom(room));
 
+            Pageable pageable = PageRequest.of(0, 10);
+
             // when
-            List<RoomListResponse> findRoomResponses = roomService.findAllRooms();
+            Page<RoomListResponse> findRoomResponses = roomService.findAllRooms(pageable);
 
             // then
             assertThat(findRoomResponses).hasSize(rooms.size());
