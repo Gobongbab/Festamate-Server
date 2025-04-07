@@ -49,7 +49,7 @@ public record RoomResponse(
 
         private static ParticipantResponse fromEntity(RoomParticipant participant, boolean isHost) {
             return new ParticipantResponse(
-                    participant.getId(),
+                    participant.getMember().getId(),
                     participant.getMember().getNickname(),
                     participant.getMember().getStudentId().substring(2, 4),
                     participant.getMember().getGender().name(),
