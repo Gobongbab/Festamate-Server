@@ -16,6 +16,7 @@ import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.serviceSliceTest;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,7 +49,7 @@ class RoomServiceTest extends serviceSliceTest {
             RoomCreateRequest request = RoomFixture.createRoomCreateRequest(room);
 
             // when
-            Room createdRoom = roomService.createRoom(member, request);
+            Room createdRoom = roomService.createRoom(member, request, Collections.emptyList());
 
             // then
             assertAll(
@@ -105,7 +106,8 @@ class RoomServiceTest extends serviceSliceTest {
             // given
             Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
             Room room = testFixtureBuilder.buildRoom(RoomFixture.ROOM1(member));
-            testFixtureBuilder.buildRoomParticipant(RoomParticipantFixture.createHost(room, member));
+            testFixtureBuilder.buildRoomParticipant(
+                    RoomParticipantFixture.createHost(room, member));
 
             int headCountToUpdate = room.getHeadCount() + 4;
             Gender preferredGenderToUpdate = room.getPreferredGender();

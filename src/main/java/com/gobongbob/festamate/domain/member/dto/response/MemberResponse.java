@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.member.dto.response;
 
 import com.gobongbob.festamate.domain.image.domain.Image;
+import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
 import com.gobongbob.festamate.domain.member.domain.Member;
 
@@ -18,7 +19,12 @@ public record MemberResponse(
 ) {
 
     public static MemberResponse fromEntity(Member member) {
-        Image profileImage = member.getProfileImage().getImage();
+        ProfileImage profileImage = member.getProfileImage();
+        if (profileImage == null) {
+            profileImage = ProfileImage.getDefaultProfileImage();
+        }
+
+        Image image = profileImage.getImage();
 
         return new MemberResponse(
                 member.getId(),
@@ -30,7 +36,7 @@ public record MemberResponse(
                 member.getPhoneNumber(),
                 member.getGender().getName(),
                 member.getMajor().getDepartment(),
-                ImageResponse.fromEntity(profileImage)
+                ImageResponse.fromEntity(image)
         );
     }
 }

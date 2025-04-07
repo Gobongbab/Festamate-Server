@@ -31,7 +31,8 @@ public class RoomService {
     private final ImageService imageService;
 
     @Transactional
-    public Room createRoom(Member member, RoomCreateRequest request, List<MultipartFile> imageFiles) {
+    public Room createRoom(Member member, RoomCreateRequest request,
+            List<MultipartFile> imageFiles) {
 //        validateRoomParticipation(member.getId());
 
         List<RoomImage> roomImages = new ArrayList<>();
@@ -62,7 +63,8 @@ public class RoomService {
         return roomRepository.findAll()
                 .stream()
                 .map(room -> {
-                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
+                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(
+                            room.getId());
                     return RoomResponse.fromEntity(room, roomParticipants);
                 })
                 .toList();
@@ -74,7 +76,8 @@ public class RoomService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("참여중인 모임방이 존재하지 않습니다."))
                 .getRoom();
-        List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(participatingRoom.getId());
+        List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(
+                participatingRoom.getId());
 
         return RoomResponse.fromEntity(participatingRoom, roomParticipants);
     }
@@ -82,7 +85,8 @@ public class RoomService {
     public RoomResponse findRoomById(Long roomId) {
         return roomRepository.findById(roomId)
                 .map(room -> {
-                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
+                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(
+                            room.getId());
                     return RoomResponse.fromEntity(room, roomParticipants);
                 }).orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
     }
@@ -104,6 +108,7 @@ public class RoomService {
         );
     }
 
+    // 방 삭제(일반, admin)
     @Transactional
     public void deleteRoomById(Member member, Long roomId) {
         Room room = roomRepository.findById(roomId)
