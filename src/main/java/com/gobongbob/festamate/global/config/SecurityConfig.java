@@ -44,12 +44,14 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS)) // 세션을 생성하지 않고, 토큰 기반 인증을 사용
                 .authorizeHttpRequests(authorize -> authorize // 요청에 대한 인증 및 인가 설정 시작
-                        .requestMatchers(CorsUtils::isPreFlightRequest)
-                        .permitAll() // Preflight 요청 허용 (OPTIONS 메서드)
-                        .requestMatchers("/test/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/user/**").hasRole("USER")
-                        .anyRequest().authenticated()
+                                .requestMatchers(CorsUtils::isPreFlightRequest)
+                                .permitAll() // Preflight 요청 허용 (OPTIONS 메서드)
+//                        .requestMatchers("/test/**").permitAll()
+//                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/api/user/**").hasRole("USER")
+//                        .anyRequest().authenticated()
+                                .anyRequest().permitAll() // 개발 중 전체 허용
+
                 )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider),
                         // JWT 토큰을 통해 인증된 사용자 정보 가져옴
