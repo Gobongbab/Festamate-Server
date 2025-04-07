@@ -46,7 +46,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize // 요청에 대한 인증 및 인가 설정 시작
                         .requestMatchers(CorsUtils::isPreFlightRequest)
                         .permitAll() // Preflight 요청 허용 (OPTIONS 메서드)
-                        .anyRequest().permitAll() // 모든 요청 허용
+                        .requestMatchers("/test/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/user/**").hasRole("USER")
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider),
                         // JWT 토큰을 통해 인증된 사용자 정보 가져옴
