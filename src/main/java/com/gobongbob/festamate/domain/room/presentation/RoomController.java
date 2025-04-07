@@ -43,7 +43,8 @@ public class RoomController {
             @RequestPart("request") RoomCreateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        Room createdRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
+        Room createdRoom = roomService.createRoom(memberDetails.getMember(), request,
+                multipartFiles);
         chatService.sendMessage(
                 createdRoom.getId(),
                 memberDetails.getMember(),
@@ -53,7 +54,7 @@ public class RoomController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("")
+    @GetMapping("/list")
     public ResponseEntity<Page<RoomListResponse>> findAllRooms(
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
@@ -64,7 +65,8 @@ public class RoomController {
     public ResponseEntity<List<RoomListResponse>> findParticipatingRooms(
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
-        return ResponseEntity.ok(roomService.findParticipatingRooms(memberDetails.getMember().getId()));
+        return ResponseEntity.ok(
+                roomService.findParticipatingRooms(memberDetails.getMember().getId()));
     }
 
     @GetMapping("/{roomId}")
@@ -128,6 +130,7 @@ public class RoomController {
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId
     ) {
-        return ResponseEntity.ok(roomParticipationService.isMemberHost(memberDetails.getMember().getId(), roomId));
+        return ResponseEntity.ok(
+                roomParticipationService.isMemberHost(memberDetails.getMember().getId(), roomId));
     }
 }

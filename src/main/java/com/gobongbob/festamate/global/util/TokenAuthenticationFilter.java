@@ -22,6 +22,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     // 여기서 Refresh Token이 아닌 Access Token만 허용하도록 설정
     // 검증된 토큰으로 SecurityContextHolder에 인증 정보를 저장함
+
+    // doFilterInternal 메서드는 JWT 없이 가능한 경로
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
@@ -33,7 +35,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 || requestUri.startsWith("/api/auth/") && !"/api/auth/register/profile".equals(
                 requestUri)
                 || "/health".equals(requestUri) || "/sentry".equals(requestUri) || "/error".equals(
-                requestUri) || "/api/".equals(requestUri)) {
+                requestUri) || "/api/".equals(requestUri) || "/api/rooms/list".equals(requestUri)) {
             filterChain.doFilter(request, response);
             return;
         }
