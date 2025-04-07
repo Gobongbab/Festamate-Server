@@ -5,6 +5,7 @@ import com.gobongbob.festamate.global.util.JwtAuthenticationEntryPoint;
 import com.gobongbob.festamate.global.util.TokenAuthenticationFilter;
 import com.gobongbob.festamate.global.util.TokenProvider;
 import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -78,7 +79,8 @@ public class SecurityConfig {
         ));
 
         // 인증 정보 포함 여부
-        configuration.setAllowCredentials(false);
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
 
         // CORS 캐싱 시간 설정 (초 단위)
         configuration.setMaxAge(3600L);

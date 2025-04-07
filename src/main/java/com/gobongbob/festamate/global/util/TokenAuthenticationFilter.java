@@ -35,7 +35,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 || requestUri.startsWith("/api/auth/") && !"/api/auth/register/profile".equals(
                 requestUri)
                 || "/health".equals(requestUri) || "/sentry".equals(requestUri) || "/error".equals(
-                requestUri) || "/api/".equals(requestUri) || "/api/rooms/list".equals(requestUri)) {
+                requestUri) || "/api/".equals(requestUri) || "/api/rooms/list".equals(requestUri)
+                || "/api/auth/login".equals(requestUri)) {
             filterChain.doFilter(request, response);
             return;
         }

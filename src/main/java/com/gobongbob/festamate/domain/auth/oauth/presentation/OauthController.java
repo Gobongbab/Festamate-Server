@@ -58,8 +58,9 @@ public class OauthController {
     @GetMapping("/api/auth/login") // 로그인 리다이렉트
     public RedirectView redirectToKakao() {
         String kakaoAuthUrl =
-                "https://kauth.kakao.com/oauth/authorize?client_id=" + clientId + "&redirect_uri="
-                        + redirectUri + "&response_type=code";
+                "https://kauth.kakao.com/oauth/authorize?client_id=" + clientId
+                        + "&response_type=code" + "&redirect_uri="
+                        + redirectUri;
         return new RedirectView(kakaoAuthUrl);
     }
 }
