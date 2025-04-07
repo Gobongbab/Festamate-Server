@@ -29,11 +29,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         String requestUri = request.getRequestURI();
 
         if (requestUri.startsWith("/test/")
-                || "/login/oauth2/code/kakao".equals(requestUri)
-                || requestUri.startsWith("/api/auth/") && !"/api/auth/register/profile".equals(
-                requestUri)
-                || "/health".equals(requestUri) || "/sentry".equals(requestUri) || "/error".equals(
-                requestUri) || "/api/".equals(requestUri)) {
+                || requestUri.startsWith("/login/oauth2/code/kakao")
+                || (requestUri.startsWith("/api/auth/") && !"/api/auth/register/profile".equals(
+                requestUri))
+                || requestUri.equals("/health") || requestUri.equals("/sentry")
+                || requestUri.equals("/error")) {
+
             filterChain.doFilter(request, response);
             return;
         }
@@ -46,7 +47,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         if (token != null && tokenProvider.validateToken(token) &&
                 (tokenProvider.isInitialAccessToken(token) || tokenProvider.isFinalAccessToken(
                         token) || tokenProvider.isTestAccessToken(
-                        token))) { // 테스트용 Access Token도 검증
+                        token)) || tokenProvider.isAdminAccessToken(
+                token)) { // 관리자용 Access Token도 검증
             Authentication authentication = tokenProvider.getAuthentication(token);
             Object principal = authentication.getPrincipal();
             if (principal instanceof MinimalMemberDetails

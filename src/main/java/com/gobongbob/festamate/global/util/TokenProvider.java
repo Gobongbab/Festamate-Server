@@ -70,6 +70,20 @@ public class TokenProvider {
                 member, "test_refresh");
     }
 
+    // 관리자용 Access Token 생성 메서드
+    public String generateAdminAccessToken(Member member) {
+        return makeAdminUserToken(
+                new Date(System.currentTimeMillis() + Duration.ofDays(100).toMillis()),
+                member, "admin_access");
+    }
+
+    // 관리자용 Refresh Token 생성 메서드
+    public String generateAdminRefreshToken(Member member) {
+        return makeAdminUserToken(
+                new Date(System.currentTimeMillis() + Duration.ofDays(100).toMillis()),
+                member, "admin_refresh");
+    }
+
     // JWT 토큰을 실제로 생성하는 내부 메서드로, 토큰의 헤더, 페이로드, 서명을 설정함
 
     /***
@@ -112,6 +126,7 @@ public class TokenProvider {
                 .claim("phoneNumber", member.getPhoneNumber())
                 .claim("gender", member.getGender().name())
                 .claim("major", member.getMajor().name())
+                .claim("role", member.getRole())
                 .claim("type", type)
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
@@ -127,12 +142,35 @@ public class TokenProvider {
                 .setExpiration(expiry)
                 .setSubject(String.valueOf(member.getId()))
                 .claim("id", member.getId())
-                .claim("name", member.getName()) // 추가
-                .claim("nickname", member.getNickname()) // 추가
-                .claim("studentId", member.getStudentId()) // 추가
-                .claim("phoneNumber", member.getPhoneNumber()) // 추가
-                .claim("gender", member.getGender().name()) // 추가
-                .claim("major", member.getMajor().name()) // 추가
+                .claim("name", member.getName())
+                .claim("nickname", member.getNickname())
+                .claim("studentId", member.getStudentId())
+                .claim("phoneNumber", member.getPhoneNumber())
+                .claim("gender", member.getGender().name())
+                .claim("major", member.getMajor().name())
+                .claim("role", member.getRole())
+                .claim("type", type)
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
+    }
+
+    // 관리자용 토큰 생성 메서드
+    private String makeAdminUserToken(Date expiry, Member member, String type) {
+        Date now = new Date();
+
+        return Jwts.builder()
+                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .setSubject(String.valueOf(member.getId()))
+                .claim("id", member.getId())
+                .claim("name", member.getName())
+                .claim("nickname", member.getNickname())
+                .claim("studentId", member.getStudentId())
+                .claim("phoneNumber", member.getPhoneNumber())
+                .claim("gender", member.getGender().name())
+                .claim("major", member.getMajor().name())
+                .claim("role", member.getRole())
                 .claim("type", type)
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
@@ -203,6 +241,7 @@ public class TokenProvider {
         String phoneNumber = claims.get("phoneNumber", String.class);
         String gender = claims.get("gender", String.class);
         String major = claims.get("major", String.class);
+        String role = claims.get("role", String.class);
 
         if (name != null) {
             memberBuilder.name(name);
@@ -221,6 +260,9 @@ public class TokenProvider {
         }
         if (major != null) {
             memberBuilder.major(Major.valueOf(major));
+        }
+        if (role != null) {
+            memberBuilder.role(role);
         }
 
         Member member = memberBuilder.build();
@@ -275,5 +317,17 @@ public class TokenProvider {
     public boolean isTestRefreshToken(String token) {
         Claims claims = getClaims(token);
         return "test_refresh".equals(claims.get("type"));
+    }
+
+    // 관리자 Access Token인지 확인하는 메서드
+    public boolean isAdminAccessToken(String token) {
+        Claims claims = getClaims(token);
+        return "admin_access".equals(claims.get("type"));
+    }
+
+    // 관리자 Refresh Token인지 확인하는 메서드
+    public boolean isAdminRefreshToken(String token) {
+        Claims claims = getClaims(token);
+        return "admin_refresh".equals(claims.get("type"));
     }
 }
