@@ -34,6 +34,8 @@ public class Room {
 
     private String title;
 
+    private String place;
+
     private String content;
 
     private int maxParticipants;
@@ -58,12 +60,14 @@ public class Room {
 
     public void updateRoom(
             String title,
+            String place,
             String content,
             Gender preferredGender,
             LocalDateTime meetingDateTime,
             int maxParticipants
     ) {
         this.title = title;
+        this.place = place;
         this.content = content;
         this.preferredGender = preferredGender;
         this.meetingDateTime = meetingDateTime;
