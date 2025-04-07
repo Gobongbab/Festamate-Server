@@ -30,13 +30,18 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         String requestUri = request.getRequestURI();
 
-        if (requestUri.startsWith("/test/")
-                || "/login/oauth2/code/kakao".equals(requestUri)
-                || requestUri.startsWith("/api/auth/") && !"/api/auth/register/profile".equals(
-                requestUri)
-                || "/health".equals(requestUri) || "/sentry".equals(requestUri) || "/error".equals(
-                requestUri) || "/api/".equals(requestUri) || "/api/rooms/list".equals(requestUri)
-                || "/api/auth/login".equals(requestUri)) {
+        if (
+                requestUri.startsWith("/test/")
+                        || requestUri.equals("/api/auth/kakao")
+                        || (requestUri.startsWith("/api/auth/") && !requestUri.equals(
+                        "/api/auth/register/profile"))
+                        || requestUri.equals("/health")
+                        || requestUri.equals("/sentry")
+                        || requestUri.equals("/error")
+                        || requestUri.equals("/api/")
+                        || requestUri.equals("/api/rooms/list")
+                        || requestUri.equals("/api/auth/login")
+        ) {
             filterChain.doFilter(request, response);
             return;
         }
