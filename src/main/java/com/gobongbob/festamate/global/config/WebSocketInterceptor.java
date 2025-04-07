@@ -3,6 +3,7 @@ package com.gobongbob.festamate.global.config;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import com.gobongbob.festamate.global.util.TokenProvider;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.USER_NOT_FOUND;
 
 @Component
 @RequiredArgsConstructor
@@ -41,7 +44,7 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 
             Long userId = tokenProvider.getUserId(token);
             Member member = memberRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("No user found"));
+                    .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
             UserDetails userDetails = new CustomMemberDetails(member);
 
             accessor.setUser(new UsernamePasswordAuthenticationToken(

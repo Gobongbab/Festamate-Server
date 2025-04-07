@@ -8,12 +8,17 @@ import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
 import java.time.LocalDateTime;
+
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.CHAT_ROOM_NOT_FOUND;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_AUTHORITY_CHAT_ROOM;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,7 +33,7 @@ public class ChatService {
     @Transactional
     public void sendMessage(Long roomId, Member member, String message) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
 
         Message savedMessage = messageRepository.save(
                 Message.builder()
@@ -52,7 +57,7 @@ public class ChatService {
 
     private void validateRoomParticipation(Long memberId, Long roomId) {
         if (roomParticipantRepository.findByRoom_IdAndMember_Id(memberId, roomId).isEmpty()) {
-            throw new IllegalArgumentException("채팅방을 조회할 수 있는 권한이 없습니다.");
+            throw new BadRequestException(NO_AUTHORITY_CHAT_ROOM);
         }
     }
 }
