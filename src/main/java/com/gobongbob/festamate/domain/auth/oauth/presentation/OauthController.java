@@ -1,7 +1,6 @@
 package com.gobongbob.festamate.domain.auth.oauth.presentation;
 
 import com.gobongbob.festamate.domain.auth.oauth.application.OauthService;
-import com.gobongbob.festamate.domain.auth.oauth.dto.request.LoginRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -22,17 +21,17 @@ public class OauthController {
 
     private final OauthService oauthService;
 
-    // @PostMapping을 통해 request로 인가 코드를 전달하고, response로 액세스 토큰을 받아옴
-    // 수동으로 인가 코드를 전달받아 처리 (테스트용으로 추후 삭제 가능)
-    @PostMapping("/api/auth/kakao")
-    public ResponseEntity<Map<String, String>> kakaoLogin(@RequestBody LoginRequest loginRequest,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        // 인가 코드 처리
-        Map<String, String> tokens = oauthService.kakaoLogin(loginRequest.getCode(), request,
-                response);
-        return ResponseEntity.ok(tokens);
-    }
+//    // @PostMapping을 통해 request로 인가 코드를 전달하고, response로 액세스 토큰을 받아옴
+//    // 수동으로 인가 코드를 전달받아 처리 (테스트용으로 추후 삭제 가능)
+//    @PostMapping("/api/auth/kakao")
+//    public ResponseEntity<Map<String, String>> kakaoLogin(@RequestBody LoginRequest loginRequest,
+//            HttpServletRequest request,
+//            HttpServletResponse response) {
+//        // 인가 코드 처리
+//        Map<String, String> tokens = oauthService.kakaoLogin(loginRequest.getCode(), request,
+//                response);
+//        return ResponseEntity.ok(tokens);
+//    }
 
     // 리다이렉트 URI에서 인가 코드를 자동으로 처리(운영용)
     @PostMapping("/api/auth/kakao")
