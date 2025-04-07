@@ -1,6 +1,6 @@
 package com.gobongbob.festamate.domain.chat.domain;
 
-import com.gobongbob.festamate.domain.chatRoom.domain.ChatRoom;
+import com.gobongbob.festamate.domain.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -22,18 +22,19 @@ import org.springframework.data.annotation.CreatedDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Chat {
+public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "chat_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "room_id")
-    private ChatRoom room;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_room_id")
+    private ChatRoom chatRoom;
 
-    private String nickname;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member sender;
 
     @Column(columnDefinition = "TEXT")
     private String message;
@@ -43,9 +44,9 @@ public class Chat {
     private LocalDateTime sendDate;
 
     @Builder
-    public Chat(ChatRoom room, String nickname, String message) {
-        this.room = room;
-        this.nickname = nickname;
+    public Message(ChatRoom chatRoom, Member sender, String message) {
+        this.chatRoom = chatRoom;
+        this.sender = sender;
         this.message = message;
         this.sendDate = LocalDateTime.now();
     }

@@ -14,6 +14,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final WebSocketInterceptor webSocketInterceptor; // autowire
+    private final WebSocketErrorHandler chatErrorHandler;
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
@@ -22,13 +23,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/subscribe");
-        config.setApplicationDestinationPrefixes("/publish");
+        config.enableSimpleBroker("/topic");
+        config.setApplicationDestinationPrefixes("/api");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-connect")
-                .setAllowedOrigins("*");
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins("*")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
+
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*");
+
+        registry.setErrorHandler(chatErrorHandler);
     }
 }

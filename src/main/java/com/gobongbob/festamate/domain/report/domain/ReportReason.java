@@ -1,5 +1,9 @@
 package com.gobongbob.festamate.domain.report.domain;
 
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_REPORT_REASON;
+
 public enum ReportReason {
     UNHEALTHY("음란물/불건전한 만남 및 대화"),
     ABUSE("욕설/비하"),
@@ -7,7 +11,7 @@ public enum ReportReason {
     SPLASH("낚시/놀람/도배"),
     POLITICS("정당/정치인 비하 및 선거운동"),
     IMPERSONATION("유출/사칭/사기"),
-    IILLEGAL("불법촬영물 등의 유통");
+    ILLEGAL("불법촬영물 등의 유통");
 
     private final String name;
 
@@ -21,6 +25,6 @@ public enum ReportReason {
                 return reason;
             }
         }
-        throw new IllegalArgumentException("해당하는 신고 사유가 없습니다.");
+        throw new BadRequestException(NO_REPORT_REASON);
     }
 }

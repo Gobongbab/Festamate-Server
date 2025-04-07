@@ -1,20 +1,24 @@
 package com.gobongbob.festamate.global.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 import com.gobongbob.festamate.global.util.JwtAccessDeniedHandler;
 import com.gobongbob.festamate.global.util.JwtAuthenticationEntryPoint;
 import com.gobongbob.festamate.global.util.TokenAuthenticationFilter;
 import com.gobongbob.festamate.global.util.TokenProvider;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsUtils;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @RequiredArgsConstructor
@@ -32,20 +36,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 참조
+                .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic 인증 비활성화
                 .formLogin(formLogin -> formLogin.disable()) // 폼 기반 로그인 비활성화
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS)) // 세션을 생성하지 않고, 토큰 기반 인증을 사용
                 .authorizeHttpRequests(authorize -> authorize // 요청에 대한 인증 및 인가 설정 시작
-                                /*** 테스트를 위해 임시 비활성화
-                                 //                        .requestMatchers("/api/auth/**", "/login/oauth2/code/kakao", "/health")
-                                 //                        .permitAll() // 경로에 대한 요청은 인증 없이 접근 가능 */
-                                .anyRequest().permitAll() // 모든 요청 허용
-                        /**.anyRequest().authenticated() // 나머지 요청은 인증이 필요*/
+                        .requestMatchers(CorsUtils::isPreFlightRequest)
+                        .permitAll() // Preflight 요청 허용 (OPTIONS 메서드)
+                        .anyRequest().permitAll() // 모든 요청 허용
                 )
-                .cors(withDefaults())
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider),
                         // JWT 토큰을 통해 인증된 사용자 정보 가져옴
                         UsernamePasswordAuthenticationFilter.class) // 헤더를 확인할 커스텀 필터 추가
@@ -57,7 +59,34 @@ public class SecurityConfig {
     }
 
     @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(tokenProvider);
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // 모든 출처 허용 (*)
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+
+        // 모든 HTTP 메서드 허용 (*)
+        configuration.setAllowedMethods(Arrays.asList("*"));
+
+        // 허용할 헤더 설정
+        configuration.setAllowedHeaders(Arrays.asList(
+                "X-Requested-With",
+                "Content-Type",
+                "Authorization",
+                "X-XSRF-token",
+                "Accept"
+        ));
+
+        // 인증 정보 포함 여부
+        configuration.setAllowCredentials(false);
+
+        // CORS 캐싱 시간 설정 (초 단위)
+        configuration.setMaxAge(3600L);
+
+        // URL 기반으로 CORS 설정 등록
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 }

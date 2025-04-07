@@ -24,25 +24,50 @@ repositories {
 }
 
 dependencies {
+    // Spring
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'com.google.firebase:firebase-admin:9.2.0' // Firebase Admin SDK
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.mysql:mysql-connector-j'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'com.h2database:h2'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.10.0'
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // MySQL
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // H2
+    testImplementation 'com.h2database:h2'
+
+    // Jakarta
     implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
     implementation 'org.glassfish.jaxb:jaxb-runtime:3.0.1'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // AWS S3
+    // 해당 라이브러리는 AWS SDK V1이며, 25년 12월 31일에 만료된다.
+    // V2로의 변경이 필요하나, 문법이 다소 다른 관계로 현재로선 보류중이다.
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.767'
+
+    // Firebase Admin SDK
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+
+    // Sentry
+    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.5.0'
 }
 
 tasks.named('test') {

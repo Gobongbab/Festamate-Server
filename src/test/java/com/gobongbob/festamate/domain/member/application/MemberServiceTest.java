@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.member.application;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -11,6 +12,7 @@ import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import com.gobongbob.festamate.serviceSliceTest;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -150,7 +152,7 @@ class MemberServiceTest extends serviceSliceTest {
 
             // then
             Member updatedMember = memberRepository.findById(member.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                    .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
             assertAll(
                     () -> assertThat(updatedMember.getNickname()).isEqualTo(nicknameToUpdate),
@@ -174,7 +176,7 @@ class MemberServiceTest extends serviceSliceTest {
 
             // then
             assertThatThrownBy(() -> memberRepository.findById(member.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다.")))
+                    .orElseThrow(() -> new BadRequestException(NO_MEMBER)))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("사용자가 존재하지 않습니다.");
         }

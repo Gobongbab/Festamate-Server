@@ -1,6 +1,6 @@
-package com.gobongbob.festamate.domain.chatRoom.repository;
+package com.gobongbob.festamate.domain.chat.persistence;
 
-import com.gobongbob.festamate.domain.chatRoom.domain.ChatRoom;
+import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {

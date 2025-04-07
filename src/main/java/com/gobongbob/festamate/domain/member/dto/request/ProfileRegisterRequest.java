@@ -17,12 +17,15 @@ public record ProfileRegisterRequest(
 
     // Member 엔티티로 변환하는 메서드
     public Member toEntity(Member existingMember) {
-        existingMember.setName(name);
-        existingMember.setNickname(nickname);
-        existingMember.setStudentId(studentId);
-        existingMember.setPhoneNumber(phoneNumber);
-        existingMember.setGender(Gender.findByName(gender));
-        existingMember.setMajor(Major.findByDepartment(department));
+        existingMember.registerProfile(
+                name,
+                nickname,
+                studentId,
+                phoneNumber,
+                Gender.findByName(gender),
+                Major.findByDepartment(department)
+        );
+
         return existingMember;
     }
 }
