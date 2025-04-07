@@ -8,6 +8,7 @@ import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -92,6 +93,10 @@ public class MemberService {
         if (isDuplicate) {
             throw new IllegalArgumentException("중복된 닉네임입니다.");
         }
+    }
+
+    public MemberExistResponse checkMemberExist(String phoneNumber) {
+        return new MemberExistResponse(memberRepository.existsByPhoneNumber(phoneNumber));
     }
 
     // 아래부터는 oauth2를 위한 메서드
