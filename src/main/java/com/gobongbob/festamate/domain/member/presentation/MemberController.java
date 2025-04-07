@@ -1,15 +1,17 @@
 package com.gobongbob.festamate.domain.member.presentation;
 
-import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.auth.jwt.domain.MinimalMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
+import com.gobongbob.festamate.domain.member.dto.request.MemberExistRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
+import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -86,6 +88,14 @@ public class MemberController {
 
         // 최종 JWT 반환
         return ResponseEntity.ok(tokens);
+    }
+
+    @PostMapping("/api/members/exist")
+    public ResponseEntity<MemberExistResponse> checkMemberExist(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @RequestBody MemberExistRequest request
+    ) {
+        return ResponseEntity.ok(memberService.checkMemberExist(request.phoneNumber()));
     }
 
     // 닉네임 중복 확인 API
