@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -22,6 +24,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.EMPTY_FILE;
 
 @Service
 @Transactional
@@ -39,7 +43,7 @@ public class OcrService {
     public StudentInfoResponse checkStudentCard(MultipartFile file, Member member) throws IOException {
         // 파일이 비어있거나 null인 경우 예외 처리
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("파일이 비어있습니다.");
+            throw new BadRequestException(EMPTY_FILE);
         }
 
         // 임시 파일로 저장

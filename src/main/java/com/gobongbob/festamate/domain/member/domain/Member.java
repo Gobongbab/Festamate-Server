@@ -4,6 +4,7 @@ import com.gobongbob.festamate.domain.auth.oauth.domain.OauthInfo;
 import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -24,6 +25,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_ENOUGH_TICKET;
 
 @Entity
 @Getter
@@ -112,7 +115,7 @@ public class Member {
         if (this.remainingTicket > 0) {
             this.remainingTicket--;
         } else {
-            throw new IllegalStateException("티켓이 부족합니다.");
+            throw new BadRequestException(NOT_ENOUGH_TICKET);
         }
     }
 

@@ -16,12 +16,16 @@ import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -83,13 +87,13 @@ public class RoomService {
                 .map(room -> {
                     List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
                     return RoomResponse.fromEntity(room, roomParticipants);
-                }).orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+                }).orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
     }
 
     @Transactional
     public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
         validateAlone(room);
 
@@ -105,7 +109,7 @@ public class RoomService {
     @Transactional
     public void deleteRoomById(Member member, Long roomId) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
 
         roomParticipantRepository.deleteByRoom(room);
@@ -121,20 +125,21 @@ public class RoomService {
                 .stream()
                 .findFirst()
                 .ifPresent(roomParticipant -> {
-                    throw new IllegalArgumentException("이미 모임방에 참여하고 있습니다.");
+                    throw new BadRequestException(ALREADY_PARTICIPATING);
                 });
     }
 
     private void validateIsHost(Room room, Member member) {
         if (!member.isHost(room)) {
-            throw new IllegalArgumentException("방장이어야 합니다.");
+            throw new BadRequestException(MUST_HOST);
+
         }
     }
 
     private void validateAlone(Room room) {
         int participantsCount = roomParticipantRepository.countByRoom_Id(room.getId());
         if (participantsCount > 1) {
-            throw new IllegalArgumentException("방에 방장을 제외한 다른 사용자가 입장한 상태에서는 수정할 수 없습니다.");
+            throw new BadRequestException(CAN_NOT_UPDATE);
         }
     }
 }

@@ -14,9 +14,13 @@ import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
 import java.util.List;
 import java.util.Map;
+
+import com.gobongbob.festamate.global.response.SuccessResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Validated
 @RequiredArgsConstructor
 public class MemberController {
 
@@ -34,50 +39,49 @@ public class MemberController {
     private final TokenService tokenService;
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<Void> signUp(@RequestBody MemberCreateRequest request) {
+    public SuccessResponse<Void> signUp(@RequestBody @Valid MemberCreateRequest request) {
         Member member = memberService.createMember(request);
-
-        return ResponseEntity.ok().build();
+        return new SuccessResponse<>();
     }
 
     @GetMapping("/members")
-    public ResponseEntity<List<MemberResponse>> findAllMembers() {
-        return ResponseEntity.ok(memberService.findAllMembers());
+    public SuccessResponse<List<MemberResponse>> findAllMembers() {
+        return new SuccessResponse<>(memberService.findAllMembers());
     }
 
     @GetMapping("/members/{memberId}")
-    public ResponseEntity<MemberResponse> findMemberById(@PathVariable Long memberId) {
-        return ResponseEntity.ok(memberService.findMemberById(memberId));
+    public SuccessResponse<MemberResponse> findMemberById(@PathVariable Long memberId) {
+        return new SuccessResponse<>(memberService.findMemberById(memberId));
     }
 
     @GetMapping("/api/auth/members/profile")
-    public ResponseEntity<MemberProfileResponse> getProfile(
+    public SuccessResponse<MemberProfileResponse> getProfile(
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
-        return ResponseEntity.ok(memberService.findProfile(memberDetails.getMember()));
+        return new SuccessResponse<>(memberService.findProfile(memberDetails.getMember()));
     }
 
     @PatchMapping("/members/profile")
-    public ResponseEntity<Void> updateProfile(
+    public SuccessResponse<Void> updateProfile(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @RequestBody ProfileUpdateRequest request
+            @RequestBody @Valid ProfileUpdateRequest request
     ) {
         memberService.updateMemberProfileById(memberDetails.getMember(), request);
 
-        return ResponseEntity.ok().build();
+        return new SuccessResponse<>();
     }
 
     @DeleteMapping("/members/{memberId}")
-    public ResponseEntity<Void> deleteMemberById(@PathVariable Long memberId) {
+    public SuccessResponse<Void> deleteMemberById(@PathVariable Long memberId) {
         memberService.deleteMemberById(memberId);
 
-        return ResponseEntity.ok().build();
+        return new SuccessResponse<>();
     }
 
     // 프로필 등록 API
     @PostMapping("/api/auth/register/profile") // 추후 /api/auth를 상위 경로에 작성하도록 변경 필요
-    public ResponseEntity<Map<String, String>> registerProfile(
-            @RequestBody ProfileRegisterRequest request,
+    public SuccessResponse<Map<String, String>> registerProfile(
+            @RequestBody @Valid ProfileRegisterRequest request,
             @AuthenticationPrincipal MinimalMemberDetails memberDetails) { // 최소 JWT 정보
 
         Long userId = memberDetails.getId();
@@ -87,7 +91,7 @@ public class MemberController {
         Map<String, String> tokens = tokenService.generateTokens(userId);
 
         // 최종 JWT 반환
-        return ResponseEntity.ok(tokens);
+        return new SuccessResponse<>(tokens);
     }
 
     @PostMapping("/api/members/exist")
@@ -100,8 +104,8 @@ public class MemberController {
 
     // 닉네임 중복 확인 API
     @GetMapping("/api/auth/register/check/nickname")
-    public ResponseEntity<String> checkNickname(@RequestParam String nickname) {
+    public SuccessResponse<String> checkNickname(@RequestParam String nickname) {
         memberService.checkNicknameDuplication(nickname);
-        return ResponseEntity.ok().build();
+        return new SuccessResponse<>();
     }
 }
