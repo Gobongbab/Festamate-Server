@@ -34,7 +34,7 @@ public class RoomService {
     private final ImageService imageService;
 
     @Transactional
-    public Room createRoom(Member member, RoomCreateRequest request, List<MultipartFile> imageFiles) {
+    public ChatRoom createRoom(Member member, RoomCreateRequest request, List<MultipartFile> imageFiles) {
 //        validateRoomParticipation(member.getId());
 
         List<RoomImage> roomImages = new ArrayList<>();
@@ -58,7 +58,7 @@ public class RoomService {
         roomParticipantRepository.save(roomParticipant);
         member.useTicket();
 
-        return createdRoom;
+        return chatRoom;
     }
 
     public Page<RoomListResponse> findAllRooms(Pageable pageable) {

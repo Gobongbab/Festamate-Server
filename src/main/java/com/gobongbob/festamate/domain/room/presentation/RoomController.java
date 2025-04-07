@@ -43,11 +43,11 @@ public class RoomController {
             @RequestPart("request") RoomCreateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        Room createdRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
+        ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
         chatService.sendMessage(
-                createdRoom.getId(),
+                createdChatRoom.getId(),
                 memberDetails.getMember(),
-                "안녕하세요! " + createdRoom.getTitle() + "에 오신 것을 환영합니다!"
+                "안녕하세요! " + createdChatRoom.getName() + "에 오신 것을 환영합니다!"
         );
 
         return ResponseEntity.ok().build();
