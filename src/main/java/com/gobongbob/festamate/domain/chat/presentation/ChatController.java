@@ -5,6 +5,7 @@ import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -25,9 +26,8 @@ public class ChatController {
 
     private final ChatService chatService;
 
-
     @MessageMapping("/chat/room/{roomId}") // Spring App 을 거쳐서 메시지 전송. 앞에 "app" prefix 를 붙여야 함
-    public ResponseEntity<Void> sendMessage(
+    public SuccessResponse<Void> sendMessage(
             @DestinationVariable Long roomId,
             Authentication authentication,
             MessageRequest request
@@ -35,17 +35,17 @@ public class ChatController {
         Member member = ((CustomMemberDetails) authentication.getPrincipal()).getMember();
         chatService.sendMessage(roomId, member, request.message());
 
-        return ResponseEntity.noContent().build();
+        return new SuccessResponse<>();
     }
 
     @GetMapping("api/messages/room/{roomId}")
-    public ResponseEntity<Slice<MessageResponse>> findMessages(
+    public SuccessResponse<Slice<MessageResponse>> findMessages(
             @AuthenticationPrincipal Member member,
             @PathVariable Long roomId,
             @PageableDefault(size = 100, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Slice<MessageResponse> messages = chatService.findMessagesByRoomId(member.getId(), roomId, pageable);
 
-        return ResponseEntity.ok(messages);
+        return new SuccessResponse<>(messages);
     }
 }
