@@ -21,7 +21,7 @@ public class MemberService {
 
     @Transactional
     public Member createMember(MemberCreateRequest request) {
-        Member member = request.toEntity(2, 2);
+        Member member = request.toEntity();
 
         return memberRepository.save(member);
     }

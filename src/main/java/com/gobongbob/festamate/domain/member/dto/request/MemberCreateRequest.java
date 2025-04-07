@@ -16,7 +16,7 @@ public record MemberCreateRequest(
         String department
 ) {
 
-    public Member toEntity(int maximumTicket, int remainingTicket) {
+    public Member toEntity() {
         return Member.builder()
                 .name(name)
                 .nickname(nickname)
@@ -26,8 +26,6 @@ public record MemberCreateRequest(
                 .phoneNumber(phoneNumber)
                 .gender(Gender.findByName(gender))
                 .major(Major.findByDepartment(department))
-                .maximumTicket(maximumTicket)
-                .remainingTicket(remainingTicket)
                 .build();
     }
 }

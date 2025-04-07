@@ -1,11 +1,7 @@
-package com.gobongbob.festamate.domain.report.domain;
+package com.gobongbob.festamate.domain.coupon.domain;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
-import com.gobongbob.festamate.domain.room.domain.Room;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,31 +20,34 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Report {
+public class Coupon {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reporter_id")
-    private Member reporter;
+    private String code;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id")
-    private Room room;
-
-    @Enumerated(EnumType.STRING)
-    private ReportReason reason;
-
-    @Column(nullable = false)
-    private LocalDateTime reportDate;
-
-    @Column
     @Builder.Default
-    private Boolean processed = false;
+    private boolean used = false;
 
-    public void markAsProcessed() {
-        this.processed = true;
+    private LocalDateTime expiresAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    public void assignToMember(Member member) {
+        this.member = member;
+    }
+
+    public void useCoupon() {
+        if (this.used) {
+            throw new IllegalStateException("이미 사용된 쿠폰입니다.");
+        }
+        if (LocalDateTime.now().isAfter(this.expiresAt)) {
+            throw new IllegalStateException("만료된 쿠폰입니다.");
+        }
+        this.used = true;
     }
 }

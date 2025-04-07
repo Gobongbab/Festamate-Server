@@ -2,20 +2,26 @@ package com.gobongbob.festamate.domain.room.application;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
+import com.gobongbob.festamate.domain.image.domain.RoomImage;
+import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
-import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
+import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,12 +31,22 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final MemberRepository memberRepository;
+    private final ImageService imageService;
 
     @Transactional
-    public Room createRoom(Member member, RoomCreateRequest request) {
+    public Room createRoom(Member member, RoomCreateRequest request, List<MultipartFile> imageFiles) {
 //        validateRoomParticipation(member.getId());
+
+        List<RoomImage> roomImages = new ArrayList<>();
+        if (!imageFiles.isEmpty()) {
+            roomImages = imageService.uploadImages(imageFiles)
+                    .stream()
+                    .map(RoomImage::fromEntity)
+                    .toList();
+        }
+
         Room createdRoom = roomRepository.save(request.toEntity(member));
+        createdRoom.assignImages(roomImages);
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(createdRoom.getTitle())
@@ -45,25 +61,21 @@ public class RoomService {
         return createdRoom;
     }
 
-    public List<RoomResponse> findAllRooms() {
-        return roomRepository.findAll()
-                .stream()
-                .map(room -> {
-                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
-                    return RoomResponse.fromEntity(room, roomParticipants);
-                })
-                .toList();
+    public Page<RoomListResponse> findAllRooms(Pageable pageable) {
+        return roomRepository.findAll(pageable)
+                .map(room -> RoomListResponse.fromEntity(
+                        room,
+                        roomParticipantRepository.countByRoom_Id(room.getId())
+                ));
     }
 
-    public RoomResponse findParticipatingRooms(Long memberId) {
-        Room participatingRoom = roomParticipantRepository.findByRoom_Id(memberId)
+    public List<RoomListResponse> findParticipatingRooms(Long memberId) {
+        return roomParticipantRepository.findByRoom_Id(memberId)
                 .stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("참여중인 모임방이 존재하지 않습니다."))
-                .getRoom();
-        List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(participatingRoom.getId());
-
-        return RoomResponse.fromEntity(participatingRoom, roomParticipants);
+                .map(roomParticipant -> RoomListResponse.fromEntity(
+                        roomParticipant.getRoom(),
+                        roomParticipantRepository.countByRoom_Id(roomParticipant.getRoom().getId())
+                )).toList();
     }
 
     public RoomResponse findRoomById(Long roomId) {
@@ -82,12 +94,11 @@ public class RoomService {
         validateAlone(room);
 
         room.updateRoom(
-                request.headCount(),
-                Gender.findByName(request.preferredGender()),
-                request.openChatLink(),
-                request.meetingDateTime(),
                 request.title(),
-                request.content()
+                request.content(),
+                Gender.findByName(request.preferredGender()),
+                request.meetingDateTime(),
+                request.maxParticipants()
         );
     }
 

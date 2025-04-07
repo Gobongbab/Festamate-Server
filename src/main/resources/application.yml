@@ -25,7 +25,7 @@ spring:
         registration:
           kakao:
             client-id: ${KAKAO_CLIENT_ID}
-            redirect-uri: ${KAKAO_REDIRECT_URI}
+            redirect-uri: ${BASE_URL}/login/oauth2/code/kakao
             authorization-grant-type: authorization_code
             scope: profile
             client-name: Kakao
@@ -47,3 +47,17 @@ sentry:
   dsn: ${SENTRY_DSN}
   send-default-pii: true
   max-request-body-size: small
+server:
+  forward-headers-strategy: framework
+
+# AWS S3
+cloud:
+  aws:
+    s3: ${S3_BUCKET_NAME}
+    credentials:
+      access-key: ${IAM_USER_ACCESS_KEY}
+      secret-key: ${IAM_USER_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false

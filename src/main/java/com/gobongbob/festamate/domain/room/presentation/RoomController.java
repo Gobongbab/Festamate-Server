@@ -7,11 +7,16 @@ import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
+import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import java.util.List;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +27,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Validated
@@ -37,9 +44,10 @@ public class RoomController {
     @PostMapping("")
     public ResponseEntity<Void> createRoom(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @RequestBody @Valid RoomCreateRequest request
+            @RequestPart("request") @Valid RoomCreateRequest request,
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        Room createdRoom = roomService.createRoom(memberDetails.getMember(), request);
+        Room createdRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
         chatService.sendMessage(
                 createdRoom.getId(),
                 memberDetails.getMember(),
@@ -50,12 +58,14 @@ public class RoomController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<RoomResponse>> findAllRooms() {
-        return ResponseEntity.ok(roomService.findAllRooms());
+    public ResponseEntity<Page<RoomListResponse>> findAllRooms(
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(roomService.findAllRooms(pageable));
     }
 
     @GetMapping("/participate")
-    public ResponseEntity<RoomResponse> findParticipatingRooms(
+    public ResponseEntity<List<RoomListResponse>> findParticipatingRooms(
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
         return ResponseEntity.ok(roomService.findParticipatingRooms(memberDetails.getMember().getId()));

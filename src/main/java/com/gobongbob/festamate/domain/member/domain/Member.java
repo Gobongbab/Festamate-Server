@@ -1,8 +1,10 @@
 package com.gobongbob.festamate.domain.member.domain;
 
 import com.gobongbob.festamate.domain.auth.oauth.domain.OauthInfo;
+import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
@@ -13,18 +15,18 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import java.util.Set;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Entity
 @Getter
-@Setter // 테스트 용으로 추후 삭제 바람
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -61,9 +63,32 @@ public class Member {
     @Column(unique = true)
     private String token; // FcmToken
 
-    private int maximumTicket;
+    @Builder.Default
+    private int maximumTicket = 2;
 
-    private int remainingTicket;
+    @Builder.Default
+    private int remainingTicket = 2;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinColumn(name = "profile_image_id")
+    @Builder.Default
+    private ProfileImage profileImage = ProfileImage.getDefaultProfileImage();
+
+    public void registerProfile(
+            String name,
+            String nickname,
+            String studentId,
+            String phoneNumber,
+            Gender gender,
+            Major major
+    ) {
+        this.name = name;
+        this.nickname = nickname;
+        this.studentId = studentId;
+        this.phoneNumber = phoneNumber;
+        this.gender = gender;
+        this.major = major;
+    }
 
     public void updateProfile(String nickname, String loginPassword) {
         this.nickname = nickname;
@@ -74,6 +99,10 @@ public class Member {
         this.name = studentName;
         this.studentDepartment = studentDepartment;
         this.studentId = studentId;
+    }
+
+    public void initializeRemainingTicket(int ticketCount) {
+        this.remainingTicket = ticketCount;
     }
 
     public void useTicket() {
@@ -88,8 +117,8 @@ public class Member {
         this.remainingTicket = maximumTicket;
     }
 
-    public void setMaximumTicket(int maximumTicket) {
-        this.maximumTicket = maximumTicket;
+    public void increaseMaximumTicket() {
+        this.maximumTicket++;
     }
 
     public boolean isHost(Room room) {
@@ -121,9 +150,9 @@ public class Member {
     }
 
     public static Member createTestMember(Long id) {
-        Member member = new Member();
-        member.setId(id);
-        return member;
+        return Member.builder()
+                .id(id)
+                .build();
     }
 
 }
