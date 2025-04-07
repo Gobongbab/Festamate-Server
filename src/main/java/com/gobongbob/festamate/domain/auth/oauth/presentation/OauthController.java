@@ -7,6 +7,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +42,7 @@ public class OauthController {
             HttpServletResponse response) {
         String code = requestBody.get("code");
 
-        if (code == null || code.isEmpty()) {
+        if (!StringUtils.hasText(code)) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Authorization code is missing"));
         }
