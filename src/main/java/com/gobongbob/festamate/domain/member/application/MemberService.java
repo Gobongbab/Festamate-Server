@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.member.application;
 
+import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
@@ -18,10 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ProfileImageRepository profileImageRepository;
 
     @Transactional
     public Member createMember(MemberCreateRequest request) {
         Member member = request.toEntity();
+        profileImageRepository.findByStoreName("default_profile_image.png")
+                .ifPresent(member::initializeProfileImage);
 
         return memberRepository.save(member);
     }
