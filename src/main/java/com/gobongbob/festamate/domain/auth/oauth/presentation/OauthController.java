@@ -8,13 +8,10 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.view.RedirectView;
 
 // 인가 코드를 받아 OauthService의 kakaoLogin 메서드를 호출하고, 인가 코드를 사용하여 액세스 토큰을 요청 후 사용자 정보를 가져와 처리함
 
@@ -38,14 +35,19 @@ public class OauthController {
     }
 
     // 리다이렉트 URI에서 인가 코드를 자동으로 처리(운영용)
-    @GetMapping("/login/oauth2/code/kakao")
-    public ResponseEntity<Map<String, String>> handleKakaoRedirect(@RequestParam String code,
+    @PostMapping("/api/auth/kakao")
+    public ResponseEntity<Map<String, String>> handleKakaoLogin(
+            @RequestBody Map<String, String> requestBody,
             HttpServletRequest request,
             HttpServletResponse response) {
-        // 전달받은 인가 코드를 서비스로 넘겨 처리
-        Map<String, String> tokens = oauthService.kakaoLogin(code, request, response);
+        String code = requestBody.get("code");
 
-        // 성공 시 JWT 토큰 반환
+        if (code == null || code.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Authorization code is missing"));
+        }
+
+        Map<String, String> tokens = oauthService.kakaoLogin(code, request, response);
         return ResponseEntity.ok(tokens);
     }
 
@@ -54,13 +56,4 @@ public class OauthController {
 
     @Value("${KAKAO_REDIRECT_URI}")
     private String redirectUri;
-
-    @GetMapping("/api/auth/login") // 로그인 리다이렉트
-    public RedirectView redirectToKakao() {
-        String kakaoAuthUrl =
-                "https://kauth.kakao.com/oauth/authorize?client_id=" + clientId
-                        + "&response_type=code" + "&redirect_uri="
-                        + redirectUri;
-        return new RedirectView(kakaoAuthUrl);
-    }
 }
