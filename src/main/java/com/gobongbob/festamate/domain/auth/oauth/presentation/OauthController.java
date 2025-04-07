@@ -5,9 +5,12 @@ import com.gobongbob.festamate.domain.auth.oauth.dto.request.LoginRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +22,7 @@ import org.springframework.web.servlet.view.RedirectView;
 // 인가 코드를 받아 OauthService의 kakaoLogin 메서드를 호출하고, 인가 코드를 사용하여 액세스 토큰을 요청 후 사용자 정보를 가져와 처리함
 
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping
 public class OauthController {
@@ -28,7 +32,7 @@ public class OauthController {
     // @PostMapping을 통해 request로 인가 코드를 전달하고, response로 액세스 토큰을 받아옴
     // 수동으로 인가 코드를 전달받아 처리 (테스트용으로 추후 삭제 가능)
     @PostMapping("/api/auth/kakao")
-    public ResponseEntity<Map<String, String>> kakaoLogin(@RequestBody LoginRequest loginRequest,
+    public ResponseEntity<Map<String, String>> kakaoLogin(@RequestBody @Valid LoginRequest loginRequest,
             HttpServletRequest request,
             HttpServletResponse response) {
         // 인가 코드 처리

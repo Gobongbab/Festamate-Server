@@ -9,9 +9,12 @@ import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import java.util.List;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/rooms")
 public class RoomController {
@@ -33,7 +37,7 @@ public class RoomController {
     @PostMapping("")
     public ResponseEntity<Void> createRoom(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @RequestBody RoomCreateRequest request
+            @RequestBody @Valid RoomCreateRequest request
     ) {
         Room createdRoom = roomService.createRoom(memberDetails.getMember(), request);
         chatService.sendMessage(
@@ -66,7 +70,7 @@ public class RoomController {
     public ResponseEntity<Void> updateRoomById(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId,
-            @RequestBody RoomUpdateRequest request
+            @RequestBody @Valid RoomUpdateRequest request
     ) {
         roomService.updateRoomById(memberDetails.getMember(), roomId, request);
 

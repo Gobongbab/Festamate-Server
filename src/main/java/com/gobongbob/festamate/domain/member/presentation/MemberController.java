@@ -12,9 +12,12 @@ import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import java.util.List;
 import java.util.Map;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Validated
 @RequiredArgsConstructor
 public class MemberController {
 
@@ -32,7 +36,7 @@ public class MemberController {
     private final TokenService tokenService;
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<Void> signUp(@RequestBody MemberCreateRequest request) {
+    public ResponseEntity<Void> signUp(@RequestBody @Valid MemberCreateRequest request) {
         Member member = memberService.createMember(request);
 
         return ResponseEntity.ok().build();
@@ -58,7 +62,7 @@ public class MemberController {
     @PatchMapping("/members/profile")
     public ResponseEntity<Void> updateProfile(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @RequestBody ProfileUpdateRequest request
+            @RequestBody @Valid ProfileUpdateRequest request
     ) {
         memberService.updateMemberProfileById(memberDetails.getMember(), request);
 
@@ -75,7 +79,7 @@ public class MemberController {
     // 프로필 등록 API
     @PostMapping("/api/auth/register/profile") // 추후 /api/auth를 상위 경로에 작성하도록 변경 필요
     public ResponseEntity<Map<String, String>> registerProfile(
-            @RequestBody ProfileRegisterRequest request,
+            @RequestBody @Valid ProfileRegisterRequest request,
             @AuthenticationPrincipal MinimalMemberDetails memberDetails) { // 최소 JWT 정보
 
         Long userId = memberDetails.getId();
