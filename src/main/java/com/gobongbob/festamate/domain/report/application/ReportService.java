@@ -3,6 +3,7 @@ package com.gobongbob.festamate.domain.report.application;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.report.domain.Report;
+import com.gobongbob.festamate.domain.report.dto.request.ReportMemberRequest;
 import com.gobongbob.festamate.domain.report.dto.request.ReportRoomRequest;
 import com.gobongbob.festamate.domain.report.dto.response.ReportRoomResponse;
 import com.gobongbob.festamate.domain.report.persistence.ReportRepository;
@@ -27,10 +28,13 @@ public class ReportService {
     private final MemberRepository memberRepository;
     private final RoomRepository roomRepository;
 
-    // 신고하기
+    // 방 신고하기
     public void reportRoom(Member reporter, Long roomId, ReportRoomRequest request) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
+
+        Member host = memberRepository.findById(room.getHost().getId())
+                .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
 
         // 자신의 방은 신고할 수 없음
         if (room.getHost().getId().equals(reporter.getId())) {
@@ -45,8 +49,24 @@ public class ReportService {
                     throw new BadRequestException(ALREADY_REPORT);
                 });
 
-        Report report = request.toEntity(reporter, room);
+        Report report = request.toEntity(reporter, room, host);
+        reportRepository.save(report);
+    }
 
+    // 유저 신고하기
+    public void reportMember(Member reporter, Long memberId, ReportMemberRequest request) {
+        Member reportedMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
+
+        // 이미 신고한 유저인지 확인
+        reportRepository.findByReportedMemberIdAndReporterId(reportedMember.getId(), reporter.getId())
+                .stream()
+                .findAny()
+                .ifPresent(report -> {
+                    throw new BadRequestException(ALREADY_REPORT);
+                });
+
+        Report report = request.toEntity(reporter, reportedMember);
         reportRepository.save(report);
     }
 
@@ -70,14 +90,5 @@ public class ReportService {
             responseList.add(ReportRoomResponse.fromEntity(report));
         }
         return responseList;
-    }
-
-    // 신고 처리
-    public void processReport(Long reportId) {
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new BadRequestException(NO_REPORT));
-
-        report.markAsProcessed();
-        reportRepository.save(report);
     }
 }
