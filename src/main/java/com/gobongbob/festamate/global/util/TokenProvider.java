@@ -95,7 +95,7 @@ public class TokenProvider {
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
-                .setIssuedAt(now)
+                .setIssuedAt(new Date())
                 .setExpiration(expiry)
                 .setSubject(String.valueOf(member.getId()))
                 .claim("id", member.getId())
@@ -103,9 +103,9 @@ public class TokenProvider {
                 .claim("nickname", member.getNickname())
                 .claim("studentId", member.getStudentId())
                 .claim("phoneNumber", member.getPhoneNumber())
+                .claim("major", member.getMajor() != null ? member.getMajor().name() : null)
                 .claim("role", member.getRole())
                 .claim("gender", member.getGender() != null ? member.getGender().name() : null)
-                .claim("major", member.getMajor() != null ? member.getMajor().name() : null)
                 .claim("type", type)
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
@@ -121,6 +121,9 @@ public class TokenProvider {
         }
     }
 
+    // 토큰 기반으로 인증 정보를 가져오는 메서드
+    // JWT 토큰에서 사용자 정보를 추출하여 Authentication 객체를 생성하며, 이를 통해 @AuthenticationPrincipal을 사용할 수 있음
+    // claims에서 필요한 정보를 추출하여 CustomMemberDetails 객체를 생성
     // 인증 객체 생성: 무조건 CustomMemberDetails로 반환
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);

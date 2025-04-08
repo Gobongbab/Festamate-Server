@@ -21,6 +21,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     // 여기서 Refresh Token이 아닌 Access Token만 허용하도록 설정
     // 검증된 토큰으로 SecurityContextHolder에 인증 정보를 저장함
+
+    // doFilterInternal 메서드는 JWT 없이 가능한 경로
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
@@ -35,6 +37,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         // 토큰 꺼내기
         String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);
+        // 가져온 값에서 접두사 제거
         String token = getAccessToken(authorizationHeader);
 
         // 토큰 유효성 검사
