@@ -72,6 +72,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 || uri.equals("/health")
                 || uri.equals("/sentry")
                 || uri.equals("/error")
-                || uri.equals("/api/rooms/list");
+                || uri.equals("/api/rooms/list")
+                || uri.startsWith("/login/oauth2/");
     }
 }

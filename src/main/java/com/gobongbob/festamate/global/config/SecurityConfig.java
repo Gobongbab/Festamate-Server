@@ -55,7 +55,8 @@ public class SecurityConfig {
                                 "/api/rooms/list",
                                 "/health",
                                 "/sentry",
-                                "/error"
+                                "/error",
+                                "/login/oauth2/**"
                         ).permitAll()
 
                         // 로그인 + JWT 인증이 필요한 경로
