@@ -68,13 +68,15 @@ public record ProfileRegisterRequest(
                 "핫도그", "피자", "타코", "부리토", "케밥", "샐러드", "스프", "찌개", "국", "탕",
                 "짜장면", "짬뽕", "볶음밥", "덮밥", "비빔밥", "오므라이스", "카레", "스테이크", "돈까스", "치킨"
         };
+        // 닉네임 뒤에 붙일 랜덤 4자리 숫자 생성
+        int randomNumber = (int) (Math.random() * 9000) + 1000;
 
         // 랜덤한 인덱스 생성
         int randomAdjectiveIndex = (int) (Math.random() * adjectives.length);
         int randomNounIndex = (int) (Math.random() * nouns.length);
 
         // 랜덤한 형용사와 명사 조합
-        String randomNickname = adjectives[randomAdjectiveIndex] + nouns[randomNounIndex];
+        String randomNickname = adjectives[randomAdjectiveIndex] + nouns[randomNounIndex] + randomNumber;
 
         return randomNickname;
     }
