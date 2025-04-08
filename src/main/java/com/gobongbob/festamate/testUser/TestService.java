@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.testUser;
 
+import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class TestService {
 
     private final MemberRepository memberRepository;
+    private final ProfileImageRepository profileImageRepository;
     private final TokenProvider tokenProvider;
 
     @Transactional
@@ -29,6 +31,9 @@ public class TestService {
                 .gender(Gender.MALE)
                 .major(Major.COMPUTER_SCIENCE)
                 .build();
+
+        profileImageRepository.findByStoreName("default_profile_image.png")
+                .ifPresent(testMember::initializeProfileImage);
 
         // 데이터베이스에 저장
         memberRepository.save(testMember);

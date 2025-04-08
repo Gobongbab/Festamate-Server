@@ -4,6 +4,7 @@ import com.gobongbob.festamate.domain.auth.oauth.domain.OauthInfo;
 import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -24,6 +25,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_ENOUGH_TICKET;
 
 @Entity
 @Getter
@@ -71,8 +74,7 @@ public class Member {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "profile_image_id")
-    @Builder.Default
-    private ProfileImage profileImage = ProfileImage.getDefaultProfileImage();
+    private ProfileImage profileImage;
 
     public void registerProfile(
             String name,
@@ -88,6 +90,10 @@ public class Member {
         this.phoneNumber = phoneNumber;
         this.gender = gender;
         this.major = major;
+    }
+
+    public void initializeProfileImage(ProfileImage profileImage) {
+        this.profileImage = profileImage;
     }
 
     public void updateProfile(String nickname, String loginPassword) {
@@ -109,7 +115,7 @@ public class Member {
         if (this.remainingTicket > 0) {
             this.remainingTicket--;
         } else {
-            throw new IllegalStateException("티켓이 부족합니다.");
+            throw new BadRequestException(NOT_ENOUGH_TICKET);
         }
     }
 

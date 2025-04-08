@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.member.application;
 
+import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
@@ -7,10 +8,16 @@ import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
 import java.util.List;
+
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.DUPLICATE_NICKNAME;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 
 @Service
 @Transactional(readOnly = true)
@@ -18,10 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ProfileImageRepository profileImageRepository;
 
     @Transactional
     public Member createMember(MemberCreateRequest request) {
         Member member = request.toEntity();
+        profileImageRepository.findByStoreName("default_profile_image.png")
+                .ifPresent(member::initializeProfileImage);
 
         return memberRepository.save(member);
     }
@@ -36,12 +46,12 @@ public class MemberService {
     public MemberResponse findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .map(MemberResponse::fromEntity)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
 
     public Member findMembersById(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() ->  new BadRequestException(NO_MEMBER));
     }
 
     public MemberProfileResponse findProfile(Member member) {
@@ -56,7 +66,7 @@ public class MemberService {
     @Transactional
     public void deleteMemberById(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() ->  new BadRequestException(NO_MEMBER));
 
         /**
          * 1. 삭제하려는 사용자가 로그인한 사용자와 같은지 확인하는 로직 필요
@@ -74,7 +84,7 @@ public class MemberService {
         checkNicknameDuplication(request.nickname()); // 프로필 등록 중 닉네임 중복 확인 필요함
 
         Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자 ID입니다."));
+                .orElseThrow(() ->  new BadRequestException(NO_MEMBER));
 
         Member registeredMember = request.toEntity(member); // 기존 Member 정보 그대로 사용
         memberRepository.save(registeredMember);
@@ -86,14 +96,18 @@ public class MemberService {
         boolean isDuplicate = memberRepository.existsByNickname(nickname);
 
         if (isDuplicate) {
-            throw new IllegalArgumentException("중복된 닉네임입니다.");
+            throw new BadRequestException(DUPLICATE_NICKNAME);
         }
+    }
+
+    public MemberExistResponse checkMemberExist(String phoneNumber) {
+        return new MemberExistResponse(memberRepository.existsByPhoneNumber(phoneNumber));
     }
 
     // 아래부터는 oauth2를 위한 메서드
     public Member findById(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("Unexpected member"));
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
 
 }

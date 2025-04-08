@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public record RoomListResponse(
         Long id,
         String title,
+        String place,
         String content,
         String preferredGender,
         LocalDateTime meetingDateTime,
@@ -22,6 +23,7 @@ public record RoomListResponse(
         return new RoomListResponse(
                 room.getId(),
                 room.getTitle(),
+                room.getPlace(),
                 room.getContent(),
                 room.getPreferredGender().name(),
                 room.getMeetingDateTime(),

@@ -9,6 +9,7 @@ import java.util.List;
 public record RoomResponse(
         Long id,
         String title,
+        String place,
         String content,
         String preferredGender,
         LocalDateTime meetingDateTime,
@@ -29,6 +30,7 @@ public record RoomResponse(
         return new RoomResponse(
                 room.getId(),
                 room.getTitle(),
+                room.getPlace(),
                 room.getContent(),
                 room.getPreferredGender().name(),
                 room.getMeetingDateTime(),
@@ -49,7 +51,7 @@ public record RoomResponse(
 
         private static ParticipantResponse fromEntity(RoomParticipant participant, boolean isHost) {
             return new ParticipantResponse(
-                    participant.getId(),
+                    participant.getMember().getId(),
                     participant.getMember().getNickname(),
                     participant.getMember().getStudentId().substring(2, 4),
                     participant.getMember().getGender().name(),
