@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.member.application;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.DUPLICATE_NICKNAME;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
@@ -11,6 +12,7 @@ import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
 import com.gobongbob.festamate.domain.sms.application.TokyoSnsService;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
