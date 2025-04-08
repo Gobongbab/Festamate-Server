@@ -57,6 +57,20 @@ public class TokenProvider {
                 member, "test_refresh");
     }
 
+    // 관리자용 Access Token 생성 메서드
+    public String generateAdminAccessToken(Member member) {
+        return makeAdminUserToken(
+                new Date(System.currentTimeMillis() + Duration.ofDays(100).toMillis()),
+                member, "admin_access");
+    }
+
+    // 관리자용 Refresh Token 생성 메서드
+    public String generateAdminRefreshToken(Member member) {
+        return makeAdminUserToken(
+                new Date(System.currentTimeMillis() + Duration.ofDays(100).toMillis()),
+                member, "admin_refresh");
+    }
+
     // 공통 토큰 생성 로직 (initial, final, test 통합)
     private String makeUserToken(Date expiry, Member member, String type) {
         return Jwts.builder()
@@ -69,6 +83,27 @@ public class TokenProvider {
                 .claim("nickname", member.getNickname())
                 .claim("studentId", member.getStudentId())
                 .claim("phoneNumber", member.getPhoneNumber())
+                .claim("gender", member.getGender() != null ? member.getGender().name() : null)
+                .claim("major", member.getMajor() != null ? member.getMajor().name() : null)
+                .claim("type", type)
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
+    }
+
+    private String makeAdminUserToken(Date expiry, Member member, String type) {
+        Date now = new Date();
+
+        return Jwts.builder()
+                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .setSubject(String.valueOf(member.getId()))
+                .claim("id", member.getId())
+                .claim("name", member.getName())
+                .claim("nickname", member.getNickname())
+                .claim("studentId", member.getStudentId())
+                .claim("phoneNumber", member.getPhoneNumber())
+                .claim("role", member.getRole())
                 .claim("gender", member.getGender() != null ? member.getGender().name() : null)
                 .claim("major", member.getMajor() != null ? member.getMajor().name() : null)
                 .claim("type", type)
@@ -113,6 +148,7 @@ public class TokenProvider {
         String phoneNumber = claims.get("phoneNumber", String.class);
         String gender = claims.get("gender", String.class);
         String major = claims.get("major", String.class);
+        String role = claims.get("role", String.class);
 
         if (name != null) {
             memberBuilder.name(name);
@@ -131,6 +167,9 @@ public class TokenProvider {
         }
         if (major != null) {
             memberBuilder.major(Major.valueOf(major));
+        }
+        if (role != null) {
+            memberBuilder.role(role);
         }
 
         return new CustomMemberDetails(memberBuilder.build());
@@ -169,5 +208,17 @@ public class TokenProvider {
 
     public boolean isTestRefreshToken(String token) {
         return "test_refresh".equals(getClaims(token).get("type"));
+    }
+
+    // 관리자 Access Token인지 확인하는 메서드
+    public boolean isAdminAccessToken(String token) {
+        Claims claims = getClaims(token);
+        return "admin_access".equals(claims.get("type"));
+    }
+
+    // 관리자 Refresh Token인지 확인하는 메서드
+    public boolean isAdminRefreshToken(String token) {
+        Claims claims = getClaims(token);
+        return "admin_refresh".equals(claims.get("type"));
     }
 }

@@ -109,6 +109,7 @@ public class RoomService {
         );
     }
 
+    // 방 삭제(일반, admin)
     @Transactional
     public void deleteRoomById(Member member, Long roomId) {
         Room room = roomRepository.findById(roomId)

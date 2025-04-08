@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+// JWT를 검증하고 인증 정보를 설정하는 클래스
 @RequiredArgsConstructor
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
@@ -18,6 +19,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
 
+    // 여기서 Refresh Token이 아닌 Access Token만 허용하도록 설정
+    // 검증된 토큰으로 SecurityContextHolder에 인증 정보를 저장함
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
@@ -35,11 +38,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         String token = getAccessToken(authorizationHeader);
 
         // 토큰 유효성 검사
-        if (token != null && tokenProvider.validateToken(token) &&
-                (tokenProvider.isInitialAccessToken(token)
+        if (token != null && tokenProvider.validateToken(token) && (
+                tokenProvider.isInitialAccessToken(token)
                         || tokenProvider.isFinalAccessToken(token)
-                        || tokenProvider.isTestAccessToken(token))) {
-
+                        || tokenProvider.isTestAccessToken(token))
+                || tokenProvider.isAdminAccessToken(token)
+        ) { // 관리자용 Access Token도 검증
             Authentication authentication = tokenProvider.getAuthentication(token);
             Object principal = authentication.getPrincipal();
 
@@ -53,7 +57,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } else {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 인증 실패 처리
             return;
         }
 

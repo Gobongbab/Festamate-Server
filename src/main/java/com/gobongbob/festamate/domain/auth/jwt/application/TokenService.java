@@ -41,6 +41,22 @@ public class TokenService {
         return tokenProvider.generateTestAccessToken(member);
     }
 
+    // 새로운 관리자용 Access Token 생성 메서드
+    public String createNewAdminAccessToken(String refreshToken) {
+        // 1. 관리자용 Refresh Token 유효성 검사
+        validateAdminRefreshToken(refreshToken);
+
+        // 2. 토큰에서 memberId 추출
+        Long memberId = getMemberIdFromRefreshToken(refreshToken);
+
+        // 3. DB에서 Member 조회
+        Member member = memberService.findById(memberId);
+
+        // 4. Access Token 생성 (관리자 전용)
+        return tokenProvider.generateAdminAccessToken(member);
+    }
+
+
     // 초기 Refresh Token 유효성 및 타입 확인 메서드
     private void validateInitialRefreshToken(String refreshToken) {
         if (!tokenProvider.validateToken(refreshToken) || !tokenProvider.isInitialRefreshToken(
@@ -62,6 +78,14 @@ public class TokenService {
         if (!tokenProvider.validateToken(refreshToken) || !tokenProvider.isTestRefreshToken(
                 refreshToken)) {
             throw new IllegalArgumentException("Invalid or unexpected test refresh token");
+        }
+    }
+
+    // 관리자용 Refresh Token 유효성 및 타입 확인 메서드
+    private void validateAdminRefreshToken(String refreshToken) {
+        if (!tokenProvider.validateToken(refreshToken) || !tokenProvider.isAdminRefreshToken(
+                refreshToken)) {
+            throw new IllegalArgumentException("Invalid or unexpected admin refresh token");
         }
     }
 

@@ -19,6 +19,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import java.util.Set;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -91,6 +92,18 @@ public class Member {
         this.major = major;
     }
 
+    // Enum으로 바꿀 예정
+    @Getter
+    private String role; // 역할
+
+    public static class MemberBuilder {
+
+        public MemberBuilder role(String role) {
+            this.role = role;
+            return this;
+        }
+    }
+
     public void initializeProfileImage(ProfileImage profileImage) {
         this.profileImage = profileImage;
     }
@@ -127,9 +140,8 @@ public class Member {
     }
 
     public boolean isHost(Room room) {
-        return room.getHost().equals(this);
+        return "ADMIN".equals(this.role) || room.getHost().equals(this);
     }
-
 
     /***
      * 아래부터 authorities, oauthInfo, accessToken 등의 필드가 추가됨.
@@ -160,4 +172,27 @@ public class Member {
                 .build();
     }
 
+    public enum MemberStatus {
+        ACTIVE, // 제재 해제
+        BLOCKED // 제재
+    }
+
+    @PrePersist
+    public void setDefaultStatus() {
+        if (status == null) {
+            this.status = MemberStatus.ACTIVE;
+        }
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private MemberStatus status = MemberStatus.ACTIVE;
+
+    public void block() {
+        this.status = MemberStatus.BLOCKED;
+    }
+
+    public void unblock() {
+        this.status = MemberStatus.ACTIVE;
+    }
 }

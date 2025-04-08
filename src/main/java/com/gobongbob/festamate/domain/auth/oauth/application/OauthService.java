@@ -132,6 +132,22 @@ public class OauthService {
         return tokens;
     }
 
+    // 관리자용
+    private Map<String, String> generateAdminJwtTokens(Member admin, HttpServletRequest request,
+            HttpServletResponse response) {
+        String accessToken = tokenProvider.generateAdminAccessToken(admin);
+        response.setHeader(ACCESS_HEADER, accessToken);
+
+        String refreshToken = tokenProvider.generateAdminRefreshToken(admin);
+        saveRefreshToken(admin.getId(), refreshToken);
+        addRefreshTokenToCookie(request, response, refreshToken);
+
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("access_token", accessToken);
+        tokens.put("refresh_token", refreshToken);
+        return tokens;
+    }
+
     private void addRefreshTokenToCookie(HttpServletRequest request, HttpServletResponse response,
             String refreshToken) {
         int cookieMaxAge = (int) REFRESH_TOKEN_DURATION.toSeconds();
