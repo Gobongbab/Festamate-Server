@@ -2,6 +2,7 @@ package com.gobongbob.festamate.domain.room.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
+import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -9,16 +10,14 @@ import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
-import java.util.List;
-
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,11 +47,11 @@ public class RoomController {
             @RequestPart("request") @Valid RoomCreateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        Room createdRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
+        ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
         chatService.sendMessage(
-                createdRoom.getId(),
+                createdChatRoom.getId(),
                 memberDetails.getMember(),
-                "안녕하세요! " + createdRoom.getTitle() + "에 오신 것을 환영합니다!"
+                "안녕하세요! " + createdChatRoom.getName() + "에 오신 것을 환영합니다!"
         );
 
         return new SuccessResponse<>();
