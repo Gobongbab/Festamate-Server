@@ -61,6 +61,7 @@ public class MemberController {
         return new SuccessResponse<>(memberService.findProfile(memberDetails.getMember()));
     }
 
+    // 프로필 수정 (닉네임 수정)
     @PatchMapping("/members/profile")
     public SuccessResponse<Void> updateProfile(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
