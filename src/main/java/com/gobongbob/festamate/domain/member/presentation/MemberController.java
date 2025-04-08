@@ -1,8 +1,8 @@
 package com.gobongbob.festamate.domain.member.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
-import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.MemberExistRequest;
@@ -79,7 +79,6 @@ public class MemberController {
     @PostMapping("/api/auth/register/profile") // 추후 /api/auth를 상위 경로에 작성하도록 변경 필요
     public SuccessResponse<Map<String, String>> registerProfile(
             @RequestBody ProfileRegisterRequest request,
-
             @AuthenticationPrincipal CustomMemberDetails memberDetails) { // 최소 JWT 정보
         Long userId = memberDetails.getMember().getId();
         memberService.registerProfile(request, userId);
