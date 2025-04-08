@@ -10,11 +10,9 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 // 인가 코드를 받아 OauthService의 kakaoLogin 메서드를 호출하고, 인가 코드를 사용하여 액세스 토큰을 요청 후 사용자 정보를 가져와 처리함
@@ -28,7 +26,7 @@ public class OauthController {
     private final OauthService oauthService;
 
     // @PostMapping을 통해 request로 인가 코드를 전달하고, response로 액세스 토큰을 받아옴
-    // 수동으로 인가 코드를 전달받아 처리 (테스트용으로 추후 삭제 가능)
+    // 수동으로 인가 코드를 전달받아 처리
     @PostMapping("/api/auth/kakao")
     public SuccessResponse<Map<String, String>> kakaoLogin(
             @RequestBody @Valid LoginRequest loginRequest,
@@ -41,17 +39,21 @@ public class OauthController {
     }
 
     // 리다이렉트 URI에서 인가 코드를 자동으로 처리(운영용)
-    @GetMapping("/login/oauth2/code/kakao")
-    public SuccessResponse<Map<String, String>> handleKakaoRedirect(
-            @RequestParam String code,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        // 전달받은 인가 코드를 서비스로 넘겨 처리
-        Map<String, String> tokens = oauthService.kakaoLogin(code, request, response);
-
-        // 성공 시 JWT 토큰 반환
-        return new SuccessResponse<>(tokens);
-    }
+//    @PostMapping("/api/auth/kakao")
+//    public SuccessResponse<Map<String, String>> handleKakaoLogin(
+//            @RequestBody Map<String, String> requestBody,
+//            HttpServletRequest request,
+//            HttpServletResponse response) {
+//        String code = requestBody.get("code");
+//
+//        if (!StringUtils.hasText(code)) {
+//            return ResponseEntity.badRequest()
+//                    .body(Map.of("error", "Authorization code is missing"));
+//        }
+//
+//        Map<String, String> tokens = oauthService.kakaoLogin(code, request, response);
+//        return new SuccessResponse<>(tokens);
+//    }
 
     @Value("${KAKAO_CLIENT_ID}")
     private String clientId;

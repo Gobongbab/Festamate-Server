@@ -44,10 +44,30 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS)) // 세션을 생성하지 않고, 토큰 기반 인증을 사용
-                .authorizeHttpRequests(authorize -> authorize // 요청에 대한 인증 및 인가 설정 시작
-                        .requestMatchers(CorsUtils::isPreFlightRequest)
-                        .permitAll() // Preflight 요청 허용 (OPTIONS 메서드)
-                        .anyRequest().permitAll() // 모든 요청 허용
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+
+                        // 비로그인 허용 경로
+                        .requestMatchers(
+                                "/api/auth/kakao",
+                                "/api/auth/login",
+                                "/api/auth/register/**",
+                                "/api/rooms/list",
+                                "/health",
+                                "/sentry",
+                                "/error"
+                        ).permitAll()
+
+                        // 로그인 + JWT 인증이 필요한 경로
+                        .requestMatchers(
+                                "/api/auth/members/profile",
+                                "/api/auth/register/profile",
+                                "/api/rooms",
+                                "/api/report/room/**"
+                        ).authenticated()
+
+                        // 나머지는 모두 인증 필요
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider),
                         // JWT 토큰을 통해 인증된 사용자 정보 가져옴
