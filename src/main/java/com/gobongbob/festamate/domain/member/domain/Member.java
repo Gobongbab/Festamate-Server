@@ -155,4 +155,8 @@ public class Member {
                 .build();
     }
 
+    public void updatePhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
 }
