@@ -1,5 +1,10 @@
 package com.gobongbob.festamate.domain.room.application;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_PARTICIPATING;
+import static com.gobongbob.festamate.global.response.ResponseCode.CAN_NOT_UPDATE;
+import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
@@ -10,12 +15,16 @@ import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
+import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,8 +40,7 @@ public class RoomService {
     private final ImageService imageService;
 
     @Transactional
-    public Room createRoom(Member member, RoomCreateRequest request,
-            List<MultipartFile> imageFiles) {
+    public ChatRoom createRoom(Member member, RoomCreateRequest request, List<MultipartFile> imageFiles) {
 //        validateRoomParticipation(member.getId());
 
         List<RoomImage> roomImages = new ArrayList<>();
@@ -56,55 +64,48 @@ public class RoomService {
         roomParticipantRepository.save(roomParticipant);
         member.useTicket();
 
-        return createdRoom;
+        return chatRoom;
     }
 
-    public List<RoomResponse> findAllRooms() {
-        return roomRepository.findAll()
-                .stream()
-                .map(room -> {
-                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(
-                            room.getId());
-                    return RoomResponse.fromEntity(room, roomParticipants);
-                })
-                .toList();
+    public Page<RoomListResponse> findAllRooms(Pageable pageable) {
+        return roomRepository.findAll(pageable)
+                .map(room -> RoomListResponse.fromEntity(
+                        room,
+                        roomParticipantRepository.countByRoom_Id(room.getId())
+                ));
     }
 
-    public RoomResponse findParticipatingRooms(Long memberId) {
-        Room participatingRoom = roomParticipantRepository.findByRoom_Id(memberId)
+    public List<RoomListResponse> findParticipatingRooms(Long memberId) {
+        return roomParticipantRepository.findByRoom_Id(memberId)
                 .stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("참여중인 모임방이 존재하지 않습니다."))
-                .getRoom();
-        List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(
-                participatingRoom.getId());
-
-        return RoomResponse.fromEntity(participatingRoom, roomParticipants);
+                .map(roomParticipant -> RoomListResponse.fromEntity(
+                        roomParticipant.getRoom(),
+                        roomParticipantRepository.countByRoom_Id(roomParticipant.getRoom().getId())
+                )).toList();
     }
 
     public RoomResponse findRoomById(Long roomId) {
         return roomRepository.findById(roomId)
                 .map(room -> {
-                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(
-                            room.getId());
+                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
                     return RoomResponse.fromEntity(room, roomParticipants);
-                }).orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+                }).orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
     }
 
     @Transactional
     public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
         validateAlone(room);
 
         room.updateRoom(
-                request.headCount(),
-                Gender.findByName(request.preferredGender()),
-                request.openChatLink(),
-                request.meetingDateTime(),
                 request.title(),
-                request.content()
+                request.place(),
+                request.content(),
+                Gender.findByName(request.preferredGender()),
+                request.meetingDateTime(),
+                request.maxParticipants()
         );
     }
 
@@ -112,7 +113,7 @@ public class RoomService {
     @Transactional
     public void deleteRoomById(Member member, Long roomId) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
 
         roomParticipantRepository.deleteByRoom(room);
@@ -128,20 +129,21 @@ public class RoomService {
                 .stream()
                 .findFirst()
                 .ifPresent(roomParticipant -> {
-                    throw new IllegalArgumentException("이미 모임방에 참여하고 있습니다.");
+                    throw new BadRequestException(ALREADY_PARTICIPATING);
                 });
     }
 
     private void validateIsHost(Room room, Member member) {
         if (!member.isHost(room)) {
-            throw new IllegalArgumentException("방장이어야 합니다.");
+            throw new BadRequestException(MUST_HOST);
+
         }
     }
 
     private void validateAlone(Room room) {
         int participantsCount = roomParticipantRepository.countByRoom_Id(room.getId());
         if (participantsCount > 1) {
-            throw new IllegalArgumentException("방에 방장을 제외한 다른 사용자가 입장한 상태에서는 수정할 수 없습니다.");
+            throw new BadRequestException(CAN_NOT_UPDATE);
         }
     }
 }

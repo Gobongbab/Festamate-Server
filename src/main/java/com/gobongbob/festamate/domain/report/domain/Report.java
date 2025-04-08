@@ -35,6 +35,10 @@ public class Report {
     private Member reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reportedMember_id")
+    private Member reportedMember;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     private Room room;
 

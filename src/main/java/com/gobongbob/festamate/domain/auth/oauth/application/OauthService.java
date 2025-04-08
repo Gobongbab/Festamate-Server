@@ -66,18 +66,13 @@ public class OauthService {
         try {
             // 1. 인가 코드로 OAuth2 액세스 토큰 요청
             String oauthAccessToken = getAccessToken(code);
-
-            // 2. 카카오 서버로부터 받은 OAuth2 액세스 토큰으로 사용자 정보를 요청
+            // 2. 사용자 정보 요청
             JsonNode userInfo = getKakaoUserInfo(oauthAccessToken);
-
-            // 3. 사용자 정보 저장 또는 업데이트
+            // 3. 사용자 저장 또는 업데이트
             Member member = registerKakaoUser(userInfo, oauthAccessToken);
-
-            // 4. 초기 JWT 생성 및 저장
+            // 4. JWT 생성
             Map<String, String> tokens = generateInitialJwtTokens(member, request, response);
-
             return tokens;
-
         } catch (Exception e) {
             throw new RuntimeException("카카오 로그인 처리 중 오류가 발생했습니다.", e);
         }
@@ -171,18 +166,15 @@ public class OauthService {
     // 인가 코드로 카카오 서버에 액세스 토큰을 요청
     private String getAccessToken(String code) {
         try {
-            // HTTP Header 생성
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-            // HTTP Body 생성
             MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
             body.add("grant_type", "authorization_code");
             body.add("client_id", CLIENT_ID);
             body.add("redirect_uri", REDIRECT_URI);
             body.add("code", code);
 
-            // HTTP 요청 보내기
             HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(body,
                     headers);
             RestTemplate restTemplate = new RestTemplate();

@@ -1,6 +1,6 @@
 package com.gobongbob.festamate.testUser;
 
-import com.gobongbob.festamate.domain.image.domain.ProfileImage;
+import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class TestService {
 
     private final MemberRepository memberRepository;
+    private final ProfileImageRepository profileImageRepository;
     private final TokenProvider tokenProvider;
 
     @Transactional
@@ -27,11 +28,12 @@ public class TestService {
                 .loginId("test_login_id")
                 .loginPassword("test_password")
                 .phoneNumber("010-0000-0000")
-                .profileImage(null)
                 .gender(Gender.MALE)
                 .major(Major.COMPUTER_SCIENCE)
-                .role("USER")
                 .build();
+
+        profileImageRepository.findByStoreName("default_profile_image.png")
+                .ifPresent(testMember::initializeProfileImage);
 
         // 데이터베이스에 저장
         memberRepository.save(testMember);
@@ -45,8 +47,6 @@ public class TestService {
 
     @Transactional
     public TestTokens createAdminMember() {
-        ProfileImage profileImage = ProfileImage.getDefaultProfileImage(); // 기본 프로필 이미지 사용
-
         // 관리자용 Member 객체 생성
         Member adminMember = Member.builder()
                 .name("Admin User")
@@ -55,11 +55,13 @@ public class TestService {
                 .loginId("admin_login_id")
                 .loginPassword("admin_password")
                 .phoneNumber("010-1111-1111")
-                .profileImage(profileImage)
                 .gender(Gender.MALE)
                 .major(Major.COMPUTER_SCIENCE)
                 .role("ADMIN") // 관리자 역할
                 .build();
+
+        profileImageRepository.findByStoreName("default_profile_image.png")
+                .ifPresent(adminMember::initializeProfileImage);
 
         // 데이터베이스에 저장
         memberRepository.save(adminMember);

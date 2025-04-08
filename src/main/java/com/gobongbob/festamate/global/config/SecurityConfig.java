@@ -5,6 +5,7 @@ import com.gobongbob.festamate.global.util.JwtAuthenticationEntryPoint;
 import com.gobongbob.festamate.global.util.TokenAuthenticationFilter;
 import com.gobongbob.festamate.global.util.TokenProvider;
 import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -43,15 +44,31 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS)) // 세션을 생성하지 않고, 토큰 기반 인증을 사용
-                .authorizeHttpRequests(authorize -> authorize // 요청에 대한 인증 및 인가 설정 시작
-                                .requestMatchers(CorsUtils::isPreFlightRequest)
-                                .permitAll() // Preflight 요청 허용 (OPTIONS 메서드)
-//                        .requestMatchers("/test/**").permitAll()
-//                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-//                        .requestMatchers("/api/user/**").hasRole("USER")
-//                        .anyRequest().authenticated()
-                                .anyRequest().permitAll() // 개발 중 전체 허용
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
 
+                        // 비로그인 허용 경로
+                        .requestMatchers(
+                                "/api/auth/kakao",
+                                "/api/auth/login",
+                                "/api/auth/register/**",
+                                "/api/rooms/list",
+                                "/health",
+                                "/sentry",
+                                "/error",
+                                "/login/oauth2/**"
+                        ).permitAll()
+
+                        // 로그인 + JWT 인증이 필요한 경로
+                        .requestMatchers(
+                                "/api/auth/members/profile",
+                                "/api/auth/register/profile",
+                                "/api/rooms",
+                                "/api/report/room/**"
+                        ).authenticated()
+
+                        // 나머지는 모두 인증 필요
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider),
                         // JWT 토큰을 통해 인증된 사용자 정보 가져옴
@@ -67,11 +84,14 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 모든 출처 허용 (*)
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        // 프론트 주소 명시 (credentials: true와 함께 쓰기 위해 * 안 됨)
+        configuration.setAllowedOrigins(List.of(
+                "https://festamate-web.vercel.app",
+                "http://localhost:5173"
+        ));
 
-        // 모든 HTTP 메서드 허용 (*)
-        configuration.setAllowedMethods(Arrays.asList("*"));
+        // 사용할 HTTP 메서드 명시
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
         // 허용할 헤더 설정
         configuration.setAllowedHeaders(Arrays.asList(
@@ -83,7 +103,7 @@ public class SecurityConfig {
         ));
 
         // 인증 정보 포함 여부
-        configuration.setAllowCredentials(false);
+        configuration.setAllowCredentials(true);
 
         // CORS 캐싱 시간 설정 (초 단위)
         configuration.setMaxAge(3600L);

@@ -4,8 +4,9 @@ import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.image.application.OcrService;
 import com.gobongbob.festamate.domain.image.dto.response.StudentInfoResponse;
 import java.io.IOException;
+
+import com.gobongbob.festamate.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,10 +22,10 @@ public class OcrController {
     private final OcrService ocrService;
 
     @PostMapping("/api/check/student-card")
-    public ResponseEntity<StudentInfoResponse> checkStudentCard(
+    public SuccessResponse<StudentInfoResponse> checkStudentCard(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestParam("file") MultipartFile file
     ) throws IOException {
-        return ResponseEntity.ok(ocrService.checkStudentCard(file, memberDetails.getMember()));
+        return new SuccessResponse<>(ocrService.checkStudentCard(file, memberDetails.getMember()));
     }
 }

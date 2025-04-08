@@ -1,10 +1,12 @@
 package com.gobongbob.festamate.domain.member.domain;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_ENOUGH_TICKET;
+
 import com.gobongbob.festamate.domain.auth.oauth.domain.OauthInfo;
 import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.room.domain.Room;
-import jakarta.persistence.CascadeType;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
@@ -16,7 +18,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import java.util.Set;
 import lombok.AccessLevel;
@@ -70,10 +72,9 @@ public class Member {
     @Builder.Default
     private int remainingTicket = 2;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_image_id")
-    @Builder.Default
-    private ProfileImage profileImage = ProfileImage.getDefaultProfileImage();
+    private ProfileImage profileImage;
 
     public void registerProfile(
             String name,
@@ -103,6 +104,10 @@ public class Member {
         }
     }
 
+    public void initializeProfileImage(ProfileImage profileImage) {
+        this.profileImage = profileImage;
+    }
+
     public void updateProfile(String nickname, String loginPassword) {
         this.nickname = nickname;
         this.loginPassword = loginPassword;
@@ -122,7 +127,7 @@ public class Member {
         if (this.remainingTicket > 0) {
             this.remainingTicket--;
         } else {
-            throw new IllegalStateException("티켓이 부족합니다.");
+            throw new BadRequestException(NOT_ENOUGH_TICKET);
         }
     }
 

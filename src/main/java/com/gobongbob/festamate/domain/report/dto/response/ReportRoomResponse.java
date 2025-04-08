@@ -20,8 +20,8 @@ public record ReportRoomResponse(
                 report.getId(),
                 report.getReporter().getId(),
                 report.getReporter().getNickname(),
-                report.getRoom().getId(),
-                report.getRoom().getTitle(),
+                report.getRoom() != null ? report.getRoom().getId() : null,
+                report.getRoom() != null ? report.getRoom().getTitle() : null,
                 report.getReason(),
                 report.getReportDate(),
                 report.getProcessed()

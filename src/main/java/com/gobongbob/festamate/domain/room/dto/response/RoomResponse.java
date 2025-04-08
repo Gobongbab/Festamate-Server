@@ -3,16 +3,17 @@ package com.gobongbob.festamate.domain.room.dto.response;
 import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record RoomResponse(
         Long id,
-        int headCount,
-        String preferredGender,
-        String openChatLink,
-        String meetingDateTime,
         String title,
+        String place,
         String content,
+        String preferredGender,
+        LocalDateTime meetingDateTime,
+        int maxParticipants,
         List<ParticipantResponse> participants,
         List<ImageResponse> images
 ) {
@@ -28,12 +29,12 @@ public record RoomResponse(
 
         return new RoomResponse(
                 room.getId(),
-                room.getHeadCount(),
-                room.getPreferredGender().name(),
-                room.getOpenChatLink(),
-                room.getMeetingDateTime().toString(),
                 room.getTitle(),
+                room.getPlace(),
                 room.getContent(),
+                room.getPreferredGender().name(),
+                room.getMeetingDateTime(),
+                room.getMaxParticipants(),
                 participantResponses,
                 imageResponses
         );
@@ -50,9 +51,9 @@ public record RoomResponse(
 
         private static ParticipantResponse fromEntity(RoomParticipant participant, boolean isHost) {
             return new ParticipantResponse(
-                    participant.getId(),
+                    participant.getMember().getId(),
                     participant.getMember().getNickname(),
-                    participant.getMember().getStudentId(),
+                    participant.getMember().getStudentId().substring(2, 4),
                     participant.getMember().getGender().name(),
                     participant.getMember().getMajor().getDepartment(),
                     isHost
