@@ -3,6 +3,7 @@ package com.gobongbob.festamate.domain.report.application;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.report.domain.Report;
+import com.gobongbob.festamate.domain.report.dto.request.ReportMemberRequest;
 import com.gobongbob.festamate.domain.report.dto.request.ReportRoomRequest;
 import com.gobongbob.festamate.domain.report.dto.response.ReportRoomResponse;
 import com.gobongbob.festamate.domain.report.persistence.ReportRepository;
@@ -10,9 +11,13 @@ import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 @Service
 @Transactional
@@ -23,14 +28,17 @@ public class ReportService {
     private final MemberRepository memberRepository;
     private final RoomRepository roomRepository;
 
-    // 신고하기
+    // 방 신고하기
     public void reportRoom(Member reporter, Long roomId, ReportRoomRequest request) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("신고할 방이 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
+
+        Member host = memberRepository.findById(room.getHost().getId())
+                .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
 
         // 자신의 방은 신고할 수 없음
         if (room.getHost().getId().equals(reporter.getId())) {
-            throw new IllegalArgumentException("자신의 방은 신고할 수 없습니다.");
+            throw new BadRequestException(CAN_NOT_REPORT_MYSELF);
         }
 
         // 이미 신고한 방인지 확인
@@ -38,11 +46,27 @@ public class ReportService {
                 .stream()
                 .findAny()
                 .ifPresent(report -> {
-                    throw new IllegalArgumentException("이미 신고한 방입니다.");
+                    throw new BadRequestException(ALREADY_REPORT);
                 });
 
-        Report report = request.toEntity(reporter, room);
+        Report report = request.toEntity(reporter, room, host);
+        reportRepository.save(report);
+    }
 
+    // 유저 신고하기
+    public void reportMember(Member reporter, Long memberId, ReportMemberRequest request) {
+        Member reportedMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
+
+        // 이미 신고한 유저인지 확인
+        reportRepository.findByReportedMemberIdAndReporterId(reportedMember.getId(), reporter.getId())
+                .stream()
+                .findAny()
+                .ifPresent(report -> {
+                    throw new BadRequestException(ALREADY_REPORT);
+                });
+
+        Report report = request.toEntity(reporter, reportedMember);
         reportRepository.save(report);
     }
 
@@ -66,14 +90,5 @@ public class ReportService {
             responseList.add(ReportRoomResponse.fromEntity(report));
         }
         return responseList;
-    }
-
-    // 신고 처리
-    public void processReport(Long reportId) {
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 신고가 존재하지 않습니다."));
-
-        report.markAsProcessed();
-        reportRepository.save(report);
     }
 }

@@ -1,5 +1,9 @@
 package com.gobongbob.festamate.domain.member.application;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
@@ -8,6 +12,7 @@ import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.sms.application.TokyoSnsService;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,11 +24,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ProfileImageRepository profileImageRepository;
     private final TokyoSnsService tokyoSnsService;
 
     @Transactional
     public Member createMember(MemberCreateRequest request) {
         Member member = request.toEntity();
+        profileImageRepository.findByStoreName("default_profile_image.png")
+                .ifPresent(member::initializeProfileImage);
 
         return memberRepository.save(member);
     }
@@ -35,7 +43,21 @@ public class MemberService {
                 .toList();
     }
 
+    // 유저 조회
     public MemberResponse findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .map(MemberResponse::fromEntity)
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
+    }
+
+    // 관리자용 유저 조회
+    public MemberResponse findMemberByIdForAdmin(CustomMemberDetails memberDetails, Long memberId) {
+        String role = memberDetails.getMember().getRole();
+
+        if (!"ADMIN".equals(role)) {
+            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
+        }
+
         return memberRepository.findById(memberId)
                 .map(MemberResponse::fromEntity)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
@@ -43,7 +65,7 @@ public class MemberService {
 
     public Member findMembersById(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
 
     public MemberProfileResponse findProfile(Member member) {
@@ -58,7 +80,7 @@ public class MemberService {
     @Transactional
     public void deleteMemberById(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
         /**
          * 1. 삭제하려는 사용자가 로그인한 사용자와 같은지 확인하는 로직 필요
@@ -68,6 +90,25 @@ public class MemberService {
          */
 
         memberRepository.delete(member);
+    }
+
+
+    // 유저 제재(admin)
+    @Transactional
+    public void blockMemberById(Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+        member.block();
+        memberRepository.save(member);
+    }
+
+    // 유저 제재 해제(admin)
+    @Transactional
+    public void unblockMemberById(Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+        member.unblock();
+        memberRepository.save(member);
     }
 
     // 프로필 등록 API
@@ -82,7 +123,7 @@ public class MemberService {
 
         // 회원 조회
         Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자 ID입니다."));
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
         // 프로필 정보 업데이트
         Member updatedMember = request.toEntity(member);
@@ -98,14 +139,18 @@ public class MemberService {
         boolean isDuplicate = memberRepository.existsByNickname(nickname);
 
         if (isDuplicate) {
-            throw new IllegalArgumentException("중복된 닉네임입니다.");
+            throw new BadRequestException(DUPLICATE_NICKNAME);
         }
+    }
+
+    public MemberExistResponse checkMemberExist(String phoneNumber) {
+        return new MemberExistResponse(memberRepository.existsByPhoneNumber(phoneNumber));
     }
 
     // 아래부터는 oauth2를 위한 메서드
     public Member findById(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("Unexpected member"));
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
 
 }
