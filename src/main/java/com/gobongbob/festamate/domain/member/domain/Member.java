@@ -108,9 +108,8 @@ public class Member {
         this.profileImage = profileImage;
     }
 
-    public void updateProfile(String nickname, String loginPassword) {
+    public void updateProfile(String nickname) {
         this.nickname = nickname;
-        this.loginPassword = loginPassword;
     }
 
     public void setStudentInfo(String studentName, String studentDepartment, String studentId) {

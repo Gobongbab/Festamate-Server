@@ -75,7 +75,7 @@ public class MemberService {
 
     @Transactional
     public void updateMemberProfileById(Member member, ProfileUpdateRequest request) {
-        member.updateProfile(request.nickname(), request.loginPassword());
+        member.updateProfile(request.nickname());
     }
 
     @Transactional
