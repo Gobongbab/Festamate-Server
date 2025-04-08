@@ -84,8 +84,10 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 프론트 주소 명시 (credentials: true와 함께 쓰기 위해 * 안 됨)
-        configuration.setAllowedOrigins(
-                List.of("https://festamate-web.vercel.app", "http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(
+                "https://festamate-web.vercel.app",
+                "http://localhost:5173"
+        ));
 
         // 사용할 HTTP 메서드 명시
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -101,7 +103,6 @@ public class SecurityConfig {
 
         // 인증 정보 포함 여부
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
 
         // CORS 캐싱 시간 설정 (초 단위)
         configuration.setMaxAge(3600L);
