@@ -21,4 +21,8 @@ public interface MemberRepository extends Repository<Member, Long> {
     boolean existsByNickname(String nickname); // 닉네임 중복 확인
 
     Optional<Member> findByLoginId(String loginId);
+
+    Optional<Member> findByPhoneNumber(String phoneNumber); // 전화번호로 회원 조회
+
+    boolean existsByPhoneNumber(String phoneNumber); // 전화번호 중복 확인
 }

@@ -1,5 +1,10 @@
 package com.gobongbob.festamate.domain.room.application;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_PARTICIPATING;
+import static com.gobongbob.festamate.global.response.ResponseCode.CAN_NOT_UPDATE;
+import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
@@ -14,18 +19,15 @@ import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -38,7 +40,7 @@ public class RoomService {
     private final ImageService imageService;
 
     @Transactional
-    public Room createRoom(Member member, RoomCreateRequest request, List<MultipartFile> imageFiles) {
+    public ChatRoom createRoom(Member member, RoomCreateRequest request, List<MultipartFile> imageFiles) {
 //        validateRoomParticipation(member.getId());
 
         List<RoomImage> roomImages = new ArrayList<>();
@@ -62,7 +64,7 @@ public class RoomService {
         roomParticipantRepository.save(roomParticipant);
         member.useTicket();
 
-        return createdRoom;
+        return chatRoom;
     }
 
     public Page<RoomListResponse> findAllRooms(Pageable pageable) {
@@ -99,6 +101,7 @@ public class RoomService {
 
         room.updateRoom(
                 request.title(),
+                request.place(),
                 request.content(),
                 Gender.findByName(request.preferredGender()),
                 request.meetingDateTime(),

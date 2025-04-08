@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.member.application;
 
+import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
@@ -7,6 +8,7 @@ import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
 import java.util.List;
 
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
@@ -23,10 +25,13 @@ import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ProfileImageRepository profileImageRepository;
 
     @Transactional
     public Member createMember(MemberCreateRequest request) {
         Member member = request.toEntity();
+        profileImageRepository.findByStoreName("default_profile_image.png")
+                .ifPresent(member::initializeProfileImage);
 
         return memberRepository.save(member);
     }
@@ -93,6 +98,10 @@ public class MemberService {
         if (isDuplicate) {
             throw new BadRequestException(DUPLICATE_NICKNAME);
         }
+    }
+
+    public MemberExistResponse checkMemberExist(String phoneNumber) {
+        return new MemberExistResponse(memberRepository.existsByPhoneNumber(phoneNumber));
     }
 
     // 아래부터는 oauth2를 위한 메서드
