@@ -3,7 +3,6 @@ package com.gobongbob.festamate.domain.room.presentation;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
-import com.gobongbob.festamate.domain.member.dto.request.MemberExistRequest;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.domain.Room;

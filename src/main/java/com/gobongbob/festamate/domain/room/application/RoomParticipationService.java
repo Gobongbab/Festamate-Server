@@ -10,10 +10,13 @@ import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Role;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
+import com.gobongbob.festamate.domain.room.dto.request.ParticipationWithFriendRequest;
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +44,23 @@ public class RoomParticipationService {
     }
 
     @Transactional
+    public void participateWithFriends(Member member, Long roomId, ParticipationWithFriendRequest request) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+        validateRoomFull(room.getId(), request.friendPhoneNumbers().size() + 1);
+
+        List<Member> participants = findParticipantsWithPhoneNumber(request);
+        participants.add(member);
+
+        participants.stream()
+                .map(participant -> RoomParticipant.createParticipant(room, participant, Role.GUEST))
+                .forEach(participant -> {
+                    roomParticipantRepository.save(participant);
+                    participant.getMember().useTicket();
+                });
+    }
+
+    @Transactional
     public void leave(Member member, Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
@@ -55,6 +75,14 @@ public class RoomParticipationService {
                 .isHost();
 
         return new IsMemberHostResponse(isHost);
+    }
+
+    private List<Member> findParticipantsWithPhoneNumber(ParticipationWithFriendRequest request) {
+        return request.friendPhoneNumbers()
+                .stream()
+                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
+                        .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."))
+                ).collect(Collectors.toList());
     }
 
     private void validateRoomParticipation(Long memberId) {
