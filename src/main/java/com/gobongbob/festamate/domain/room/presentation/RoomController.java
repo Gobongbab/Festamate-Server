@@ -5,7 +5,6 @@ import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
-import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
@@ -65,7 +64,7 @@ public class RoomController {
         return new SuccessResponse<>(roomService.findAllRooms(pageable));
     }
 
-    @GetMapping("/participate")
+    @GetMapping("/participations")
     public SuccessResponse<List<RoomListResponse>> findParticipatingRooms(
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
