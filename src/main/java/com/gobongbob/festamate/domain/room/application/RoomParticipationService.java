@@ -30,16 +30,34 @@ public class RoomParticipationService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void participateRoom(Member member, Long roomId) {
+    public void participateAlone(Member member, Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
 
 //        validateRoomParticipation(member.getId());
         validateRoomFull(room.getId(), 1);
 
-        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, Role.HOST);
+        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, Role.GUEST);
         roomParticipantRepository.save(roomParticipant);
         member.useTicket();
+    }
+
+    @Transactional
+    public void participateWithFriends(Member member, Long roomId, ParticipationWithFriendRequest request) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+        validateRoomFull(room.getId(), request.friendPhoneNumbers().size() + 1);
+
+        List<Member> participants = request.friendPhoneNumbers()
+                .stream()
+                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
+                        .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."))
+                ).collect(Collectors.toList());
+        participants.add(member);
+
+        participants.stream()
+                .map(participant -> RoomParticipant.createParticipant(room, participant, Role.GUEST))
+                .forEach(roomParticipantRepository::save);
     }
 
     @Transactional
