@@ -20,4 +20,11 @@ public class TestController {
         TestService.TestTokens testTokens = testService.createTestMember();
         return new SuccessResponse<>(testTokens);
     }
+
+    @PostMapping("/create-admin")
+    public ResponseEntity<TestService.TestTokens> createAdminMember() {
+        // 테스트 관리자용 유저 생성 및 JWT 토큰 반환
+        TestService.TestTokens adminTokens = testService.createAdminMember();
+        return ResponseEntity.ok(adminTokens);
+    }
 }
