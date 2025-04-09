@@ -30,7 +30,7 @@ public class RoomParticipationService {
 //        validateRoomParticipation(member.getId());
         validateRoomFull(room.getId());
 
-        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member);
+        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, Role.HOST);
         roomParticipantRepository.save(roomParticipant);
         member.useTicket();
     }
