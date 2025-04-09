@@ -2,6 +2,8 @@ package com.gobongbob.festamate.domain.room.domain;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,6 +34,9 @@ public class RoomParticipant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     private boolean isHost;
 
