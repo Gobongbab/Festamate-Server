@@ -35,6 +35,13 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_SNS_ACCESS_KEY}
+        secret-key: ${AWS_SNS_SECRET_KEY}
+      region:
+        static: ap-northeast-1 # 도쿄 리전
 jwt:
   header: Authorization
   secret: ${JWT_SECRET}

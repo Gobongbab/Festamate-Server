@@ -67,6 +67,10 @@ dependencies {
 
     // Sentry
     implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.5.0'
+
+    // AWS SNS
+    implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.0.1")
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sns'
 }
 
 tasks.named('test') {

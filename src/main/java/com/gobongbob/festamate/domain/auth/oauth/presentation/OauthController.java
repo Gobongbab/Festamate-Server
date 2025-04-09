@@ -40,7 +40,7 @@ public class OauthController {
 
     // 리다이렉트 URI에서 인가 코드를 자동으로 처리(운영용)
 //    @PostMapping("/api/auth/kakao")
-//    public SuccessResponse<Map<String, String>> handleKakaoLogin(
+//    public ResponseEntity<Map<String, String>> handleKakaoLogin(
 //            @RequestBody Map<String, String> requestBody,
 //            HttpServletRequest request,
 //            HttpServletResponse response) {
@@ -52,7 +52,7 @@ public class OauthController {
 //        }
 //
 //        Map<String, String> tokens = oauthService.kakaoLogin(code, request, response);
-//        return new SuccessResponse<>(tokens);
+//        return ResponseEntity.ok(tokens);
 //    }
 
     @Value("${KAKAO_CLIENT_ID}")

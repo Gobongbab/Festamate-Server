@@ -1,7 +1,7 @@
 package com.gobongbob.festamate.domain.member.presentation;
 
-import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
@@ -11,15 +11,13 @@ import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
-import java.util.List;
-import java.util.Map;
-
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@Validated
 @RequiredArgsConstructor
 public class MemberController {
 
@@ -83,8 +80,8 @@ public class MemberController {
     @PostMapping("/api/auth/register/profile") // 추후 /api/auth를 상위 경로에 작성하도록 변경 필요
     public SuccessResponse<Map<String, String>> registerProfile(
             @RequestBody ProfileRegisterRequest request,
-            @AuthenticationPrincipal CustomMemberDetails memberDetails) { // 최소 JWT 정보
 
+            @AuthenticationPrincipal CustomMemberDetails memberDetails) { // 최소 JWT 정보
         Long userId = memberDetails.getMember().getId();
         memberService.registerProfile(request, userId);
 

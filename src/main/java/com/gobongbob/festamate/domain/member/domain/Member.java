@@ -194,4 +194,9 @@ public class Member {
     public void unblock() {
         this.status = MemberStatus.ACTIVE;
     }
+
+    public void updatePhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
 }

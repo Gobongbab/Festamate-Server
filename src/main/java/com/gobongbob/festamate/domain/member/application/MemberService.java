@@ -1,7 +1,10 @@
 package com.gobongbob.festamate.domain.member.application;
 
-import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
+import static com.gobongbob.festamate.global.response.ResponseCode.DUPLICATE_NICKNAME;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
@@ -10,15 +13,12 @@ import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
-import java.util.List;
-
+import com.gobongbob.festamate.domain.sms.application.TokyoSnsService;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.gobongbob.festamate.global.response.ResponseCode.DUPLICATE_NICKNAME;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 
 @Service
 @Transactional(readOnly = true)
@@ -27,6 +27,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final ProfileImageRepository profileImageRepository;
+    private final TokyoSnsService tokyoSnsService;
 
     @Transactional
     public Member createMember(MemberCreateRequest request) {
@@ -66,7 +67,7 @@ public class MemberService {
 
     public Member findMembersById(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() ->  new BadRequestException(NO_MEMBER));
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
 
     public MemberProfileResponse findProfile(Member member) {
@@ -116,11 +117,22 @@ public class MemberService {
     @Transactional
     public void registerProfile(ProfileRegisterRequest request, Long userId) {
 
-        Member member = memberRepository.findById(userId)
-                .orElseThrow(() ->  new BadRequestException(NO_MEMBER));
+        // 전화번호 인증 여부 확인
+        String phoneNumber = request.getPhoneNumber();
+        if (!tokyoSnsService.isPhoneNumberVerified(phoneNumber)) {
+            throw new IllegalArgumentException("전화번호 인증이 완료되지 않았습니다.");
+        }
 
-        Member registeredMember = request.toEntity(member); // 기존 Member 정보 그대로 사용
-        memberRepository.save(registeredMember);
+        // 회원 조회
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
+
+        // 프로필 정보 업데이트
+        Member updatedMember = request.toEntity(member);
+        memberRepository.save(updatedMember);
+
+        // 인증 기록 삭제 (더 이상 인증 재사용 안되게)
+        tokyoSnsService.removeVerificationInfo(phoneNumber);
     }
 
     // 닉네임 중복 체크
