@@ -11,6 +11,7 @@ import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.room.domain.Role;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
@@ -86,10 +87,11 @@ public class RoomService {
 
     public RoomResponse findRoomById(Long roomId) {
         return roomRepository.findById(roomId)
-                .map(room -> {
-                    List<RoomParticipant> roomParticipants = roomParticipantRepository.findByRoom_Id(room.getId());
-                    return RoomResponse.fromEntity(room, roomParticipants);
-                }).orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
+                .map(room -> RoomResponse.fromEntity(
+                        room,
+                        roomParticipantRepository.findByRoomAndRole(room.getId(), Role.HOST),
+                        roomParticipantRepository.findByRoomAndRole(room.getId(), Role.GUEST)
+                )).orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
     }
 
     @Transactional
