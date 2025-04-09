@@ -44,14 +44,16 @@ public class RoomParticipant {
         return RoomParticipant.builder()
                 .room(room)
                 .member(member)
+                .role(Role.HOST)
                 .isHost(true)
                 .build();
     }
 
-    public static RoomParticipant createParticipant(Room room, Member member) {
+    public static RoomParticipant createParticipant(Room room, Member member, Role role) {
         return RoomParticipant.builder()
                 .room(room)
                 .member(member)
+                .role(role)
                 .isHost(false)
                 .build();
     }
