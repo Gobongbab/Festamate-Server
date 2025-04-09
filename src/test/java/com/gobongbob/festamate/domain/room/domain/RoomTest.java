@@ -22,6 +22,7 @@ class RoomTest {
         // when
         room.updateRoom(
                 room.getTitle(),
+                room.getPlace(),
                 room.getContent(),
                 Gender.FEMALE,
                 room.getMeetingDateTime(),
