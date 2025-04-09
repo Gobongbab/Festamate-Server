@@ -3,10 +3,12 @@ package com.gobongbob.festamate.domain.room.presentation;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
+import com.gobongbob.festamate.domain.member.dto.request.MemberExistRequest;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
+import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
@@ -41,7 +43,7 @@ public class RoomController {
     private final ChatService chatService;
 
     @PostMapping("")
-    public SuccessResponse<Void> createRoom(
+    public SuccessResponse<Void> create(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestPart("request") @Valid RoomCreateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
@@ -57,7 +59,7 @@ public class RoomController {
     }
 
     @GetMapping("")
-    public SuccessResponse<Page<RoomListResponse>> findAllRooms(
+    public SuccessResponse<Page<RoomListResponse>> findAll(
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return new SuccessResponse<>(roomService.findAllRooms(pageable));
@@ -76,7 +78,7 @@ public class RoomController {
     }
 
     @PatchMapping("/{roomId}")
-    public SuccessResponse<Void> updateRoomById(
+    public SuccessResponse<Void> updateById(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId,
             @RequestBody @Valid RoomUpdateRequest request
@@ -87,7 +89,7 @@ public class RoomController {
     }
 
     @DeleteMapping("/{roomId}")
-    public SuccessResponse<Void> deleteRoomById(
+    public SuccessResponse<Void> deleteById(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId
     ) {
@@ -96,12 +98,12 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
-    @PostMapping("/{roomId}/participate")
-    public SuccessResponse<Void> participateRoom(
+    @PostMapping("/{roomId}/participations")
+    public SuccessResponse<Void> participateAlone(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId
     ) {
-        roomParticipationService.participateRoom(memberDetails.getMember(), roomId);
+        roomParticipationService.participateAlone(memberDetails.getMember(), roomId);
         chatService.sendMessage(
                 roomId,
                 memberDetails.getMember(),
@@ -112,11 +114,11 @@ public class RoomController {
     }
 
     @PostMapping("/{roomId}/leave")
-    public SuccessResponse<Void> leaveRoom(
+    public SuccessResponse<Void> leave(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable Long roomId
     ) {
-        roomParticipationService.leaveRoomById(memberDetails.getMember(), roomId);
+        roomParticipationService.leave(memberDetails.getMember(), roomId);
         chatService.sendMessage(
                 roomId,
                 memberDetails.getMember(),
@@ -126,11 +128,11 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
-    @GetMapping("/{roomId}/isHost")
-    public SuccessResponse<Boolean> isMemberHost(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId
+    @GetMapping("/{roomId}/host")
+    public SuccessResponse<IsMemberHostResponse> isMemberHost(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
-        return new SuccessResponse<>(roomParticipationService.isMemberHost(memberDetails.getMember().getId(), roomId));
+        return new SuccessResponse<>(roomParticipationService.isMemberHost(roomId, memberDetails.getMember()));
     }
 }
