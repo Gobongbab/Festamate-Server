@@ -77,7 +77,7 @@ public class RoomService {
     }
 
     public List<RoomListResponse> findParticipatingRooms(Long memberId) {
-        return roomParticipantRepository.findByRoom_Id(memberId)
+        return roomParticipantRepository.findByMember_Id(memberId)
                 .stream()
                 .map(roomParticipant -> RoomListResponse.fromEntity(
                         roomParticipant.getRoom(),
