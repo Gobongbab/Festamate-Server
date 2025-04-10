@@ -42,9 +42,7 @@ public class OauthController {
     @PostMapping("/login")
     public SuccessResponse<Map<String, String>> loginWithKakao(
             @RequestBody LoginWithKakaoRequest request) {
-
-        Long userId = oauthService.findUserIdByKakaoToken(request.getKakaoAccessToken());
-        Map<String, String> tokens = tokenService.generateTokens(userId);
+        Map<String, String> tokens = oauthService.loginWithKakao(request.getKakaoAccessToken());
         return new SuccessResponse<>(tokens);
     }
 
