@@ -3,6 +3,7 @@ package com.gobongbob.festamate.domain.auth.oauth.application;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
 import com.gobongbob.festamate.domain.auth.oauth.dto.request.KakaoUserInfo;
 import com.gobongbob.festamate.domain.auth.oauth.dto.response.KakaoCheckResponse;
 import com.gobongbob.festamate.domain.auth.oauth.dto.response.KakaoTokenResponse;
@@ -10,6 +11,7 @@ import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import jakarta.transaction.Transactional;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -30,6 +32,7 @@ public class OauthService {
     private final WebClient webClient;
     private final MemberRepository memberRepository;
     private final ObjectMapper objectMapper;
+    private final TokenService tokenService;
 
     @Value("${kakao.client-id}")
     private String clientId;
@@ -61,13 +64,31 @@ public class OauthService {
     }
 
     /**
-     * 기존 회원 로그인 시, Kakao Access Token으로 kakaoId 추출 후 유저 ID 반환
+     * 기존 회원 로그인 시, Kakao Access Token으로 kakaoId 추출 후 JWT 반환
      */
     public Long findUserIdByKakaoToken(String kakaoAccessToken) {
         KakaoUserInfo userInfo = getKakaoUserInfo(kakaoAccessToken);
         Member member = memberRepository.findByKakaoId(userInfo.getId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         return member.getId();
+    }
+
+    public Map<String, String> loginWithKakao(String kakaoAccessToken) {
+        // 카카오 액세스 토큰을 통해 유저 ID를 가져옴
+        Long userId = findUserIdByKakaoToken(kakaoAccessToken);
+
+        // 유저 정보 가져오기
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        // 프로필 완료 여부 확인
+        if (member.isProfileCompleted()) {
+            // 프로필 등록이 완료된 경우 JWT 반환
+            return tokenService.generateTokens(userId);
+        } else {
+            // 프로필 등록이 안 된 경우 예외 처리
+            throw new IllegalStateException("프로필 등록이 필요합니다.");
+        }
     }
 
     /**
