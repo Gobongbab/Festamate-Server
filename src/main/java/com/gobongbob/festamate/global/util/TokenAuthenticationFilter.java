@@ -71,6 +71,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean isPublicPath(String uri) {
         return uri.startsWith("/api/auth/kakao")
+                || uri.equals("/api/auth/register/profile") // 프로필 등록
                 || uri.equals("/health")
                 || uri.equals("/sentry")
                 || uri.equals("/error")
