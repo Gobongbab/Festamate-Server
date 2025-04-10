@@ -41,12 +41,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         String token = getAccessToken(authorizationHeader);
 
         // 토큰 유효성 검사
-        if (token != null && tokenProvider.validateToken(token) && (
-                tokenProvider.isInitialAccessToken(token)
-                        || tokenProvider.isFinalAccessToken(token)
-                        || tokenProvider.isTestAccessToken(token))
-                || tokenProvider.isAdminAccessToken(token)
-        ) { // 관리자용 Access Token도 검증
+        if (token != null && tokenProvider.validateToken(token)) {
             Authentication authentication = tokenProvider.getAuthentication(token);
             Object principal = authentication.getPrincipal();
 
