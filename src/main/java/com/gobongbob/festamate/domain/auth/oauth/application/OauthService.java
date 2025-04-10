@@ -9,6 +9,7 @@ import com.gobongbob.festamate.domain.auth.oauth.dto.response.KakaoTokenResponse
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -72,6 +73,7 @@ public class OauthService {
     /**
      * 신규 회원 프로필 등록: Kakao ID 기반 회원 생성
      */
+    @Transactional
     public Long registerNewMember(ProfileRegisterRequest request) {
         KakaoUserInfo userInfo = getKakaoUserInfo(request.kakaoAccessToken()); // record의 필드 사용
 
@@ -79,12 +81,19 @@ public class OauthService {
             throw new IllegalStateException("이미 존재하는 회원입니다.");
         }
 
+        // 새로운 Member 객체 생성
         Member newMember = Member.builder()
                 .kakaoId(userInfo.getId())
-                .nickname(request.nickname()) // record의 필드 사용
                 .build();
 
-        return memberRepository.save(newMember).getId();
+        // 요청에서 받은 데이터를 Member 객체에 세팅
+        request.toEntity(newMember);  // nickname은 랜덤 생성
+
+        // RDS에 저장
+        memberRepository.save(newMember);  // 이 부분 추가!
+
+        // 성공적으로 저장된 Member의 ID 반환
+        return newMember.getId();
     }
 
     // 🔹 카카오 인가 코드로 Access Token 발급
