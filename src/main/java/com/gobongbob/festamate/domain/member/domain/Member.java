@@ -45,6 +45,10 @@ public class Member {
     @Column(nullable = false)
     private boolean isProfileCompleted = false; // 첫 로그인 후 프로필 작성 여부 판단용
 
+    public void completeProfile() {
+        this.isProfileCompleted = true;
+    }
+
     private String name;
 
     @Column(unique = true)

@@ -89,6 +89,9 @@ public class OauthService {
         // 요청에서 받은 데이터를 Member 객체에 세팅
         request.toEntity(newMember);  // nickname은 랜덤 생성
 
+        // 프로필 등록이 완료되었음을 표시
+        newMember.completeProfile(); // 프로필 완료 처리
+
         // RDS에 저장
         memberRepository.save(newMember);  // 이 부분 추가!
 
