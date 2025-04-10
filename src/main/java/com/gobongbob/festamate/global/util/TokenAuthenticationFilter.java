@@ -70,7 +70,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublicPath(String uri) {
-        return uri.equals("/api/auth/kakao")
+        return uri.startsWith("/api/auth/kakao")
                 || uri.equals("/health")
                 || uri.equals("/sentry")
                 || uri.equals("/error")
