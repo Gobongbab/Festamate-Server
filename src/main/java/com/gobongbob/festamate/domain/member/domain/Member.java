@@ -39,6 +39,12 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
+    private Long kakaoId; // 카카오 고유 ID로 기존 사용자와 구분하기 위해 사용
+
+    @Column(nullable = false)
+    private boolean isProfileCompleted = false; // 첫 로그인 후 프로필 작성 여부 판단용
+
     private String name;
 
     @Column(unique = true)
