@@ -76,6 +76,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 || uri.equals("/sentry")
                 || uri.equals("/error")
                 || uri.equals("/api/rooms/list")
-                || uri.startsWith("/login/oauth2/");
+                || uri.startsWith("/login/oauth2/")
+                || uri.equals("/api/auth/login");  // 기존 유저 로그인
     }
 }
