@@ -118,7 +118,7 @@ public class MemberService {
     public void registerProfile(ProfileRegisterRequest request, Long userId) {
 
         // 전화번호 인증 여부 확인
-        String phoneNumber = request.getPhoneNumber();
+        String phoneNumber = request.phoneNumber();
         if (!tokyoSnsService.isPhoneNumberVerified(phoneNumber)) {
             throw new IllegalArgumentException("전화번호 인증이 완료되지 않았습니다.");
         }

@@ -3,11 +3,7 @@ package com.gobongbob.festamate.domain.member.dto.request;
 import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@Getter
-@AllArgsConstructor
 // 프로필 등록용 DTO
 public record ProfileRegisterRequest(
         String name,

@@ -12,12 +12,18 @@ import java.time.Duration;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 // 카카오 서버로부터 받은 액세스 토큰을 사용하여 자체 JWT 토큰을 생성함
 @Component
 @RequiredArgsConstructor
 public class TokenProvider {
+
+    private final UserDetailsService userDetailsService;
 
     // 서명에 사용할 시크릿 키
     @Value("${jwt.secret}")
@@ -167,4 +173,30 @@ public class TokenProvider {
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
+
+    public Long getUserId(String token) {
+        // 토큰에서 사용자 ID를 추출하는 로직을 구현
+        // 예: JWT 토큰에서 클레임을 파싱하여 사용자 ID를 반환
+        Claims claims = parseClaims(token);
+        return Long.valueOf(claims.get("userId").toString());
+    }
+
+    public Authentication getAuthentication(String token) {
+        // 토큰에서 사용자 정보 추출
+        String username = getUsernameFromToken(token);
+
+        // 사용자 정보를 기반으로 Authentication 객체 생성
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        return new UsernamePasswordAuthenticationToken(userDetails, null,
+                userDetails.getAuthorities());
+    }
+
+    private String getUsernameFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(secret.getBytes())
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getSubject();
+    }
+
 }
