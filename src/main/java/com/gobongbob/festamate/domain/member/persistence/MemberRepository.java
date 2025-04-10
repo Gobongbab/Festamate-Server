@@ -25,4 +25,8 @@ public interface MemberRepository extends Repository<Member, Long> {
     Optional<Member> findByPhoneNumber(String phoneNumber); // 전화번호로 회원 조회
 
     boolean existsByPhoneNumber(String phoneNumber); // 전화번호 중복 확인
+
+    Optional<Member> findByKakaoId(Long kakaoId);
+
+    boolean existsByKakaoId(Long kakaoId);
 }
