@@ -83,8 +83,7 @@ public class RoomParticipationService {
         return request.friendPhoneNumbers()
                 .stream()
                 .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
-                        .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."))
-                ).collect(Collectors.toList());
+                        .orElseThrow(() -> new BadRequestException(NOT_FOUND_MEMBER))
     }
 
     private void validateRoomParticipation(Long memberId) {
