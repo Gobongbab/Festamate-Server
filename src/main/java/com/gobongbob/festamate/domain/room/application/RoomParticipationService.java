@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.room.application;
 
 import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_PARTICIPATING;
+import static com.gobongbob.festamate.global.response.ResponseCode.FULL_ROOM;
 import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
 import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
@@ -100,7 +101,7 @@ public class RoomParticipationService {
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
 
         if (isRoomFull(membersToParticipate, room)) {
-            throw new BadRequestException(NOT_FOUND_ROOM);
+            throw new BadRequestException(FULL_ROOM);
         }
     }
 
