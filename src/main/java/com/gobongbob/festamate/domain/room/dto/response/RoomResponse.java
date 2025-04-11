@@ -29,7 +29,7 @@ public record RoomResponse(
                 room.getTitle(),
                 room.getPlace(),
                 room.getContent(),
-                room.getPreferredGender().name(),
+                room.getPreferredGender().getName(),
                 room.getMeetingDateTime(),
                 room.getMaxParticipants(),
                 toParticipantResponse(hostParticipants),
