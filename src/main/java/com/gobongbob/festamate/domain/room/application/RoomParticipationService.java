@@ -4,6 +4,7 @@ import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_PARTI
 import static com.gobongbob.festamate.global.response.ResponseCode.FULL_ROOM;
 import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
 import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
@@ -17,7 +18,6 @@ import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,7 +83,8 @@ public class RoomParticipationService {
         return request.friendPhoneNumbers()
                 .stream()
                 .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
-                        .orElseThrow(() -> new BadRequestException(NOT_FOUND_MEMBER))
+                        .orElseThrow(() -> new BadRequestException(NO_MEMBER)))
+                .toList();
     }
 
     private void validateRoomParticipation(Long memberId) {
