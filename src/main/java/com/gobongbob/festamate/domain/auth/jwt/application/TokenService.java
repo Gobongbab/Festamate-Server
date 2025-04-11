@@ -59,32 +59,28 @@ public class TokenService {
 
     // 초기 Refresh Token 유효성 및 타입 확인 메서드
     private void validateInitialRefreshToken(String refreshToken) {
-        if (!tokenProvider.validateToken(refreshToken) || !tokenProvider.isInitialRefreshToken(
-                refreshToken)) {
+        if (!tokenProvider.validateToken(refreshToken)) {
             throw new IllegalArgumentException("Invalid or unexpected initial refresh token");
         }
     }
 
     // 최종 Refresh Token 유효성 및 타입 확인 메서드
     private void validateFinalRefreshToken(String refreshToken) {
-        if (!tokenProvider.validateToken(refreshToken) || !tokenProvider.isFinalRefreshToken(
-                refreshToken)) {
+        if (!tokenProvider.validateToken(refreshToken)) {
             throw new IllegalArgumentException("Invalid or unexpected final refresh token");
         }
     }
 
     // 테스트용 Refresh Token 유효성 및 타입 확인 메서드
     private void validateTestRefreshToken(String refreshToken) {
-        if (!tokenProvider.validateToken(refreshToken) || !tokenProvider.isTestRefreshToken(
-                refreshToken)) {
+        if (!tokenProvider.validateToken(refreshToken)) {
             throw new IllegalArgumentException("Invalid or unexpected test refresh token");
         }
     }
 
     // 관리자용 Refresh Token 유효성 및 타입 확인 메서드
     private void validateAdminRefreshToken(String refreshToken) {
-        if (!tokenProvider.validateToken(refreshToken) || !tokenProvider.isAdminRefreshToken(
-                refreshToken)) {
+        if (!tokenProvider.validateToken(refreshToken)) {
             throw new IllegalArgumentException("Invalid or unexpected admin refresh token");
         }
     }

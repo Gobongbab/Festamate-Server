@@ -21,6 +21,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     // 여기서 Refresh Token이 아닌 Access Token만 허용하도록 설정
     // 검증된 토큰으로 SecurityContextHolder에 인증 정보를 저장함
+
+    // doFilterInternal 메서드는 JWT 없이 가능한 경로
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
@@ -35,15 +37,11 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         // 토큰 꺼내기
         String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);
+        // 가져온 값에서 접두사 제거
         String token = getAccessToken(authorizationHeader);
 
         // 토큰 유효성 검사
-        if (token != null && tokenProvider.validateToken(token) && (
-                tokenProvider.isInitialAccessToken(token)
-                        || tokenProvider.isFinalAccessToken(token)
-                        || tokenProvider.isTestAccessToken(token))
-                || tokenProvider.isAdminAccessToken(token)
-        ) { // 관리자용 Access Token도 검증
+        if (token != null && tokenProvider.validateToken(token)) {
             Authentication authentication = tokenProvider.getAuthentication(token);
             Object principal = authentication.getPrincipal();
 
@@ -72,11 +70,13 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublicPath(String uri) {
-        return uri.equals("/api/auth/kakao")
+        return uri.startsWith("/api/auth/kakao")
+                || uri.equals("/api/auth/register/profile") // 프로필 등록
                 || uri.equals("/health")
                 || uri.equals("/sentry")
                 || uri.equals("/error")
                 || uri.equals("/api/rooms/list")
-                || uri.startsWith("/login/oauth2/");
+                || uri.startsWith("/login/oauth2/")
+                || uri.equals("/api/auth/login");  // 기존 유저 로그인
     }
 }

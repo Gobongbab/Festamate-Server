@@ -1,12 +1,12 @@
 package com.gobongbob.festamate.global.util;
 
-import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
-import com.gobongbob.festamate.domain.major.domain.Major;
-import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.time.Duration;
 import java.util.Date;
@@ -14,211 +14,189 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
 
 // 카카오 서버로부터 받은 액세스 토큰을 사용하여 자체 JWT 토큰을 생성함
+@Component
 @RequiredArgsConstructor
-@Service
 public class TokenProvider {
 
-    private final String header = "Authorization";
+    private final UserDetailsService userDetailsService;
 
-    @Value("${JWT_SECRET}")
+    // 서명에 사용할 시크릿 키
+    @Value("${jwt.secret}")
     private String secret;
 
-    // Access & Refresh Token 생성 메서드들
+    /**
+     * 공통적인 JWT 생성 메서드
+     *
+     * @param member   사용자 정보
+     * @param type     토큰의 용도 구분 (ex. initial_access, final_refresh, admin_access 등)
+     * @param duration 토큰 유효 기간
+     * @param isAdmin  관리자 여부 (role 클레임 포함 여부 결정)
+     * @param isTest   테스트 계정 여부 (필요시 처리 가능)
+     * @return JWT 문자열
+     */
+    private String createToken(Member member, String type, Duration duration, boolean isAdmin,
+            boolean isTest) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + duration.toMillis());
+
+        JwtBuilder builder = Jwts.builder()
+                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)  // 헤더 typ: "JWT"
+                .setIssuedAt(now)                               // 발급 시간
+                .setExpiration(expiry)                          // 만료 시간
+                .setSubject(String.valueOf(member.getId()))     // 서브젝트: 사용자 ID
+                .claim("id", member.getId())
+                .claim("name", member.getName())
+                .claim("nickname", member.getNickname())
+                .claim("studentId", member.getStudentId())
+                .claim("phoneNumber", member.getPhoneNumber())
+                .claim("type", type);                           // type: 토큰 용도
+
+        // 선택적인 정보
+        if (member.getGender() != null) {
+            builder.claim("gender", member.getGender().name());
+        }
+
+        if (member.getMajor() != null) {
+            builder.claim("major", member.getMajor().name());
+        }
+
+        // 관리자용 role 클레임 추가
+        if (isAdmin) {
+            builder.claim("role", member.getRole());
+        }
+
+        // 서명 후 토큰 문자열 반환
+        return builder
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
+    }
+
+    // ========== ✅ 일반 사용자용 토큰 ==========
+
+    // 최초 로그인 후 임시로 발급되는 Access Token (ex. 프로필 미완성 시)
     public String generateInitialAccessToken(Member member) {
-        return makeUserToken(new Date(System.currentTimeMillis() + Duration.ofHours(2).toMillis()),
-                member, "initial_access");
+        return createToken(member, "initial_access", Duration.ofHours(2), false, false);
     }
 
     public String generateInitialRefreshToken(Member member) {
-        return makeUserToken(new Date(System.currentTimeMillis() + Duration.ofDays(7).toMillis()),
-                member, "initial_refresh");
+        return createToken(member, "initial_refresh", Duration.ofDays(7), false, false);
     }
 
+    // 프로필 완성 후 최종 Access Token
     public String generateFinalAccessToken(Member member) {
-        return makeUserToken(new Date(System.currentTimeMillis() + Duration.ofHours(2).toMillis()),
-                member, "final_access");
+        return createToken(member, "final_access", Duration.ofHours(2), false, false);
     }
 
     public String generateFinalRefreshToken(Member member) {
-        return makeUserToken(new Date(System.currentTimeMillis() + Duration.ofDays(7).toMillis()),
-                member, "final_refresh");
+        return createToken(member, "final_refresh", Duration.ofDays(7), false, false);
     }
 
+    // 임시 토큰 (짧은 시간동안만 유효, 예: 로그인 직후 유효성 검사 등)
+    public String createTemporaryAccessToken(Member member) {
+        return createToken(member, "temporary_access", Duration.ofMinutes(10), false, false);
+    }
+
+    // ========== 👩‍💼 관리자 전용 토큰 ==========
+
+    public String generateAdminAccessToken(Member member) {
+        return createToken(member, "admin_access", Duration.ofDays(100), true, false);
+    }
+
+    public String generateAdminRefreshToken(Member member) {
+        return createToken(member, "admin_refresh", Duration.ofDays(100), true, false);
+    }
+
+    // ========== 🧪 테스트 유저 전용 토큰 ==========
+
     public String generateTestAccessToken(Member member) {
-        return makeUserToken(new Date(System.currentTimeMillis() + Duration.ofDays(100).toMillis()),
-                member, "test_access");
+        return createToken(member, "test_access", Duration.ofDays(100), false, true);
     }
 
     public String generateTestRefreshToken(Member member) {
-        return makeUserToken(new Date(System.currentTimeMillis() + Duration.ofDays(100).toMillis()),
-                member, "test_refresh");
+        return createToken(member, "test_refresh", Duration.ofDays(100), false, true);
     }
 
-    // 관리자용 Access Token 생성 메서드
-    public String generateAdminAccessToken(Member member) {
-        return makeAdminUserToken(
-                new Date(System.currentTimeMillis() + Duration.ofDays(100).toMillis()),
-                member, "admin_access");
+    // ========== ✅ JWT 검증 관련 ==========
+
+    /**
+     * JWT에서 Claims 추출
+     */
+    public Claims parseClaims(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secret)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims(); // 만료된 토큰도 클레임은 반환
+        }
     }
 
-    // 관리자용 Refresh Token 생성 메서드
-    public String generateAdminRefreshToken(Member member) {
-        return makeAdminUserToken(
-                new Date(System.currentTimeMillis() + Duration.ofDays(100).toMillis()),
-                member, "admin_refresh");
-    }
-
-    // 공통 토큰 생성 로직 (initial, final, test 통합)
-    private String makeUserToken(Date expiry, Member member, String type) {
-        return Jwts.builder()
-                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
-                .setIssuedAt(new Date())
-                .setExpiration(expiry)
-                .setSubject(String.valueOf(member.getId()))
-                .claim("id", member.getId())
-                .claim("name", member.getName())
-                .claim("nickname", member.getNickname())
-                .claim("studentId", member.getStudentId())
-                .claim("phoneNumber", member.getPhoneNumber())
-                .claim("gender", member.getGender() != null ? member.getGender().name() : null)
-                .claim("major", member.getMajor() != null ? member.getMajor().name() : null)
-                .claim("type", type)
-                .signWith(SignatureAlgorithm.HS256, secret)
-                .compact();
-    }
-
-    private String makeAdminUserToken(Date expiry, Member member, String type) {
-        Date now = new Date();
-
-        return Jwts.builder()
-                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
-                .setIssuedAt(now)
-                .setExpiration(expiry)
-                .setSubject(String.valueOf(member.getId()))
-                .claim("id", member.getId())
-                .claim("name", member.getName())
-                .claim("nickname", member.getNickname())
-                .claim("studentId", member.getStudentId())
-                .claim("phoneNumber", member.getPhoneNumber())
-                .claim("role", member.getRole())
-                .claim("gender", member.getGender() != null ? member.getGender().name() : null)
-                .claim("major", member.getMajor() != null ? member.getMajor().name() : null)
-                .claim("type", type)
-                .signWith(SignatureAlgorithm.HS256, secret)
-                .compact();
-    }
-
-    // 토큰 유효성 검사
+    /**
+     * 토큰 유효성 검사
+     */
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
             return true;
-        } catch (Exception e) {
+        } catch (ExpiredJwtException | MalformedJwtException |
+                 IllegalArgumentException e) {
             return false;
         }
     }
 
-    // 인증 객체 생성: 무조건 CustomMemberDetails로 반환
+    /**
+     * Access Token 생성
+     */
+    public String createAccessToken(Long memberId) {
+        return Jwts.builder()
+                .setSubject(String.valueOf(memberId))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis()))
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
+    }
+
+    /**
+     * Refresh Token 생성
+     */
+    public String createRefreshToken(Long memberId) {
+        return Jwts.builder()
+                .setSubject(String.valueOf(memberId))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis()))
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
+    }
+
+    public Long getUserId(String token) {
+        // 토큰에서 사용자 ID를 추출하는 로직을 구현
+        // 예: JWT 토큰에서 클레임을 파싱하여 사용자 ID를 반환
+        Claims claims = parseClaims(token);
+        return Long.valueOf(claims.get("userId").toString());
+    }
+
     public Authentication getAuthentication(String token) {
-        Claims claims = getClaims(token);
-        CustomMemberDetails userDetails = getCustomMemberDetailsFromClaims(claims);
+        // 토큰에서 사용자 정보 추출
+        String username = getUsernameFromToken(token);
 
-        if (userDetails == null) {
-            throw new IllegalArgumentException("Invalid token: UserDetails is null");
-        }
-
-        return new UsernamePasswordAuthenticationToken(userDetails, token,
+        // 사용자 정보를 기반으로 Authentication 객체 생성
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        return new UsernamePasswordAuthenticationToken(userDetails, null,
                 userDetails.getAuthorities());
     }
 
-    // 클레임 기반 CustomMemberDetails 생성
-    private CustomMemberDetails getCustomMemberDetailsFromClaims(Claims claims) {
-        Long id = claims.get("id", Long.class);
-        if (id == null) {
-            return null;
-        }
-
-        Member.MemberBuilder memberBuilder = Member.builder().id(id);
-        String name = claims.get("name", String.class);
-        String nickname = claims.get("nickname", String.class);
-        String studentId = claims.get("studentId", String.class);
-        String phoneNumber = claims.get("phoneNumber", String.class);
-        String gender = claims.get("gender", String.class);
-        String major = claims.get("major", String.class);
-        String role = claims.get("role", String.class);
-
-        if (name != null) {
-            memberBuilder.name(name);
-        }
-        if (nickname != null) {
-            memberBuilder.nickname(nickname);
-        }
-        if (studentId != null) {
-            memberBuilder.studentId(studentId);
-        }
-        if (phoneNumber != null) {
-            memberBuilder.phoneNumber(phoneNumber);
-        }
-        if (gender != null) {
-            memberBuilder.gender(Gender.valueOf(gender));
-        }
-        if (major != null) {
-            memberBuilder.major(Major.valueOf(major));
-        }
-        if (role != null) {
-            memberBuilder.role(role);
-        }
-
-        return new CustomMemberDetails(memberBuilder.build());
+    private String getUsernameFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(secret.getBytes())
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getSubject();
     }
 
-    // 유저 ID 추출
-    public Long getUserId(String token) {
-        return getClaims(token).get("id", Long.class);
-    }
-
-    // 토큰에서 Claims 추출
-    private Claims getClaims(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-    }
-
-    // 타입 체크 메서드들
-    public boolean isInitialAccessToken(String token) {
-        return "initial_access".equals(getClaims(token).get("type"));
-    }
-
-    public boolean isInitialRefreshToken(String token) {
-        return "initial_refresh".equals(getClaims(token).get("type"));
-    }
-
-    public boolean isFinalAccessToken(String token) {
-        return "final_access".equals(getClaims(token).get("type"));
-    }
-
-    public boolean isFinalRefreshToken(String token) {
-        return "final_refresh".equals(getClaims(token).get("type"));
-    }
-
-    public boolean isTestAccessToken(String token) {
-        return "test_access".equals(getClaims(token).get("type"));
-    }
-
-    public boolean isTestRefreshToken(String token) {
-        return "test_refresh".equals(getClaims(token).get("type"));
-    }
-
-    // 관리자 Access Token인지 확인하는 메서드
-    public boolean isAdminAccessToken(String token) {
-        Claims claims = getClaims(token);
-        return "admin_access".equals(claims.get("type"));
-    }
-
-    // 관리자 Refresh Token인지 확인하는 메서드
-    public boolean isAdminRefreshToken(String token) {
-        Claims claims = getClaims(token);
-        return "admin_refresh".equals(claims.get("type"));
-    }
 }
