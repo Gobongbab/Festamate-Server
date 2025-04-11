@@ -138,7 +138,6 @@ public class RoomService {
     private void validateIsHost(Room room, Member member) {
         if (!member.isHost(room)) {
             throw new BadRequestException(MUST_HOST);
-
         }
     }
 
