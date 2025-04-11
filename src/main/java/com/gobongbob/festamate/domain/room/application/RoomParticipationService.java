@@ -66,7 +66,8 @@ public class RoomParticipationService {
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateNotHost(room, member);
 
-        roomParticipantRepository.deleteByMember_Id(member.getId());
+        List<RoomParticipant> guestParticipants = roomParticipantRepository.findByRoomAndRole(roomId, Role.GUEST);
+        roomParticipantRepository.deleteAll(guestParticipants);
     }
 
     public IsMemberHostResponse isMemberHost(Long roomId, Member member) {
