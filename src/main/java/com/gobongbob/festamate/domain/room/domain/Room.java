@@ -49,7 +49,7 @@ public class Room {
     @JoinColumn(name = "host_id")
     private Member host;
 
-    @OneToMany(mappedBy = "room", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomImage> images = new ArrayList<>();
 
     // 연관관계 편의 메서드
