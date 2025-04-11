@@ -98,7 +98,7 @@ public class RoomService {
 
     @Transactional
     public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request) {
-        Room room = roomRepository.findById(roomId)
+        Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
         validateAlone(room);
