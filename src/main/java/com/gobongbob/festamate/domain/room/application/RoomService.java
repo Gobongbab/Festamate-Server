@@ -7,6 +7,7 @@ import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROO
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
+import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
 import com.gobongbob.festamate.domain.member.domain.Gender;
@@ -38,6 +39,7 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final MessageRepository messageRepository;
     private final ImageService imageService;
 
     @Transactional
@@ -114,11 +116,13 @@ public class RoomService {
     // 방 삭제(일반, admin)
     @Transactional
     public void deleteRoomById(Member member, Long roomId) {
-        Room room = roomRepository.findById(roomId)
+        Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
 
-        roomParticipantRepository.deleteByRoom(room);
+        roomParticipantRepository.deleteByRoomId(roomId);
+        messageRepository.deleteByRoomId(roomId);
+        chatRoomRepository.deleteByRoomId(roomId);
         roomRepository.delete(room);
 
         /*
