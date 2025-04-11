@@ -47,7 +47,7 @@ public class RoomParticipationService {
     @Transactional
     public void participateWithFriends(Member member, Long roomId, ParticipationWithFriendRequest request) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("모임방이 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateRoomFull(room.getId(), request.friendPhoneNumbers().size() + 1);
 
         List<Member> participants = findParticipantsWithPhoneNumber(request);
