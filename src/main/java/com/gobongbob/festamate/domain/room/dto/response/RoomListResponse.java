@@ -25,7 +25,7 @@ public record RoomListResponse(
                 room.getTitle(),
                 room.getPlace(),
                 room.getContent(),
-                room.getPreferredGender().name(),
+                room.getPreferredGender().getName(),
                 room.getMeetingDateTime(),
                 room.getMaxParticipants(),
                 currentParticipants,
