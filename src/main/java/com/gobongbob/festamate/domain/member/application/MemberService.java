@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MemberService {
 
+    private static final String DEFAULT_PROFILE_IMAGE_NAME = "default_profile_image.png";
+
     private final MemberRepository memberRepository;
     private final ProfileImageRepository profileImageRepository;
     private final TokyoSnsService tokyoSnsService;
@@ -32,14 +34,14 @@ public class MemberService {
     @Transactional
     public Member createMember(MemberCreateRequest request) {
         Member member = request.toEntity();
-        profileImageRepository.findByStoreName("default_profile_image.png")
+        profileImageRepository.findByStoreName(DEFAULT_PROFILE_IMAGE_NAME)
                 .ifPresent(member::initializeProfileImage);
 
         return memberRepository.save(member);
     }
 
     public List<MemberResponse> findAllMembers() {
-        return memberRepository.findAll()
+        return memberRepository.findAllWithProfileImage()
                 .stream()
                 .map(MemberResponse::fromEntity)
                 .toList();
@@ -47,7 +49,7 @@ public class MemberService {
 
     // 유저 조회
     public MemberResponse findMemberById(Long memberId) {
-        return memberRepository.findById(memberId)
+        return memberRepository.findByIdWithProfileImage(memberId)
                 .map(MemberResponse::fromEntity)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
@@ -60,13 +62,13 @@ public class MemberService {
             throw new IllegalArgumentException("관리자 권한이 필요합니다.");
         }
 
-        return memberRepository.findById(memberId)
+        return memberRepository.findByIdWithProfileImage(memberId)
                 .map(MemberResponse::fromEntity)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
 
     public Member findMembersById(Long memberId) {
-        return memberRepository.findById(memberId)
+        return memberRepository.findByIdWithProfileImage(memberId)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
 
@@ -151,7 +153,7 @@ public class MemberService {
 
     // 아래부터는 oauth2를 위한 메서드
     public Member findById(Long memberId) {
-        return memberRepository.findById(memberId)
+        return memberRepository.findByIdWithProfileImage(memberId)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
 
