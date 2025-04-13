@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.auth.oauth.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
+import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.auth.oauth.application.OauthService;
 import com.gobongbob.festamate.domain.auth.oauth.dto.request.LoginRequest;
 import com.gobongbob.festamate.domain.auth.oauth.dto.request.LoginWithKakaoRequest;
@@ -52,7 +53,7 @@ public class OauthController {
             @RequestBody ProfileRegisterRequest request) {
 
         Long userId = oauthService.registerNewMember(request);
-        Map<String, String> tokens = tokenService.generateTokens(userId);
+        Map<String, String> tokens = tokenService.generateTokens(userId, TokenType.FINAL_ACCESS);
         return new SuccessResponse<>(tokens);
     }
 }
