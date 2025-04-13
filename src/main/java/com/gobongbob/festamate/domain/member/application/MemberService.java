@@ -122,7 +122,7 @@ public class MemberService {
         // 전화번호 인증 여부 확인
         String phoneNumber = request.phoneNumber();
         if (!tokyoSnsService.isPhoneNumberVerified(phoneNumber)) {
-            throw new BadRequestException(NOT_COMPLETION_PHONE);
+            throw new BadRequestException(PHONE_NOT_VERIFIED);
         }
 
         // 회원 조회

@@ -56,7 +56,7 @@ public class ChatController {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
             @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
     })
-    @GetMapping("api/messages/room/{roomId}")
+    @GetMapping("/api/messages/room/{roomId}")
     public SuccessResponse<Slice<MessageResponse>> findMessages(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal Member member,
