@@ -12,6 +12,7 @@ import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import jakarta.transaction.Transactional;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,10 +54,10 @@ public class OauthService {
      */
     public KakaoCheckResponse checkKakaoUser(String code) {
         // 1. 카카오 인가 코드를 통해 access token 발급
-        String kakaoAccessToken = getKakaoAccessToken(code);
+        String kakaoAccessToken = getKakaoAccessToken(code).toString();
 
         // 2. access token으로 사용자 정보 요청
-        KakaoUserInfo userInfo = getKakaoUserInfo(kakaoAccessToken);
+        KakaoUserInfo userInfo = (KakaoUserInfo) getKakaoUserInfo(kakaoAccessToken);
 
         // 3. DB에 해당 kakaoId가 존재하는지 여부 확인
         boolean isMember = memberRepository.existsByKakaoId(userInfo.getId());
@@ -68,7 +69,7 @@ public class OauthService {
      * 기존 회원 로그인 시, Kakao Access Token으로 kakaoId 추출 후 JWT 반환
      */
     public Long findUserIdByKakaoToken(String kakaoAccessToken) {
-        KakaoUserInfo userInfo = getKakaoUserInfo(kakaoAccessToken);
+        KakaoUserInfo userInfo = (KakaoUserInfo) getKakaoUserInfo(kakaoAccessToken);
         Member member = memberRepository.findByKakaoId(userInfo.getId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         return member.getId();
@@ -97,7 +98,8 @@ public class OauthService {
      */
     @Transactional
     public Long registerNewMember(ProfileRegisterRequest request) {
-        KakaoUserInfo userInfo = getKakaoUserInfo(request.kakaoAccessToken()); // record의 필드 사용
+        KakaoUserInfo userInfo = (KakaoUserInfo) getKakaoUserInfo(
+                request.kakaoAccessToken()); // record의 필드 사용
 
         if (memberRepository.existsByKakaoId(userInfo.getId())) {
             throw new IllegalStateException("이미 존재하는 회원입니다.");
@@ -122,7 +124,7 @@ public class OauthService {
     }
 
     // 🔹 카카오 인가 코드로 Access Token 발급
-    private String getKakaoAccessToken(String code) {
+    private Map<String, String> getKakaoAccessToken(String code) {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("client_id", clientId);
@@ -137,11 +139,15 @@ public class OauthService {
                 .bodyToMono(KakaoTokenResponse.class)
                 .block();
 
-        return response.getAccessToken();
+        // Map으로 변환하여 access_token만 넣어 반환
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", response.getAccessToken());
+
+        return tokens;
     }
 
     // 🔹 Kakao Access Token으로 사용자 정보 조회
-    private KakaoUserInfo getKakaoUserInfo(String accessToken) {
+    private Map<String, String> getKakaoUserInfo(String accessToken) {
         String json = webClient.get()
                 .uri(userInfoUri)
                 .header("Authorization", "Bearer " + accessToken)
@@ -152,7 +158,12 @@ public class OauthService {
         try {
             JsonNode root = objectMapper.readTree(json);
             Long kakaoId = root.get("id").asLong();
-            return new KakaoUserInfo(kakaoId);
+
+            // Map으로 반환
+            Map<String, String> userInfo = new HashMap<>();
+            userInfo.put("kakaoId", String.valueOf(kakaoId)); // kakaoId는 String으로 반환
+
+            return userInfo;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("카카오 사용자 정보 파싱 실패", e);
         }
