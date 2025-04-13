@@ -27,7 +27,7 @@ public enum ResponseCode {
     DUPLICATE_NICKNAME(false, "중복된 닉네임입니다."),
     USER_NOT_FOUND(false, "해당 유저를 찾을 수 없습니다"),
     UNEXPECTED_TOKEN(false, "올바르지 않은 토큰입니다."),
-    NOT_COMPLETION_PHONE(false, "전화번호 인증이 완료되지 않았습니다."),
+    PHONE_NOT_VERIFIED(false, "전화번호 인증이 완료되지 않았습니다."),
 
     // 파일
     EMPTY_FILE(false, "파일이 비어있습니다."),
