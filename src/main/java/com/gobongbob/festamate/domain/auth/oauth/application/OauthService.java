@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
+import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.auth.oauth.dto.request.KakaoUserInfo;
 import com.gobongbob.festamate.domain.auth.oauth.dto.response.KakaoCheckResponse;
 import com.gobongbob.festamate.domain.auth.oauth.dto.response.KakaoTokenResponse;
@@ -84,7 +85,7 @@ public class OauthService {
         // 프로필 완료 여부 확인
         if (member.isProfileCompleted()) {
             // 프로필 등록이 완료된 경우 JWT 반환
-            return tokenService.generateTokens(userId);
+            return tokenService.generateTokens(userId, TokenType.FINAL_ACCESS);
         } else {
             // 프로필 등록이 안 된 경우 예외 처리
             throw new IllegalStateException("프로필 등록이 필요합니다.");
@@ -131,7 +132,7 @@ public class OauthService {
         KakaoTokenResponse response = webClient.post()
                 .uri(tokenUri)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                .body(BodyInserters.fromFormData(body)) // ✅ 꼭 이렇게!
+                .body(BodyInserters.fromFormData(body))
                 .retrieve()
                 .bodyToMono(KakaoTokenResponse.class)
                 .block();
