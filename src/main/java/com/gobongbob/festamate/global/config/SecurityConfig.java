@@ -56,7 +56,8 @@ public class SecurityConfig {
                                 "/health",
                                 "/sentry",
                                 "/error",
-                                "/login/oauth2/**"
+                                "/login/oauth2/**",
+                                "/test/**"
                         ).permitAll()
 
                         // 로그인 + JWT 인증이 필요한 경로
