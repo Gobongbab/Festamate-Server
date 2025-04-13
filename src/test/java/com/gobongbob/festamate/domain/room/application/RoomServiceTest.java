@@ -83,7 +83,7 @@ class RoomServiceTest extends serviceSliceTest {
             doNothing().when(imageService).uploadImages(any());
 
             // when
-            Room createdRoom = roomService.createRoom(member, request, imageFiles);
+            Room createdRoom = roomService.createRoom(member, request, imageFiles).getRoom();
 
             // then
             assertAll(
@@ -151,6 +151,7 @@ class RoomServiceTest extends serviceSliceTest {
             // when
             RoomUpdateRequest request = new RoomUpdateRequest(
                     room.getTitle(),
+                    room.getPlace(),
                     room.getContent(),
                     preferredGenderToUpdate.getName(),
                     room.getMeetingDateTime(),

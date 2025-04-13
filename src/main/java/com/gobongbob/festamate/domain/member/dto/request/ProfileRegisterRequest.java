@@ -9,9 +9,12 @@ public record ProfileRegisterRequest(
         String name,
         String studentId,
         String phoneNumber,
+        String phoneVerificationCodes,
         String gender,
         String college,
-        String department
+        String department,
+        String kakaoAccessToken, // 카카오 access token
+        String nickname         // 회원이 등록할 닉네임
 ) {
 
     // Member 엔티티로 변환하는 메서드
@@ -57,7 +60,7 @@ public record ProfileRegisterRequest(
                 "물방울", "눈송이", "바람개비", "풍선", "요술봉", "종이접기", "인형", "장난감", "연필", "크레파스",
                 "지우개", "색연필", "물감", "크레용", "붓", "도화지", "색종이", "풀", "가위", "테이프",
                 "스티커", "도장", "책갈피", "책", "동화", "이야기", "노래", "춤", "그림", "사진", "팬케이크", "와플",
-                "머핀", "도넛", "타르트", "파이", "케이크", "빵", "비스킷","크로와상", "베이글", "프레첼", "마들렌",
+                "머핀", "도넛", "타르트", "파이", "케이크", "빵", "비스킷", "크로와상", "베이글", "프레첼", "마들렌",
                 "에클레어", "슈크림", "크레페", "롤케이크", "치즈케이크", "티라미수",
                 "아이스크림", "소르베", "밀크셰이크", "스무디", "주스", "레모네이드", "차", "커피",
                 "코코아", "핫초코", "밀크티", "버블티", "에이드", "소다", "사이다", "콜라", "라떼", "모카",
@@ -76,7 +79,8 @@ public record ProfileRegisterRequest(
         int randomNounIndex = (int) (Math.random() * nouns.length);
 
         // 랜덤한 형용사와 명사 조합
-        String randomNickname = adjectives[randomAdjectiveIndex] + nouns[randomNounIndex] + randomNumber;
+        String randomNickname =
+                adjectives[randomAdjectiveIndex] + nouns[randomNounIndex] + randomNumber;
 
         return randomNickname;
     }

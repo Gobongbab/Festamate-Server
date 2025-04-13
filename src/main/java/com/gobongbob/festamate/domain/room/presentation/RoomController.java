@@ -7,6 +7,7 @@ import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
+import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
@@ -52,7 +53,7 @@ public class RoomController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     @PostMapping("")
-    public SuccessResponse<Void> createRoom(
+    public SuccessResponse<Void> create(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(description = "방 생성 요청 정보")
@@ -75,7 +76,7 @@ public class RoomController {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
     })
     @GetMapping("")
-    public SuccessResponse<Page<RoomListResponse>> findAllRooms(
+    public SuccessResponse<Page<RoomListResponse>> findAll(
             @Parameter(description = "페이징 정보")
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
@@ -86,7 +87,7 @@ public class RoomController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
     })
-    @GetMapping("/participate")
+    @GetMapping("/participations")
     public SuccessResponse<List<RoomListResponse>> findParticipatingRooms(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails
@@ -112,7 +113,7 @@ public class RoomController {
             @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
     })
     @PatchMapping("/{roomId}")
-    public SuccessResponse<Void> updateRoomById(
+    public SuccessResponse<Void> updateById(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId,
@@ -130,7 +131,7 @@ public class RoomController {
             @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
     })
     @DeleteMapping("/{roomId}")
-    public SuccessResponse<Void> deleteRoomById(
+    public SuccessResponse<Void> deleteById(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
@@ -145,13 +146,13 @@ public class RoomController {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
             @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
     })
-    @PostMapping("/{roomId}/participate")
-    public SuccessResponse<Void> participateRoom(
+    @PostMapping("/{roomId}/participations")
+    public SuccessResponse<Void> participateAlone(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
     ) {
-        roomParticipationService.participateRoom(memberDetails.getMember(), roomId);
+        roomParticipationService.participateAlone(memberDetails.getMember(), roomId);
         chatService.sendMessage(
                 roomId,
                 memberDetails.getMember(),
@@ -167,12 +168,12 @@ public class RoomController {
             @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
     })
     @PostMapping("/{roomId}/leave")
-    public SuccessResponse<Void> leaveRoom(
+    public SuccessResponse<Void> leave(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
     ) {
-        roomParticipationService.leaveRoomById(memberDetails.getMember(), roomId);
+        roomParticipationService.leave(memberDetails.getMember(), roomId);
         chatService.sendMessage(
                 roomId,
                 memberDetails.getMember(),
@@ -187,12 +188,12 @@ public class RoomController {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
             @ApiResponse(responseCode = "400", description = "참여중인 모임방이 존재하지 않습니다.")
     })
-    @GetMapping("/{roomId}/isHost")
-    public SuccessResponse<Boolean> isMemberHost(
+    @GetMapping("/{roomId}/host")
+    public SuccessResponse<IsMemberHostResponse> isMemberHost(
+            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId,
             @Parameter(description = "인증된 사용자 정보", hidden = true)
-            @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
-        return new SuccessResponse<>(roomParticipationService.isMemberHost(memberDetails.getMember().getId(), roomId));
+        return new SuccessResponse<>(roomParticipationService.isMemberHost(roomId, memberDetails.getMember()));
     }
 }

@@ -1,12 +1,9 @@
 package com.gobongbob.festamate.domain.member.presentation;
 
-import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
-import com.gobongbob.festamate.domain.member.domain.Member;
-import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.MemberExistRequest;
-import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
@@ -18,13 +15,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @Validated
@@ -35,19 +30,19 @@ public class MemberController {
     private final MemberService memberService;
     private final TokenService tokenService;
 
-    @Operation(summary = "회원가입", description = "새로운 회원을 등록합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청")
-    })
-    @PostMapping("/auth/signup")
-    public SuccessResponse<Void> signUp(
-            @Parameter(description = "회원가입 요청 정보")
-            @RequestBody @Valid MemberCreateRequest request
-    ) {
-        Member member = memberService.createMember(request);
-        return new SuccessResponse<>();
-    }
+//    @Operation(summary = "회원가입", description = "새로운 회원을 등록합니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청")
+//    })
+//    @PostMapping("/auth/signup")
+//    public SuccessResponse<Void> signUp(
+//            @Parameter(description = "회원가입 요청 정보")
+//            @RequestBody @Valid MemberCreateRequest request
+//    ) {
+//        Member member = memberService.createMember(request);
+//        return new SuccessResponse<>();
+//    }
 
     @Operation(summary = "모든 회원 조회", description = "모든 회원 목록을 조회합니다.")
     @ApiResponses(value = {
@@ -113,23 +108,26 @@ public class MemberController {
         return new SuccessResponse<>();
     }
 
-    @Operation(summary = "프로필 등록", description = "회원의 프로필 정보를 등록하고 토큰을 발급합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "중복된 닉네임이 존재합니다.")
-    })
-    @PostMapping("/api/auth/register/profile")
-    public SuccessResponse<Map<String, String>> registerProfile(
-            @Parameter(description = "프로필 등록 요청 정보")
-            @RequestBody ProfileRegisterRequest request,
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
-            @AuthenticationPrincipal CustomMemberDetails memberDetails
-    ) {
-        Long userId = memberDetails.getMember().getId();
-        memberService.registerProfile(request, userId);
-        Map<String, String> tokens = tokenService.generateTokens(userId);
-        return new SuccessResponse<>(tokens);
-    }
+//    @Operation(summary = "프로필 등록", description = "회원의 프로필 정보를 등록하고 토큰을 발급합니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+//            @ApiResponse(responseCode = "400", description = "중복된 닉네임이 존재합니다.")
+//    })
+//    @PostMapping("/api/auth/register/profile") // 추후 /api/auth를 상위 경로에 작성하도록 변경 필요
+//    public SuccessResponse<Map<String, String>> registerProfile(
+//            @Parameter(description = "프로필 등록 요청 정보")
+//            @RequestBody ProfileRegisterRequest request,
+//            @Parameter(description = "인증된 사용자 정보", hidden = true)
+//            @AuthenticationPrincipal CustomMemberDetails memberDetails // 최소 JWT 정보
+//    ) {
+//        Long userId = memberDetails.getMember().getId();
+//        memberService.registerProfile(request, userId);
+//
+//        // TokenService를 이용하여 최종 JWT(access, refresh) 생성
+//        Map<String, String> tokens = tokenService.generateTokens(userId);
+//        // 최종 JWT 반환
+//        return new SuccessResponse<>(tokens);
+//    }
 
     @Operation(summary = "회원 존재 여부 확인", description = "전화번호로 회원 존재 여부를 확인합니다.")
     @ApiResponses(value = {

@@ -1,10 +1,12 @@
 package com.gobongbob.festamate.domain.room.presentation;
 
+import com.gobongbob.festamate.domain.room.domain.Role;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface RoomParticipantRepository extends JpaRepository<RoomParticipant, Long> {
 
@@ -21,6 +23,9 @@ public interface RoomParticipantRepository extends JpaRepository<RoomParticipant
     void deleteByRoom(Room room);
 
     List<RoomParticipant> findByRoom_Id(Long roomId);
+
+    @Query("select r from RoomParticipant r where r.room.id = ?1 and r.role = ?2")
+    List<RoomParticipant> findByRoomAndRole(Long id, Role role);
 
     List<RoomParticipant> findByMember_Id(Long memberId);
 

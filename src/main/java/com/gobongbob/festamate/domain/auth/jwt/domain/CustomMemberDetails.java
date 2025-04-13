@@ -2,7 +2,6 @@ package com.gobongbob.festamate.domain.auth.jwt.domain;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

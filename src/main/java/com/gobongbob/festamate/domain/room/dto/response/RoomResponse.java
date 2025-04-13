@@ -14,30 +14,41 @@ public record RoomResponse(
         String preferredGender,
         LocalDateTime meetingDateTime,
         int maxParticipants,
-        List<ParticipantResponse> participants,
+        List<ParticipantResponse> hostParticipants,
+        List<ParticipantResponse> guestParticipants,
         List<ImageResponse> images
 ) {
 
-    public static RoomResponse fromEntity(Room room, List<RoomParticipant> participants) {
-        List<ParticipantResponse> participantResponses = participants.stream()
-                .map(participant -> ParticipantResponse.fromEntity(participant, participant.isHost()))
-                .toList();
-        List<ImageResponse> imageResponses = room.getImages()
-                .stream()
-                .map(roomImage -> ImageResponse.fromEntity(roomImage.getImage()))
-                .toList();
-
+    public static RoomResponse fromEntity(
+            Room room,
+            List<RoomParticipant> hostParticipants,
+            List<RoomParticipant> guestParticipants
+    ) {
         return new RoomResponse(
                 room.getId(),
                 room.getTitle(),
                 room.getPlace(),
                 room.getContent(),
-                room.getPreferredGender().name(),
+                room.getPreferredGender().getName(),
                 room.getMeetingDateTime(),
                 room.getMaxParticipants(),
-                participantResponses,
-                imageResponses
+                toParticipantResponse(hostParticipants),
+                toParticipantResponse(guestParticipants),
+                toImageResponse(room)
         );
+    }
+
+    private static List<ParticipantResponse> toParticipantResponse(List<RoomParticipant> participants) {
+        return participants.stream()
+                .map(participant -> ParticipantResponse.fromEntity(participant, participant.isHost()))
+                .toList();
+    }
+
+    private static List<ImageResponse> toImageResponse(Room room) {
+        return room.getImages()
+                .stream()
+                .map(roomImage -> ImageResponse.fromEntity(roomImage.getImage()))
+                .toList();
     }
 
     private record ParticipantResponse(
@@ -45,7 +56,7 @@ public record RoomResponse(
             String nickname,
             String studentId,
             String gender,
-            String department,
+            String major,
             boolean isHost
     ) {
 
