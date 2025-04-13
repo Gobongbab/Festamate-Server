@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.auth.jwt.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
+import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.auth.jwt.dto.request.CreateAccessTokenRequest;
 import com.gobongbob.festamate.domain.auth.jwt.dto.response.CreateAccessTokenResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
@@ -23,26 +24,20 @@ public class TokenController {
     private final TokenService tokenService;
     private final TokenProvider tokenProvider;
 
-    @PostMapping("/refresh") // 초기 refresh jwt로 access jwt 받아옴
-    public SuccessResponse<CreateAccessTokenResponse> createNewAccessToken(
-            @RequestBody @Valid CreateAccessTokenRequest request) {
-        String newAccessToken = tokenService.createNewInitialAccessToken(request.getRefreshToken());
-
-        return new SuccessResponse<>(new CreateAccessTokenResponse(newAccessToken));
-    }
-
-    @PostMapping("/refresh/final") // 최종 refresh jwt로 access jwt 받아옴
+    @PostMapping("/final") // refresh jwt로 access jwt 받아옴
     public SuccessResponse<CreateAccessTokenResponse> createNewFinalAccessToken(
             @RequestBody @Valid CreateAccessTokenRequest request) {
-        String newAccessToken = tokenService.createNewFinalAccessToken(request.getRefreshToken());
+        String newAccessToken = tokenService.createNewAccessToken(request.getRefreshToken(),
+                TokenType.FINAL_ACCESS);
 
         return new SuccessResponse<>(new CreateAccessTokenResponse(newAccessToken));
     }
 
-    @PostMapping("/refresh/test") // 테스트용 refresh jwt로 access jwt 받아옴
+    @PostMapping("/test") // 테스트용 refresh jwt로 access jwt 받아옴
     public SuccessResponse<CreateAccessTokenResponse> createNewTestAccessToken(
             @RequestBody @Valid CreateAccessTokenRequest request) {
-        String newAccessToken = tokenService.createNewTestAccessToken(request.getRefreshToken());
+        String newAccessToken = tokenService.createNewAccessToken(request.getRefreshToken(),
+                TokenType.TEST_ACCESS);
 
         return new SuccessResponse<>(new CreateAccessTokenResponse(newAccessToken));
     }

@@ -24,7 +24,6 @@ public class CustomMemberDetailsService implements UserDetailsService {
         //UserDetails에 담아서 return하면 AutneticationManager가 검증 함
         Member member = memberRepository.findByLoginIdWithProfileImage(loginId)
                 .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
-
         return new CustomMemberDetails(member);
     }
 }
