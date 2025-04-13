@@ -77,6 +77,11 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 || uri.equals("/sentry")
                 || uri.equals("/error")
                 || uri.equals("/api/rooms/list")
-                || uri.startsWith("/login/oauth2/");
+                || uri.startsWith("/login/oauth2/")
+                || uri.startsWith("/swagger-ui/")
+                || uri.startsWith("/v3/api-docs")
+                || uri.startsWith("/swagger-resources")
+                || uri.startsWith("/webjars/")
+                || uri.equals("/swagger-ui.html");
     }
 }

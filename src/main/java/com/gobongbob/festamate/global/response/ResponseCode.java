@@ -29,6 +29,7 @@ public enum ResponseCode {
     ALREADY_REPORT(false, "이미 신고한 방입니다."),
     NO_REPORT(false, "해당 신고가 존재하지 않습니다."),
     NO_REPORT_REASON(false, "해당하는 신고 사유가 없습니다."),
+    NO_ADMIN(false, "관리자 권한이 필요합니다."),
 
     EXCEED_IMAGE_CAPACITY(false, "업로드 가능한 이미지 용량을 초과했습니다.");
 

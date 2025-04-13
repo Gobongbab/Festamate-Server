@@ -5,12 +5,16 @@ import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
-import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -35,16 +39,25 @@ import org.springframework.web.multipart.MultipartFile;
 @Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/rooms")
+@Tag(name = "Room", description = "방 관련 API")
 public class RoomController {
 
     private final RoomService roomService;
     private final RoomParticipationService roomParticipationService;
     private final ChatService chatService;
 
+    @Operation(summary = "모임방 생성", description = "새로운 모임방을 생성합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청")
+    })
     @PostMapping("")
     public SuccessResponse<Void> createRoom(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @Parameter(description = "방 생성 요청 정보")
             @RequestPart("request") @Valid RoomCreateRequest request,
+            @Parameter(description = "방 이미지")
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
         ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
@@ -57,29 +70,53 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
+    @Operation(summary = "모든 모임방 조회", description = "모든 방 목록을 페이징하여 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
+    })
     @GetMapping("")
     public SuccessResponse<Page<RoomListResponse>> findAllRooms(
+            @Parameter(description = "페이징 정보")
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return new SuccessResponse<>(roomService.findAllRooms(pageable));
     }
 
+    @Operation(summary = "참여 중인 모임방 조회", description = "사용자가 참여 중인 방 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
+    })
     @GetMapping("/participate")
     public SuccessResponse<List<RoomListResponse>> findParticipatingRooms(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
         return new SuccessResponse<>(roomService.findParticipatingRooms(memberDetails.getMember().getId()));
     }
 
+    @Operation(summary = "모임방 상세 조회", description = "모임방 ID로 방 상세 정보를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
+    })
     @GetMapping("/{roomId}")
-    public SuccessResponse<RoomResponse> findRoomById(@PathVariable Long roomId) {
+    public SuccessResponse<RoomResponse> findRoomById(
+            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
+    ) {
         return new SuccessResponse<>(roomService.findRoomById(roomId));
     }
 
+    @Operation(summary = "모임방 정보 수정", description = "모임방 정보를 수정합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
+    })
     @PatchMapping("/{roomId}")
     public SuccessResponse<Void> updateRoomById(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId,
+            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId,
+            @Parameter(description = "모임방 수정 요청 정보")
             @RequestBody @Valid RoomUpdateRequest request
     ) {
         roomService.updateRoomById(memberDetails.getMember(), roomId, request);
@@ -87,20 +124,32 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
+    @Operation(summary = "모임방 삭제", description = "모임방을 삭제합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
+    })
     @DeleteMapping("/{roomId}")
     public SuccessResponse<Void> deleteRoomById(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId
+            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
     ) {
         roomService.deleteRoomById(memberDetails.getMember(), roomId);
 
         return new SuccessResponse<>();
     }
 
+    @Operation(summary = "방 참여", description = "방에 참여합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
+    })
     @PostMapping("/{roomId}/participate")
     public SuccessResponse<Void> participateRoom(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId
+            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
     ) {
         roomParticipationService.participateRoom(memberDetails.getMember(), roomId);
         chatService.sendMessage(
@@ -112,10 +161,16 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
+    @Operation(summary = "모임방 나가기", description = "모임방에서 나갑니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
+    })
     @PostMapping("/{roomId}/leave")
     public SuccessResponse<Void> leaveRoom(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId
+            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
     ) {
         roomParticipationService.leaveRoomById(memberDetails.getMember(), roomId);
         chatService.sendMessage(
@@ -127,10 +182,16 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
+    @Operation(summary = "방장 여부 확인", description = "사용자가 방장인지 확인합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "참여중인 모임방이 존재하지 않습니다.")
+    })
     @GetMapping("/{roomId}/isHost")
     public SuccessResponse<Boolean> isMemberHost(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId
+            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
     ) {
         return new SuccessResponse<>(roomParticipationService.isMemberHost(memberDetails.getMember().getId(), roomId));
     }
