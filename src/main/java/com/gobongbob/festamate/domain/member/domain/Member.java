@@ -149,7 +149,7 @@ public class Member {
     }
 
     public boolean isHost(Room room) {
-        return "ADMIN".equals(this.role) || room.getHost().equals(this);
+        return "ADMIN".equals(this.role) || room.getHost().getId().equals(this.getId());
     }
 
     /***

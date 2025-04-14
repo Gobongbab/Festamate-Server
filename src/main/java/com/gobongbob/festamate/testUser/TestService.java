@@ -29,6 +29,10 @@ public class TestService {
         Member testMember = createTestMemberEntity("Test User7", "test_nickname7",
                 "test_student_id7");
 
+        // 초기 프로필 이미지 설정
+        profileImageRepository.findByStoreName("default_profile_image.png")
+                .ifPresent(testMember::initializeProfileImage);
+
         // DB에 회원 저장
         memberRepository.save(testMember);  // JPA를 사용하여 DB에 저장
 

@@ -21,8 +21,10 @@ public class CustomMemberDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
-        Member member = memberRepository.findByLoginId(loginId)
+        //UserDetails에 담아서 return하면 AutneticationManager가 검증 함
+        Member member = memberRepository.findByIdWithProfileImage(Long.parseLong(loginId))
                 .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
+
         return new CustomMemberDetails(member);
     }
 }
