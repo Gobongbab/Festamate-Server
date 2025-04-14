@@ -47,6 +47,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
 
+                        // Swagger UI 관련 경로 허용 추가
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+
                         // 비로그인 허용 경로
                         .requestMatchers(
                                 "/api/auth/kakao",
@@ -93,7 +103,7 @@ public class SecurityConfig {
 
         // 사용할 HTTP 메서드 명시
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
+        
         // 허용할 헤더 설정
         configuration.setAllowedHeaders(Arrays.asList(
                 "X-Requested-With",

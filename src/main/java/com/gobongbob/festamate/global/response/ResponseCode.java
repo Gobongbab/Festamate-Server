@@ -27,6 +27,7 @@ public enum ResponseCode {
     DUPLICATE_NICKNAME(false, "중복된 닉네임입니다."),
     USER_NOT_FOUND(false, "해당 유저를 찾을 수 없습니다"),
     UNEXPECTED_TOKEN(false, "올바르지 않은 토큰입니다."),
+    PHONE_NOT_VERIFIED(false, "전화번호 인증이 완료되지 않았습니다."),
 
     // 파일
     EMPTY_FILE(false, "파일이 비어있습니다."),
@@ -41,7 +42,11 @@ public enum ResponseCode {
     CAN_NOT_REPORT_MYSELF(false, "자신의 방은 신고할 수 없습니다."),
     ALREADY_REPORT(false, "이미 신고한 방입니다."),
     NO_REPORT(false, "해당 신고가 존재하지 않습니다."),
-    NO_REPORT_REASON(false, "해당하는 신고 사유가 없습니다.");
+    NO_REPORT_REASON(false, "해당하는 신고 사유가 없습니다."),
+
+    // 관리자
+    NO_ADMIN(false, "관리자 권한이 필요합니다.");
+
 
     private final boolean isSuccess;
     private final String message;

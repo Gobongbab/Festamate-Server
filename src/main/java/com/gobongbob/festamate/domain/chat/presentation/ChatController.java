@@ -6,12 +6,16 @@ import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.global.response.SuccessResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.Authentication;
@@ -22,14 +26,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Chat", description = "채팅 관련 API")
 public class ChatController {
 
     private final ChatService chatService;
 
-    @MessageMapping("/chat/room/{roomId}") // Spring App 을 거쳐서 메시지 전송. 앞에 "app" prefix 를 붙여야 함
+    @Operation(summary = "메시지 전송", description = "채팅방에 메시지를 전송합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
+    })
+    @MessageMapping("/chat/room/{roomId}")
     public SuccessResponse<Void> sendMessage(
-            @DestinationVariable Long roomId,
+            @Parameter(name = "roomId", description = "모임방 ID")
+            @DestinationVariable("roomId") Long roomId,
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
             Authentication authentication,
+            @Parameter(description = "메시지 전송 요청 정보")
             MessageRequest request
     ) {
         Member member = ((CustomMemberDetails) authentication.getPrincipal()).getMember();
@@ -38,10 +51,18 @@ public class ChatController {
         return new SuccessResponse<>();
     }
 
-    @GetMapping("api/messages/room/{roomId}")
+    @Operation(summary = "메시지 조회", description = "모임방의 메시지 목록을 페이징하여 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
+    })
+    @GetMapping("/api/messages/room/{roomId}")
     public SuccessResponse<Slice<MessageResponse>> findMessages(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal Member member,
-            @PathVariable Long roomId,
+            @Parameter(name = "roomId", description = "모임방 ID")
+            @PathVariable("roomId") Long roomId,
+            @Parameter(description = "페이징 정보")
             @PageableDefault(size = 100, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Slice<MessageResponse> messages = chatService.findMessagesByRoomId(member.getId(), roomId, pageable);

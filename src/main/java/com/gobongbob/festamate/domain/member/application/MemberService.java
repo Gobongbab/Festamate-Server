@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -59,7 +61,7 @@ public class MemberService {
         String role = memberDetails.getMember().getRole();
 
         if (!"ADMIN".equals(role)) {
-            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
+            throw new BadRequestException(NO_ADMIN);
         }
 
         return memberRepository.findByIdWithProfileImage(memberId)
@@ -101,7 +103,7 @@ public class MemberService {
     @Transactional
     public void blockMemberById(Long userId) {
         Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
         member.block();
         memberRepository.save(member);
     }
@@ -110,7 +112,7 @@ public class MemberService {
     @Transactional
     public void unblockMemberById(Long userId) {
         Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
         member.unblock();
         memberRepository.save(member);
     }
@@ -122,7 +124,7 @@ public class MemberService {
         // 전화번호 인증 여부 확인
         String phoneNumber = request.phoneNumber();
         if (!tokyoSnsService.isPhoneNumberVerified(phoneNumber)) {
-            throw new IllegalArgumentException("전화번호 인증이 완료되지 않았습니다.");
+            throw new BadRequestException(PHONE_NOT_VERIFIED);
         }
 
         // 회원 조회
