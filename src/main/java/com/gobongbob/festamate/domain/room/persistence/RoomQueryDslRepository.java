@@ -7,5 +7,5 @@ import org.springframework.data.domain.Slice;
 
 public interface RoomQueryDslRepository {
 
-    Slice<Room> findByFilter(SearchCondition searchCondition, Pageable pageable);
+    Slice<Room> findBySearchCondition(SearchCondition searchCondition, Pageable pageable);
 }

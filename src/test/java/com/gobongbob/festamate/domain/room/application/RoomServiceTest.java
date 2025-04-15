@@ -125,7 +125,7 @@ class RoomServiceTest extends serviceSliceTest {
             Pageable pageable = PageRequest.of(0, 10);
 
             // when
-            Page<RoomListResponse> findRoomResponses = roomService.findAllRooms(pageable);
+            Page<RoomListResponse> findRoomResponses = roomService.findBySearchCondition(pageable);
 
             // then
             assertThat(findRoomResponses).hasSize(rooms.size());
