@@ -5,6 +5,8 @@ import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,6 +39,10 @@ public class Room {
     private String place;
 
     private String content;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Status status = Status.MATCHING;
 
     private int maxParticipants;
 
