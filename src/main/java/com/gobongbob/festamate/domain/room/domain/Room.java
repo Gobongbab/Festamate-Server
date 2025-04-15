@@ -44,12 +44,12 @@ public class Room {
 
     private LocalDateTime meetingDateTime;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host_id")
     private Member host;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<RoomImage> images = new ArrayList<>();
 
     // 연관관계 편의 메서드
