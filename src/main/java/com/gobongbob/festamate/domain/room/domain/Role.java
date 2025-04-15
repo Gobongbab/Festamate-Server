@@ -4,20 +4,16 @@ import static com.gobongbob.festamate.global.response.ResponseCode.ROLE_NOT_FOUN
 
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.Arrays;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
+@AllArgsConstructor
 public enum Role {
     HOST("HOST"),
     GUEST("GUEST");
 
     private final String name;
-
-    Role(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
 
     public static Role findByName(String name) {
         return Arrays.stream(Role.values())

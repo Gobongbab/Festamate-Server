@@ -1,9 +1,13 @@
 package com.gobongbob.festamate.domain.report.domain;
 
-import com.gobongbob.festamate.global.response.exception.BadRequestException;
-
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_REPORT_REASON;
 
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum ReportReason {
     UNHEALTHY("음란물/불건전한 만남 및 대화"),
     ABUSE("욕설/비하"),
@@ -14,10 +18,6 @@ public enum ReportReason {
     ILLEGAL("불법촬영물 등의 유통");
 
     private final String name;
-
-    ReportReason(String name) {
-        this.name = name;
-    }
 
     public static ReportReason findByName(String name) {
         for (ReportReason reason : ReportReason.values()) {
