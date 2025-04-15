@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
-public interface RoomRepository extends Repository<Room, Long> {
+public interface RoomRepository extends Repository<Room, Long>, RoomQueryDslRepository {
 
     Room save(Room room);
 
