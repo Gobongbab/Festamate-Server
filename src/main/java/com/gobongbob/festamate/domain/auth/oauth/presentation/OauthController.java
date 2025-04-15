@@ -9,6 +9,7 @@ import com.gobongbob.festamate.domain.auth.oauth.dto.response.KakaoCheckResponse
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.global.response.SuccessResponse;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -49,11 +50,13 @@ public class OauthController {
 
     // 3️⃣ 신규 회원 프로필 등록 후 JWT 발급
     @PostMapping("/register/profile")
+    @Transactional // 이 메서드 전체를 하나의 트랜잭션으로 묶음
     public SuccessResponse<Map<String, String>> registerProfile(
             @RequestBody ProfileRegisterRequest request) {
 
-        Long userId = oauthService.registerNewMember(request);
-        Map<String, String> tokens = tokenService.generateTokens(userId, TokenType.FINAL_ACCESS);
+        Long userId = oauthService.registerNewMember(request); // 같은 트랜잭션 내에서 실행
+        Map<String, String> tokens = tokenService.generateTokens(userId,
+                TokenType.FINAL_ACCESS); // 같은 트랜잭션 내에서 실행
         return new SuccessResponse<>(tokens);
-    }
+    } // 메서드 종료 시 트랜잭션 커밋
 }
