@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.room.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
@@ -12,6 +13,7 @@ public record RoomResponse(
         String place,
         String content,
         String preferredGender,
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime meetingDateTime,
         int maxParticipants,
         List<ParticipantResponse> hostParticipants,
