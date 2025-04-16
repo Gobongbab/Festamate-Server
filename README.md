@@ -1,8 +1,7 @@
 # FestaMate
 
 ### infrastructure
-![](https://github.com/user-attachments/assets/035fec11-7ea9-4a92-ba68-bbfa2ead978f)
-
+![image](https://github.com/user-attachments/assets/afb2fda9-5392-4840-a7ae-bd9b561afc9b)
 
 ### Commit Convention 🤝
 
