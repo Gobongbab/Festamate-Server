@@ -10,7 +10,7 @@ public record ProfileRegisterRequest(
         String studentId,
         String phoneNumber,
         String phoneVerificationCodes,
-        String gender,
+        Gender gender,
         String college,
         String department,
         String kakaoAccessToken, // 카카오 access token
@@ -24,7 +24,7 @@ public record ProfileRegisterRequest(
                 makeRandomNickname(),
                 studentId,
                 phoneNumber,
-                Gender.findByName(gender),
+                gender,
                 Major.findByDepartment(department)
         );
 
