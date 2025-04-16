@@ -126,11 +126,10 @@ class RoomServiceTest extends serviceSliceTest {
 
             Pageable pageable = PageRequest.of(0, 10);
             SearchCondition searchCondition = new SearchCondition(
-                    Status.MATCHING.getName(),
+                    Status.MATCHING,
+                    Gender.MALE,
                     4,
-                    "20",
-                    Gender.MALE.getName(),
-                    "id"
+                    "20"
             );
 
             // when
