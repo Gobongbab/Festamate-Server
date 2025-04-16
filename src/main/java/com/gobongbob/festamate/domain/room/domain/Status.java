@@ -1,6 +1,6 @@
 package com.gobongbob.festamate.domain.room.domain;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.ROLE_NOT_FOUND;
+import static com.gobongbob.festamate.global.response.ResponseCode.STATUS_NOT_FOUND;
 
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.Arrays;
@@ -16,10 +16,10 @@ public enum Status {
 
     private final String name;
 
-    public static Role findByName(String name) {
-        return Arrays.stream(Role.values())
-                .filter(role -> role.getName().equals(name))
+    public static Status findByName(String name) {
+        return Arrays.stream(Status.values())
+                .filter(status -> status.getName().equals(name))
                 .findFirst()
-                .orElseThrow(() -> new BadRequestException(ROLE_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(STATUS_NOT_FOUND));
     }
 }
