@@ -20,6 +20,7 @@ public enum ResponseCode {
     CAN_NOT_UPDATE(false, "방에 방장을 제외한 다른 사용자가 입장한 상태에서는 수정할 수 없습니다."),
     NOT_ENOUGH_TICKET(false, "티켓이 부족합니다."),
     ROLE_NOT_FOUND(false, "해당하는 권한이 없습니다."),
+    STATUS_NOT_FOUND(false, "해당하는 모임방 상태가 없습니다. (매칭중, 매칭완료, 종료)"),
 
     // 회원
     NO_MEMBER(false, "사용자가 존재하지 않습니다."),
