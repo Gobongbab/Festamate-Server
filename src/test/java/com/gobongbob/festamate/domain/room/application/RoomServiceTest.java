@@ -128,6 +128,8 @@ class RoomServiceTest extends serviceSliceTest {
             FilteringCondition filteringCondition = new FilteringCondition(
                     Status.MATCHING,
                     Gender.MALE,
+                    "25",
+                    "20",
                     4,
                     "20"
             );
@@ -161,7 +163,9 @@ class RoomServiceTest extends serviceSliceTest {
                     room.getTitle(),
                     room.getPlace(),
                     room.getContent(),
-                    preferredGenderToUpdate.getName(),
+                    preferredGenderToUpdate,
+                    room.getPreferredStudentIdMin(),
+                    room.getPreferredStudentIdMax(),
                     room.getMeetingDateTime(),
                     maxParticipantsToUpdate
             );
