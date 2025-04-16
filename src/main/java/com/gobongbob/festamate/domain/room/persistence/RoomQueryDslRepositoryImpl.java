@@ -6,7 +6,7 @@ import static org.springframework.util.StringUtils.hasText;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.Status;
-import com.gobongbob.festamate.domain.room.dto.request.SearchCondition;
+import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -27,16 +27,16 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
      * 모임 상태, 학과, 학번, 성별에 따른 조회
      */
     @Override
-    public Slice<Room> findBySearchCondition(Pageable pageable, SearchCondition searchCondition) {
+    public Slice<Room> findBySearchCondition(Pageable pageable, FilteringCondition filteringCondition) {
         int pageSize = pageable.getPageSize();
 
         JPAQuery<Room> basicQuery = queryFactory
                 .selectFrom(room)
                 .where(
-                        statusEquals(searchCondition.status()),
-                        genderEquals(searchCondition.gender()),
-                        participantsEquals(searchCondition.participants()),
-                        studentIdContains(searchCondition.minStudentId(), searchCondition.maxStudentId())
+                        statusEquals(filteringCondition.status()),
+                        genderEquals(filteringCondition.gender()),
+                        participantsEquals(filteringCondition.participants()),
+                        studentIdContains(filteringCondition.minStudentId(), filteringCondition.maxStudentId())
                 )
                 .offset(pageable.getOffset())
                 .limit(pageSize + 1);

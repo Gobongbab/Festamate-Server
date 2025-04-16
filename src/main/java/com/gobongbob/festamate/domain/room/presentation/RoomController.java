@@ -5,9 +5,9 @@ import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
+import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
-import com.gobongbob.festamate.domain.room.dto.request.SearchCondition;
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
@@ -86,9 +86,9 @@ public class RoomController {
             @Parameter(description = "페이징 정보")
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @Parameter(description = "필터링 정보")
-            @ModelAttribute SearchCondition searchCondition
+            @ModelAttribute FilteringCondition filteringCondition
     ) {
-        return new SuccessResponse<>(roomService.findBySearchCondition(pageable, searchCondition));
+        return new SuccessResponse<>(roomService.findBySearchCondition(pageable, filteringCondition));
     }
 
     @Operation(summary = "참여 중인 모임방 조회", description = "사용자가 참여 중인 방 목록을 조회합니다.")
