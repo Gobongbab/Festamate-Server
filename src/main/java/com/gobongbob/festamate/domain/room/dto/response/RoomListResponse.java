@@ -3,6 +3,7 @@ package com.gobongbob.festamate.domain.room.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
+import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.Status;
 import java.time.LocalDateTime;
@@ -13,7 +14,7 @@ public record RoomListResponse(
         Status status,
         String place,
         String content,
-        String preferredGender,
+        Gender preferredGender,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime meetingDateTime,
         int maxParticipants,
@@ -30,7 +31,7 @@ public record RoomListResponse(
                 room.getStatus(),
                 room.getPlace(),
                 room.getContent(),
-                room.getPreferredGender().getName(),
+                room.getPreferredGender(),
                 room.getMeetingDateTime(),
                 room.getMaxParticipants(),
                 currentParticipants,
