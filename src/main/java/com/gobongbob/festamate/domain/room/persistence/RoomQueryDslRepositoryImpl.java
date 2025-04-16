@@ -111,14 +111,19 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
                 content = basicQuery
                         .orderBy(room.meetingDateTime.desc())
                         .fetch();
+                break;
 
             case "rdate":
                 content = basicQuery
                         .orderBy(room.meetingDateTime.asc())
                         .fetch();
+                break;
 
             default:
-                content = new ArrayList<>();
+                content = basicQuery
+                        .orderBy(room.id.desc())
+                        .fetch(); // 기본 정렬
+                break;
         }
 
         return content;
