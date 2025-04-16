@@ -2,6 +2,7 @@ package com.gobongbob.festamate.domain.member.dto.response;
 
 import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
+import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 
 public record MemberProfileResponse(
@@ -9,7 +10,7 @@ public record MemberProfileResponse(
         String nickname,
         String studentId,
         String phoneNumber,
-        String gender,
+        Gender gender,
         String major,
         int maximumTicket,
         int remainingTicket,
@@ -24,8 +25,8 @@ public record MemberProfileResponse(
                 member.getNickname(),
                 member.getStudentId(),
                 member.getPhoneNumber(),
-                member.getGender() != null ? member.getGender().getName() : "Unknown",
-                member.getMajor() != null ? member.getMajor().getDepartment() : "Unknown",
+                member.getGender(),
+                member.getMajor().getDepartment(),
                 member.getMaximumTicket(),
                 member.getRemainingTicket(),
                 ImageResponse.fromEntity(profileImage)

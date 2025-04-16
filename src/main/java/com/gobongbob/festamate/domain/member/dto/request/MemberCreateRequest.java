@@ -11,7 +11,7 @@ public record MemberCreateRequest(
         String loginId,
         String loginPassword,
         String phoneNumber,
-        String gender,
+        Gender gender,
         String college,
         String department
 ) {
@@ -24,7 +24,7 @@ public record MemberCreateRequest(
                 .loginId(loginId)
                 .loginPassword(loginPassword)
                 .phoneNumber(phoneNumber)
-                .gender(Gender.findByName(gender))
+                .gender(gender)
                 .major(Major.findByDepartment(department))
                 .build();
     }
