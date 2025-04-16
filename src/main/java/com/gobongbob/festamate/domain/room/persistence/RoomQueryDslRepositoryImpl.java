@@ -35,8 +35,8 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
                 .where(
                         statusEquals(searchCondition.status()),
                         genderEquals(searchCondition.gender()),
-                        participantsEquals(searchCondition.participants())
-//                                ,studentIdContains(searchCondition.studentId())
+                        participantsEquals(searchCondition.participants()),
+                        studentIdContains(searchCondition.minStudentId(), searchCondition.maxStudentId())
                 )
                 .offset(pageable.getOffset())
                 .limit(pageSize + 1);
@@ -83,16 +83,14 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
         return null;
     }
 
-    // 방 안에 입력받은 학번을 가진 사람이 있는지 확인
-    // Room 엔티티에 선호 학번이 들어가야 구현 가능하므로, 추후 구현할 예정
-//    private BooleanExpression studentIdContains(String studentId) {
-//        JPQLQuery<Long> roomIdsOfStudentIdMatched = queryFactory
-//                .select(roomParticipant.room.id)
-//                .from(roomParticipant)
-//                .where(roomParticipant.member.studentId.startsWith(studentId));
-//
-//        return room.id.in(roomIdsOfStudentIdMatched);
-//    }
+    private BooleanExpression studentIdContains(String minStudentId, String maxStudentId) {
+        if (hasText(minStudentId) && hasText(minStudentId)) {
+            // 모임방의 최소 학번 조건이 25일 경우 24는 통과하고, 최대 학번 조건이 20일 경우 19는 통과하지 못함
+            return room.preferredStudentIdMin.goe(minStudentId).and(room.preferredStudentIdMax.loe(maxStudentId));
+        }
+
+        return null;
+    }
 
     /*
       정렬 관련 쿼리를 추가하기 위한 메소드
