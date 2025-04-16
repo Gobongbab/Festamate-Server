@@ -71,13 +71,13 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean isPublicPath(String uri) {
         return uri.startsWith("/api/auth/kakao")
-                || uri.equals("/api/auth/register/profile") // 프로필 등록
+                || uri.startsWith("/api/auth/login")  // 기존 유저 로그인
+                || uri.startsWith("/api/auth/register") // 회원가입(프로필 등록)
                 || uri.equals("/health")
                 || uri.equals("/sentry")
                 || uri.equals("/error")
                 || uri.equals("/api/rooms/list")
                 || uri.startsWith("/login/oauth2/")
-                || uri.equals("/api/auth/login")  // 기존 유저 로그인
                 || uri.startsWith("/test/") // `/test/`로 시작하는 모든 경로를 공용 경로로 추가
                 || uri.startsWith("/swagger-ui/")
                 || uri.startsWith("/v3/api-docs")

@@ -59,9 +59,9 @@ public class SecurityConfig {
 
                         // 비로그인 허용 경로
                         .requestMatchers(
-                                "/api/auth/kakao",
-                                "/api/auth/login",
-                                "/api/auth/register/**",
+                                "/api/auth/kakao",         // JWT 필요 없음
+                                "/api/auth/login",         // JWT 필요 없음
+                                "/api/auth/register/**",   // 회원가입 관련 전체 경로 (프로필 포함) JWT 필요 없음
                                 "/api/rooms/list",
                                 "/health",
                                 "/sentry",
@@ -72,8 +72,7 @@ public class SecurityConfig {
 
                         // 로그인 + JWT 인증이 필요한 경로
                         .requestMatchers(
-                                "/api/auth/members/profile",
-                                "/api/auth/register/profile",
+                                "/api/auth/members/profile", // 프로필 조회는 JWT 필요
                                 "/api/rooms",
                                 "/api/report/room/**"
                         ).authenticated()
@@ -103,7 +102,7 @@ public class SecurityConfig {
 
         // 사용할 HTTP 메서드 명시
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        
+
         // 허용할 헤더 설정
         configuration.setAllowedHeaders(Arrays.asList(
                 "X-Requested-With",
