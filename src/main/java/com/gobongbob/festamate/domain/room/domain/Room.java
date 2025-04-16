@@ -46,6 +46,7 @@ public class Room {
 
     private int maxParticipants;
 
+    @Enumerated(EnumType.STRING)
     private Gender preferredGender;
 
     private LocalDateTime meetingDateTime;
