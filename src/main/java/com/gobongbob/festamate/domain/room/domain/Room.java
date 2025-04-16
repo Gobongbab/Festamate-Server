@@ -49,6 +49,10 @@ public class Room {
     @Enumerated(EnumType.STRING)
     private Gender preferredGender;
 
+    private String preferredStudentIdMin;
+
+    private String preferredStudentIdMax;
+
     private LocalDateTime meetingDateTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -70,6 +74,8 @@ public class Room {
             String place,
             String content,
             Gender preferredGender,
+            String preferredStudentIdMin,
+            String preferredStudentIdMax,
             LocalDateTime meetingDateTime,
             int maxParticipants
     ) {
@@ -77,6 +83,8 @@ public class Room {
         this.place = place;
         this.content = content;
         this.preferredGender = preferredGender;
+        this.preferredStudentIdMin = preferredStudentIdMin;
+        this.preferredStudentIdMax = preferredStudentIdMax;
         this.meetingDateTime = meetingDateTime;
         this.maxParticipants = maxParticipants;
     }
