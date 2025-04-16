@@ -17,9 +17,9 @@ import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.Status;
+import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
-import com.gobongbob.festamate.domain.room.dto.request.SearchCondition;
 import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
@@ -125,7 +125,7 @@ class RoomServiceTest extends serviceSliceTest {
             rooms.forEach(room -> testFixtureBuilder.buildRoom(room));
 
             Pageable pageable = PageRequest.of(0, 10);
-            SearchCondition searchCondition = new SearchCondition(
+            FilteringCondition filteringCondition = new FilteringCondition(
                     Status.MATCHING,
                     Gender.MALE,
                     4,
@@ -133,7 +133,7 @@ class RoomServiceTest extends serviceSliceTest {
             );
 
             // when
-            Slice<RoomListResponse> findRoomResponses = roomService.findBySearchCondition(pageable, searchCondition);
+            Slice<RoomListResponse> findRoomResponses = roomService.findBySearchCondition(pageable, filteringCondition);
 
             // then
             assertThat(findRoomResponses).hasSize(rooms.size());

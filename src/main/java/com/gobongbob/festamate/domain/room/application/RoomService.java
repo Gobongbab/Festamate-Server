@@ -14,9 +14,9 @@ import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.domain.Role;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
+import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
-import com.gobongbob.festamate.domain.room.dto.request.SearchCondition;
 import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
@@ -70,8 +70,8 @@ public class RoomService {
         return chatRoom;
     }
 
-    public Slice<RoomListResponse> findBySearchCondition(Pageable pageable, SearchCondition searchCondition) {
-        return roomRepository.findBySearchCondition(pageable, searchCondition)
+    public Slice<RoomListResponse> findBySearchCondition(Pageable pageable, FilteringCondition filteringCondition) {
+        return roomRepository.findBySearchCondition(pageable, filteringCondition)
                 .map(room -> RoomListResponse.fromEntity(
                         room,
                         roomParticipantRepository.countByRoom_Id(room.getId())
