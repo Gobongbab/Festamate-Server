@@ -11,6 +11,8 @@ public record RoomUpdateRequest(
         @Size(max = 10, message = "장소는 최대 10자까지 입력 가능합니다") String place,
         @Size(max = 200, message = "글 내용은 최대 200자까지 입력 가능합니다") String content,
         Gender preferredGender,
+        String preferredStudentIdMin,
+        String preferredStudentIdMax,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime meetingDateTime,
         int maxParticipants
@@ -22,6 +24,8 @@ public record RoomUpdateRequest(
                 .place(place)
                 .content(content)
                 .preferredGender(preferredGender)
+                .preferredStudentIdMin(preferredStudentIdMin)
+                .preferredStudentIdMax(preferredStudentIdMax)
                 .meetingDateTime(meetingDateTime)
                 .maxParticipants(maxParticipants)
                 .build();
