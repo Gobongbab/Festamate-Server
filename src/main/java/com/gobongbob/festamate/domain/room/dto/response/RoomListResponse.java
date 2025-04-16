@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.domain.Status;
 import java.time.LocalDateTime;
 
 public record RoomListResponse(
         Long id,
         String title,
+        Status status,
         String place,
         String content,
         String preferredGender,
@@ -25,6 +27,7 @@ public record RoomListResponse(
         return new RoomListResponse(
                 room.getId(),
                 room.getTitle(),
+                room.getStatus(),
                 room.getPlace(),
                 room.getContent(),
                 room.getPreferredGender().getName(),
