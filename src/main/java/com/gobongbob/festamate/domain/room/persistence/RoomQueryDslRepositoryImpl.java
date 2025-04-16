@@ -30,7 +30,7 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
      * 모임 상태, 학과, 학번, 성별에 따른 조회
      */
     @Override
-    public Slice<Room> findBySearchCondition(SearchCondition searchCondition, Pageable pageable) {
+    public Slice<Room> findBySearchCondition(Pageable pageable, SearchCondition searchCondition) {
         int pageSize = pageable.getPageSize();
 
         JPAQuery<Room> basicQuery = queryFactory

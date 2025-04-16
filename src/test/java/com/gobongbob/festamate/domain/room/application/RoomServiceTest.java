@@ -16,8 +16,10 @@ import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.domain.Status;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
+import com.gobongbob.festamate.domain.room.dto.request.SearchCondition;
 import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
@@ -31,9 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -123,9 +125,16 @@ class RoomServiceTest extends serviceSliceTest {
             rooms.forEach(room -> testFixtureBuilder.buildRoom(room));
 
             Pageable pageable = PageRequest.of(0, 10);
+            SearchCondition searchCondition = new SearchCondition(
+                    Status.MATCHING.getName(),
+                    4,
+                    "20",
+                    Gender.MALE.getName(),
+                    "id"
+            );
 
             // when
-            Page<RoomListResponse> findRoomResponses = roomService.findBySearchCondition(pageable);
+            Slice<RoomListResponse> findRoomResponses = roomService.findBySearchCondition(pageable, searchCondition);
 
             // then
             assertThat(findRoomResponses).hasSize(rooms.size());
