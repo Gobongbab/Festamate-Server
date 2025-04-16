@@ -10,7 +10,6 @@ import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
-import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.domain.Role;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -108,7 +107,7 @@ public class RoomService {
                 request.title(),
                 request.place(),
                 request.content(),
-                Gender.findByName(request.preferredGender()),
+                request.preferredGender(),
                 request.meetingDateTime(),
                 request.maxParticipants()
         );
