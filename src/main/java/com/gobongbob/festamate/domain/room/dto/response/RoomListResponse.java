@@ -15,6 +15,8 @@ public record RoomListResponse(
         String place,
         String content,
         Gender preferredGender,
+        String preferredStudentIdMin,
+        String preferredStudentIdMax,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime meetingDateTime,
         int maxParticipants,
@@ -32,6 +34,8 @@ public record RoomListResponse(
                 room.getPlace(),
                 room.getContent(),
                 room.getPreferredGender(),
+                room.getPreferredStudentIdMin(),
+                room.getPreferredStudentIdMax(),
                 room.getMeetingDateTime(),
                 room.getMaxParticipants(),
                 currentParticipants,
