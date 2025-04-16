@@ -1,7 +1,9 @@
 package com.gobongbob.festamate.domain.member.application;
 
 import static com.gobongbob.festamate.global.response.ResponseCode.DUPLICATE_NICKNAME;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_ADMIN;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NOT_VERIFIED;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
@@ -19,8 +21,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 @Service
 @Transactional(readOnly = true)
