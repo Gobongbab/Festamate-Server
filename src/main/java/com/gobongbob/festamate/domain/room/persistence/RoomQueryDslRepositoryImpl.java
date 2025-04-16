@@ -1,7 +1,6 @@
 package com.gobongbob.festamate.domain.room.persistence;
 
 import static com.gobongbob.festamate.domain.room.domain.QRoom.room;
-import static com.gobongbob.festamate.domain.room.domain.QRoomParticipant.roomParticipant;
 import static org.springframework.util.StringUtils.hasText;
 
 import com.gobongbob.festamate.domain.member.domain.Gender;
@@ -9,10 +8,8 @@ import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.Status;
 import com.gobongbob.festamate.domain.room.dto.request.SearchCondition;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -37,14 +34,14 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
                 .selectFrom(room)
                 .where(
                         statusEquals(searchCondition.status()),
-                        participantsEquals(searchCondition.participants()),
-                        studentIdContains(searchCondition.studentId()),
-                        genderEquals(searchCondition.gender())
+                        genderEquals(searchCondition.gender()),
+                        participantsEquals(searchCondition.participants())
+//                                ,studentIdContains(searchCondition.studentId())
                 )
                 .offset(pageable.getOffset())
                 .limit(pageSize + 1);
 
-        List<Room> content = addSortingQuery(basicQuery, searchCondition.sortType());
+        List<Room> content = addSortingQuery(basicQuery, pageable.getSort().toString());
 
         return new SliceImpl<>(content, pageable, hasNextPage(content, pageSize));
     }
@@ -62,31 +59,40 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
         return hasNext;
     }
 
-    private BooleanExpression participantsEquals(int participants) {
-        return hasText(String.valueOf(participants)) ? room.maxParticipants.eq(participants) : null;
+    private BooleanExpression statusEquals(Status status) {
+        if (status != null && hasText(status.getName())) {
+            return room.status.eq(status);
+        }
+
+        return null;
+    }
+
+    private BooleanExpression participantsEquals(Integer participants) {
+        if (participants != null) {
+            return room.maxParticipants.eq(participants);
+        }
+
+        return null;
+    }
+
+    private BooleanExpression genderEquals(Gender gender) {
+        if (gender != null && hasText(gender.getName())) {
+            return room.preferredGender.eq(gender);
+        }
+
+        return null;
     }
 
     // 방 안에 입력받은 학번을 가진 사람이 있는지 확인
-    private BooleanExpression studentIdContains(String studentId) {
-        JPQLQuery<Long> roomIdsOfStudentIdMatched = queryFactory
-                .select(roomParticipant.room.id)
-                .from(roomParticipant)
-                .where(roomParticipant.member.studentId.startsWith(studentId));
-
-        return room.id.in(roomIdsOfStudentIdMatched);
-    }
-
-    private BooleanExpression genderEquals(String gender) {
-        return hasText(gender) ? room.preferredGender.eq(Gender.valueOf(gender)) : null;
-    }
-
-    private BooleanExpression statusEquals(String status) {
-        if (!hasText(status)) {
-            return null;
-        }
-
-        return room.status.eq(Status.valueOf(status));
-    }
+    // Room 엔티티에 선호 학번이 들어가야 구현 가능하므로, 추후 구현할 예정
+//    private BooleanExpression studentIdContains(String studentId) {
+//        JPQLQuery<Long> roomIdsOfStudentIdMatched = queryFactory
+//                .select(roomParticipant.room.id)
+//                .from(roomParticipant)
+//                .where(roomParticipant.member.studentId.startsWith(studentId));
+//
+//        return room.id.in(roomIdsOfStudentIdMatched);
+//    }
 
     /*
       정렬 관련 쿼리를 추가하기 위한 메소드
