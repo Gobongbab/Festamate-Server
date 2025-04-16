@@ -108,6 +108,8 @@ public class RoomService {
                 request.place(),
                 request.content(),
                 request.preferredGender(),
+                request.preferredStudentIdMin(),
+                request.preferredStudentIdMax(),
                 request.meetingDateTime(),
                 request.maxParticipants()
         );
