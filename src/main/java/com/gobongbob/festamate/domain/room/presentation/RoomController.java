@@ -73,7 +73,11 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
-    @Operation(summary = "필터에 따른 모임방 조회", description = "필터에 따라 방 목록을 무한 스크롤 방식으로 조회합니다.")
+    @Operation(summary = "필터에 따른 모임방 조회", description = """
+            필터에 따라 방 목록을 무한 스크롤 방식으로 조회합니다. gender 및 status로 전달할 수 있는 값은 다음과 같습니다.
+            <br><br>gender: [MALE, FEMALE] (남성, 여성)
+            <br>status: [MATCHING, MATCHED, CLOSED] (매칭중, 매칭 완료, 모임 종료)
+            """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
     })
@@ -81,7 +85,7 @@ public class RoomController {
     public SuccessResponse<Slice<RoomListResponse>> findBySearchCondition(
             @Parameter(description = "페이징 정보")
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @Parameter(description = "필터링 조건")
+            @Parameter(description = "필터링 정보")
             @ModelAttribute SearchCondition searchCondition
     ) {
         return new SuccessResponse<>(roomService.findBySearchCondition(pageable, searchCondition));
@@ -111,7 +115,10 @@ public class RoomController {
         return new SuccessResponse<>(roomService.findRoomById(roomId));
     }
 
-    @Operation(summary = "모임방 정보 수정", description = "모임방 정보를 수정합니다.")
+    @Operation(summary = "모임방 정보 수정", description = """
+            모임방 정보를 수정합니다. gender로 전달할 수 있는 값은 다음과 같습니다.
+            <br><br>gender: [MALE, FEMALE] (남성, 여성)
+            """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
             @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
