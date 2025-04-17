@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -62,7 +63,6 @@ public class SecurityConfig {
                                 "/api/auth/kakao",         // JWT 필요 없음
                                 "/api/auth/login",         // JWT 필요 없음
                                 "/api/auth/register/**",   // 회원가입 관련 전체 경로 (프로필 포함) JWT 필요 없음
-                                "/api/rooms/list",
                                 "/health",
                                 "/sentry",
                                 "/error",
@@ -70,6 +70,12 @@ public class SecurityConfig {
                                 "/test/**",
                                 "/api/auth/phone/**" // 인증번호 요청 및 확인
                         ).permitAll()
+
+                        // == 모임방 관련 경로 (HttpMethod 명시) ==
+                        .requestMatchers(HttpMethod.GET, "/api/rooms")
+                        .permitAll()       // 모임방 목록 조회 (GET) 허용
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/{rooms_id}")
+                        .permitAll() // 모임방 상세 조회 (GET) 허용
 
                         // 로그인 + JWT 인증이 필요한 경로
                         .requestMatchers(
@@ -98,7 +104,8 @@ public class SecurityConfig {
         // 프론트 주소 명시 (credentials: true와 함께 쓰기 위해 * 안 됨)
         configuration.setAllowedOrigins(List.of(
                 "https://festamate-web.vercel.app",
-                "http://localhost:5173"
+                "http://localhost:5173",
+                "https://www.festamate.shop/swagger-ui/index.html"
         ));
 
         // 사용할 HTTP 메서드 명시
