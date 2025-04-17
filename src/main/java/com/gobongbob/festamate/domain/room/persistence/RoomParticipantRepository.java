@@ -1,4 +1,4 @@
-package com.gobongbob.festamate.domain.room.presentation;
+package com.gobongbob.festamate.domain.room.persistence;
 
 import com.gobongbob.festamate.domain.room.domain.Role;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
