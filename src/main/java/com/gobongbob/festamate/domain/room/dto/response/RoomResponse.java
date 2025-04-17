@@ -76,7 +76,7 @@ public record RoomResponse(
                     participant.getMember().getNickname(),
                     participant.getMember().getStudentId().substring(2, 4),
                     participant.getMember().getGender().name(),
-                    participant.getMember().getMajor().getDepartment(),
+                    participant.getMember().getStudentDepartment(),
                     isHost
             );
         }
