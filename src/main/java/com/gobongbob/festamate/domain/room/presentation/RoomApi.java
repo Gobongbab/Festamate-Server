@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -97,8 +96,10 @@ public interface RoomApi {
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId,
-            @Parameter(description = "모임방 수정 요청 정보")
-            @RequestBody @Valid RoomUpdateRequest request
+            @Parameter(description = "방 수정 요청 정보")
+            @RequestPart("request") @Valid RoomUpdateRequest request,
+            @Parameter(description = "방 이미지")
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     );
 
     @Operation(summary = "모임방 삭제", description = "모임방을 삭제합니다.")

@@ -65,7 +65,7 @@ public class Room {
 
     // 연관관계 편의 메서드
     public void assignImages(List<RoomImage> roomImages) {
-        this.images = roomImages;
+        this.images.addAll(roomImages);
         roomImages.forEach(roomImage -> roomImage.setRoom(this));
     }
 

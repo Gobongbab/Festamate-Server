@@ -8,7 +8,6 @@ public record ProfileRegisterRequest(
         String name,
         String studentId,
         String phoneNumber,
-        String phoneVerificationCodes,
         Gender gender,
         String college,
         String department,
