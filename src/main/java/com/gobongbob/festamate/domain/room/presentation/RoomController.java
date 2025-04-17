@@ -12,11 +12,6 @@ import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -42,25 +37,17 @@ import org.springframework.web.multipart.MultipartFile;
 @Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/rooms")
-@Tag(name = "Room", description = "방 관련 API")
-public class RoomController {
+public class RoomController implements RoomApi {
 
     private final RoomService roomService;
     private final RoomParticipationService roomParticipationService;
     private final ChatService chatService;
 
-    @Operation(summary = "모임방 생성", description = "새로운 모임방을 생성합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청")
-    })
+    @Override
     @PostMapping("")
     public SuccessResponse<Void> create(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @Parameter(description = "방 생성 요청 정보")
             @RequestPart("request") @Valid RoomCreateRequest request,
-            @Parameter(description = "방 이미지")
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
         ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
@@ -73,62 +60,34 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
-    @Operation(summary = "필터에 따른 모임방 조회", description = """
-            필터에 따라 방 목록을 무한 스크롤 방식으로 조회합니다. gender 및 status로 전달할 수 있는 값은 다음과 같습니다.
-            <br><br>gender: [MALE, FEMALE] (남성, 여성)
-            <br>status: [MATCHING, MATCHED, CLOSED] (매칭중, 매칭 완료, 모임 종료)
-            """)
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
-    })
+    @Override
     @GetMapping("")
     public SuccessResponse<Slice<RoomListResponse>> findBySearchCondition(
-            @Parameter(description = "페이징 정보")
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @Parameter(description = "필터링 정보")
             @ModelAttribute FilteringCondition filteringCondition
     ) {
         return new SuccessResponse<>(roomService.findBySearchCondition(pageable, filteringCondition));
     }
 
-    @Operation(summary = "참여 중인 모임방 조회", description = "사용자가 참여 중인 방 목록을 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
-    })
+    @Override
     @GetMapping("/participations")
     public SuccessResponse<List<RoomListResponse>> findParticipatingRooms(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
         return new SuccessResponse<>(roomService.findParticipatingRooms(memberDetails.getMember().getId()));
     }
 
-    @Operation(summary = "모임방 상세 조회", description = "모임방 ID로 방 상세 정보를 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
-    })
+    @Override
     @GetMapping("/{roomId}")
-    public SuccessResponse<RoomResponse> findRoomById(
-            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
-    ) {
+    public SuccessResponse<RoomResponse> findRoomById(@PathVariable("roomId") Long roomId) {
         return new SuccessResponse<>(roomService.findRoomById(roomId));
     }
 
-    @Operation(summary = "모임방 정보 수정", description = """
-            모임방 정보를 수정합니다. gender로 전달할 수 있는 값은 다음과 같습니다.
-            <br><br>gender: [MALE, FEMALE] (남성, 여성)
-            """)
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
-    })
+    @Override
     @PatchMapping("/{roomId}")
     public SuccessResponse<Void> updateById(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId,
-            @Parameter(description = "모임방 수정 요청 정보")
+            @PathVariable("roomId") Long roomId,
             @RequestBody @Valid RoomUpdateRequest request
     ) {
         roomService.updateRoomById(memberDetails.getMember(), roomId, request);
@@ -136,32 +95,22 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
-    @Operation(summary = "모임방 삭제", description = "모임방을 삭제합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
-    })
+    @Override
     @DeleteMapping("/{roomId}")
     public SuccessResponse<Void> deleteById(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
+            @PathVariable("roomId") Long roomId
     ) {
         roomService.deleteRoomById(memberDetails.getMember(), roomId);
 
         return new SuccessResponse<>();
     }
 
-    @Operation(summary = "방 참여", description = "방에 참여합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
-    })
+    @Override
     @PostMapping("/{roomId}/participations")
     public SuccessResponse<Void> participateAlone(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
+            @PathVariable("roomId") Long roomId
     ) {
         roomParticipationService.participateAlone(memberDetails.getMember(), roomId);
         chatService.sendMessage(
@@ -173,16 +122,11 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
-    @Operation(summary = "모임방 나가기", description = "모임방에서 나갑니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
-    })
+    @Override
     @PostMapping("/{roomId}/leave")
     public SuccessResponse<Void> leave(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
+            @PathVariable("roomId") Long roomId
     ) {
         roomParticipationService.leave(memberDetails.getMember(), roomId);
         chatService.sendMessage(
@@ -194,15 +138,10 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
-    @Operation(summary = "방장 여부 확인", description = "사용자가 방장인지 확인합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "참여중인 모임방이 존재하지 않습니다.")
-    })
+    @Override
     @GetMapping("/{roomId}/host")
     public SuccessResponse<IsMemberHostResponse> isMemberHost(
-            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId,
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @PathVariable("roomId") Long roomId,
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
         return new SuccessResponse<>(roomParticipationService.isMemberHost(roomId, memberDetails.getMember()));
