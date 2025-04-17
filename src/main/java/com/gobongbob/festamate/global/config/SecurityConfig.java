@@ -105,7 +105,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "https://festamate-web.vercel.app",
                 "http://localhost:5173",
-                "https://www.festamate.shop/swagger-ui/index.html"
+                "https://www.festamate.shop"
         ));
 
         // 사용할 HTTP 메서드 명시
