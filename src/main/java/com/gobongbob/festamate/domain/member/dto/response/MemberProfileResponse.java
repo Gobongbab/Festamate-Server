@@ -26,7 +26,7 @@ public record MemberProfileResponse(
                 member.getStudentId(),
                 member.getPhoneNumber(),
                 member.getGender(),
-                member.getMajor().getDepartment(),
+                member.getStudentDepartment(),
                 member.getMaximumTicket(),
                 member.getRemainingTicket(),
                 ImageResponse.fromEntity(profileImage)

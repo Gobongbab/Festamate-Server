@@ -3,7 +3,6 @@ package com.gobongbob.festamate.testUser;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
-import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
@@ -78,7 +77,7 @@ public class TestService {
                 .loginPassword("test_password")
                 .phoneNumber("010-7777-7777")
                 .gender(Gender.MALE)
-                .major(Major.COMPUTER_SCIENCE)
+                .studentDepartment("Computer Science")
                 .build();
     }
 
@@ -91,7 +90,7 @@ public class TestService {
                 .loginPassword("admin_password")
                 .phoneNumber("010-1111-1111")
                 .gender(Gender.MALE)
-                .major(Major.COMPUTER_SCIENCE)
+                .studentDepartment("Computer Science")
                 .role("ADMIN")
                 .build();
     }

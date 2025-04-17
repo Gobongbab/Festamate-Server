@@ -4,7 +4,6 @@ import static com.gobongbob.festamate.global.response.ResponseCode.NOT_ENOUGH_TI
 
 import com.gobongbob.festamate.domain.auth.oauth.domain.OauthInfo;
 import com.gobongbob.festamate.domain.image.domain.ProfileImage;
-import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import jakarta.persistence.Column;
@@ -69,9 +68,6 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Enumerated(EnumType.STRING)
-    private Major major;
-
     private String studentDepartment; // 임시 필드, 학생증 등록으로 학과 정보 기입을 할 예정이면 이 필드를 사용. 추후 의논해야 함.
 
     @Column(unique = true)
@@ -93,14 +89,14 @@ public class Member {
             String studentId,
             String phoneNumber,
             Gender gender,
-            Major major
+            String studentDepartment
     ) {
         this.name = name;
         this.nickname = nickname;
         this.studentId = studentId;
         this.phoneNumber = phoneNumber;
         this.gender = gender;
-        this.major = major;
+        this.studentDepartment = studentDepartment;
     }
 
     // Enum으로 바꿀 예정

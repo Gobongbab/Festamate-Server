@@ -30,7 +30,7 @@ public record MemberResponse(
                 member.getLoginPassword(),
                 member.getPhoneNumber(),
                 member.getGender(),
-                member.getMajor().getDepartment(),
+                member.getStudentDepartment(),
                 ImageResponse.fromEntity(profileImage)
         );
     }
