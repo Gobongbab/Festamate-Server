@@ -6,12 +6,8 @@ import com.gobongbob.festamate.domain.report.dto.request.ReportMemberRequest;
 import com.gobongbob.festamate.domain.report.dto.request.ReportRoomRequest;
 import com.gobongbob.festamate.domain.report.dto.response.ReportRoomResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -22,72 +18,47 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/report")
-@Tag(name = "Report", description = "신고 관련 API")
-public class ReportController {
+public class ReportController implements ReportApi {
 
     private final ReportService reportService;
 
-    @Operation(summary = "모임방 신고", description = "모임방을 신고합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
-    })
+    @Override
     @PostMapping("/room/{roomId}")
     public SuccessResponse<Void> reportRoom(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @Parameter(name = "roomId", description = "신고할 모임방 ID")
             @PathVariable("roomId") Long roomId,
-            @Parameter(description = "모임방 신고 요청 정보")
             @RequestBody @Valid ReportRoomRequest request
     ) {
         reportService.reportRoom(memberDetails.getMember(), roomId, request);
         return new SuccessResponse<>();
     }
 
-    @Operation(summary = "사용자 신고", description = "사용자를 신고합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "사용자가 존재하지 않습니다.")
-    })
+    @Override
     @PostMapping("/member/{memberId}")
     public SuccessResponse<Void> reportMember(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @Parameter(name = "memberId", description = "신고할 사용자 ID")
             @PathVariable("memberId") Long memberId,
-            @Parameter(description = "사용자 신고 요청 정보")
             @RequestBody @Valid ReportMemberRequest request
     ) {
         reportService.reportMember(memberDetails.getMember(), memberId, request);
         return new SuccessResponse<>();
     }
 
-    @Operation(summary = "모든 신고 조회", description = "모든 신고 목록을 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
-    })
+    @Override
     @GetMapping("")
     public SuccessResponse<List<ReportRoomResponse>> getAllReports(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
         return new SuccessResponse<>(reportService.getAllReports());
     }
 
-    @Operation(summary = "미처리 신고 조회", description = "미처리된 신고 목록을 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
-    })
+    @Override
     @GetMapping("/unprocessed")
     public SuccessResponse<List<ReportRoomResponse>> getUnprocessedReports(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
         return new SuccessResponse<>(reportService.getUnprocessedReports());

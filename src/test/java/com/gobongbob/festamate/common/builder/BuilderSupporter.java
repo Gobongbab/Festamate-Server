@@ -1,8 +1,8 @@
 package com.gobongbob.festamate.common.builder;
 
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
-import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
