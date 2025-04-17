@@ -18,7 +18,9 @@ public class TokyoSnsService {
 
     private final SnsClient snsClient; // AWS SNS 클라이언트
     private final Map<String, VerificationInfo> verificationData = new HashMap<>();
-    private static final long CODE_VALID_MILLIS = 5 * 60 * 1000; // 5분
+    // 인증 코드 유효 시간을 100일로 변경 (단위: 밀리초)
+    private static final long CODE_VALID_MILLIS =
+            100L * 24L * 60L * 60L * 1000L; // 100일 (8,640,000,000 밀리초)
     private static final int MAX_FAIL_COUNT = 5;
     private final MemberRepository memberRepository;
 
