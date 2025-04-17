@@ -105,18 +105,24 @@ public class RoomService {
         validateIsHost(room, member);
         validateAlone(room);
 
-        List<RoomImage> roomImages;
-        if (!imageFiles.isEmpty()) {
-            room.getImages()
-                    .forEach(roomImage -> imageService.delete(roomImage.getImage()));
-            room.getImages().clear();
+        imageFiles.stream()
+                .filter(imageFile -> imageFile == null || imageFile.isEmpty())
+                .findAny()
+                .ifPresentOrElse(
+                        imageFile -> {
+                        },
+                        () -> {
+                            room.getImages()
+                                    .forEach(roomImage -> imageService.delete(roomImage.getImage()));
+                            room.getImages().clear();
 
-            roomImages = imageService.uploadImages(imageFiles)
-                    .stream()
-                    .map(RoomImage::fromEntity)
-                    .toList();
-            room.assignImages(roomImages);
-        }
+                            List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
+                                    .stream()
+                                    .map(RoomImage::fromEntity)
+                                    .toList();
+                            room.assignImages(roomImages);
+                        }
+                );
 
         room.updateRoom(
                 request.title(),
