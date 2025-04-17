@@ -140,7 +140,38 @@ VALUES ('같이 축제 갈 사람 구함!', '학교 앞 광장', '저녁 7시에
 -- room_id는 Room 테이블의 id를 참조합니다.
 -- RoomImage 엔티티는 Image 엔티티를 @Embedded 하므로, image의 필드들이 RoomImage 테이블 컬럼으로 존재한다고 가정합니다.
 INSERT INTO room_image (upload_name, store_name, url, room_id)
-VALUES ('room_banner.jpg', 'uuid_room_banner.jpg', 'http://example.com/images/room_banner.jpg', 1);
+VALUES
+        ('room_banner_1.jpg', 'uuid_room_banner_1.jpg', 'http://example.com/images/uuid_room_banner_1.jpg', 1),
+        ('room_banner_2.jpg', 'uuid_room_banner_2.jpg', 'http://example.com/images/uuid_room_banner_2.jpg', 2),
+        ('room_banner_3.jpg', 'uuid_room_banner_3.jpg', 'http://example.com/images/uuid_room_banner_3.jpg', 3),
+        ('room_banner_4.jpg', 'uuid_room_banner_4.jpg', 'http://example.com/images/uuid_room_banner_4.jpg', 4),
+        ('room_banner_5.jpg', 'uuid_room_banner_5.jpg', 'http://example.com/images/uuid_room_banner_5.jpg', 5),
+        ('room_banner_6.jpg', 'uuid_room_banner_6.jpg', 'http://example.com/images/uuid_room_banner_6.jpg', 6),
+        ('room_banner_7.jpg', 'uuid_room_banner_7.jpg', 'http://example.com/images/uuid_room_banner_7.jpg', 7),
+        ('room_banner_8.jpg', 'uuid_room_banner_8.jpg', 'http://example.com/images/uuid_room_banner_8.jpg', 8),
+        ('room_banner_9.jpg', 'uuid_room_banner_9.jpg', 'http://example.com/images/uuid_room_banner_9.jpg', 9),
+        ('room_banner_10.jpg', 'uuid_room_banner_10.jpg', 'http://example.com/images/uuid_room_banner_10.jpg', 10),
+        ('room_banner_11.jpg', 'uuid_room_banner_11.jpg', 'http://example.com/images/uuid_room_banner_11.jpg', 11),
+        ('room_banner_12.jpg', 'uuid_room_banner_12.jpg', 'http://example.com/images/uuid_room_banner_12.jpg', 12),
+        ('room_banner_13.jpg', 'uuid_room_banner_13.jpg', 'http://example.com/images/uuid_room_banner_13.jpg', 13),
+        ('room_banner_14.jpg', 'uuid_room_banner_14.jpg', 'http://example.com/images/uuid_room_banner_14.jpg', 14),
+        ('room_banner_15.jpg', 'uuid_room_banner_15.jpg', 'http://example.com/images/uuid_room_banner_15.jpg', 15),
+        ('room_banner_16.jpg', 'uuid_room_banner_16.jpg', 'http://example.com/images/uuid_room_banner_16.jpg', 16),
+        ('room_banner_17.jpg', 'uuid_room_banner_17.jpg', 'http://example.com/images/uuid_room_banner_17.jpg', 17),
+        ('room_banner_18.jpg', 'uuid_room_banner_18.jpg', 'http://example.com/images/uuid_room_banner_18.jpg', 18),
+        ('room_banner_19.jpg', 'uuid_room_banner_19.jpg', 'http://example.com/images/uuid_room_banner_19.jpg', 19),
+        ('room_banner_20.jpg', 'uuid_room_banner_20.jpg', 'http://example.com/images/uuid_room_banner_20.jpg', 20),
+        ('room_banner_21.jpg', 'uuid_room_banner_21.jpg', 'http://example.com/images/uuid_room_banner_21.jpg', 21),
+        ('room_banner_22.jpg', 'uuid_room_banner_22.jpg', 'http://example.com/images/uuid_room_banner_22.jpg', 22),
+        ('room_banner_23.jpg', 'uuid_room_banner_23.jpg', 'http://example.com/images/uuid_room_banner_23.jpg', 23),
+        ('room_banner_24.jpg', 'uuid_room_banner_24.jpg', 'http://example.com/images/uuid_room_banner_24.jpg', 24),
+        ('room_banner_25.jpg', 'uuid_room_banner_25.jpg', 'http://example.com/images/uuid_room_banner_25.jpg', 25),
+        ('room_banner_26.jpg', 'uuid_room_banner_26.jpg', 'http://example.com/images/uuid_room_banner_26.jpg', 26),
+        ('room_banner_27.jpg', 'uuid_room_banner_27.jpg', 'http://example.com/images/uuid_room_banner_27.jpg', 27),
+        ('room_banner_28.jpg', 'uuid_room_banner_28.jpg', 'http://example.com/images/uuid_room_banner_28.jpg', 28),
+        ('room_banner_29.jpg', 'uuid_room_banner_29.jpg', 'http://example.com/images/uuid_room_banner_29.jpg', 29),
+        ('room_banner_30.jpg', 'uuid_room_banner_30.jpg', 'http://example.com/images/uuid_room_banner_30.jpg', 30),
+        ('room_banner_31.jpg', 'uuid_room_banner_31.jpg', 'http://example.com/images/uuid_room_banner_31.jpg', 31);
 
 -- Coupon 테이블 더미 데이터
 -- member_id는 Member 테이블의 id를 참조합니다.
