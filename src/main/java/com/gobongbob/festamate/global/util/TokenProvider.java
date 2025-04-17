@@ -69,7 +69,7 @@ public class TokenProvider {
             builder.claim("gender", member.getGender().name());
         }
         if (member.getStudentDepartment() != null) {
-            builder.claim("major", member.getStudentDepartment());
+            builder.claim("department", member.getStudentDepartment());
         }
         if (type.isAdmin()) {
             builder.claim("role", member.getRole());
