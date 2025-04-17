@@ -97,7 +97,7 @@ public class RoomService {
     }
 
     @Transactional
-    public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request) {
+    public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request, List<MultipartFile> imageFiles) {
         Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
