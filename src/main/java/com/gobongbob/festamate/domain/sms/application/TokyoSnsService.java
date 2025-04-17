@@ -1,7 +1,5 @@
 package com.gobongbob.festamate.domain.sms.application;
 
-import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
-import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import jakarta.transaction.Transactional;
 import java.util.HashMap;
@@ -20,7 +18,7 @@ public class TokyoSnsService {
 
     private final SnsClient snsClient; // AWS SNS 클라이언트
     private final Map<String, VerificationInfo> verificationData = new HashMap<>();
-    private static final long CODE_VALID_MILLIS = 3 * 60 * 1000; // 3분
+    private static final long CODE_VALID_MILLIS = 5 * 60 * 1000; // 5분
     private static final int MAX_FAIL_COUNT = 5;
     private final MemberRepository memberRepository;
 
@@ -45,8 +43,7 @@ public class TokyoSnsService {
     }
 
     @Transactional
-    public void verifyCode(String phoneNumber, String inputCode,
-            CustomMemberDetails memberDetails) {
+    public void verifyCode(String phoneNumber, String inputCode) {
         VerificationInfo info = verificationData.get(phoneNumber);
         if (info == null) {
             throw new IllegalArgumentException("인증 요청이 존재하지 않습니다.");
@@ -67,12 +64,6 @@ public class TokyoSnsService {
         }
 
         info.verified = true; // 인증 완료
-
-        // 🔽 인증 성공 시 사용자 정보 업데이트
-        Member member = memberRepository.findById(memberDetails.getMember().getId())
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-
-        member.updatePhoneNumber(phoneNumber); // phoneNumber 업데이트
     }
 
     public boolean isPhoneNumberVerified(String phoneNumber) {

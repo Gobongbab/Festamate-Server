@@ -67,7 +67,8 @@ public class SecurityConfig {
                                 "/sentry",
                                 "/error",
                                 "/login/oauth2/**",
-                                "/test/**"
+                                "/test/**",
+                                "/api/auth/phone/**" // 인증번호 요청 및 확인
                         ).permitAll()
 
                         // 로그인 + JWT 인증이 필요한 경로

@@ -79,6 +79,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 || uri.equals("/api/rooms/list")
                 || uri.startsWith("/login/oauth2/")
                 || uri.startsWith("/test/") // `/test/`로 시작하는 모든 경로를 공용 경로로 추가
+                || uri.startsWith("/api/auth/phone/") // 인증번호 요청 및 확인
                 || uri.startsWith("/swagger-ui/")
                 || uri.startsWith("/v3/api-docs")
                 || uri.startsWith("/swagger-resources")
