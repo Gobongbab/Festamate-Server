@@ -77,7 +77,7 @@ public class TestService {
                 .loginPassword("test_password")
                 .phoneNumber("010-7777-7777")
                 .gender(Gender.MALE)
-                .studentDepartment("Computer Science")
+                .studentDepartment("컴퓨터 공학부")
                 .build();
     }
 
@@ -90,7 +90,7 @@ public class TestService {
                 .loginPassword("admin_password")
                 .phoneNumber("010-1111-1111")
                 .gender(Gender.MALE)
-                .studentDepartment("Computer Science")
+                .studentDepartment("컴퓨터 공학부")
                 .role("ADMIN")
                 .build();
     }
