@@ -10,6 +10,7 @@ import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
+import com.gobongbob.festamate.domain.image.persistence.RoomImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.domain.Role;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -37,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final RoomImageRepository roomImageRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
@@ -102,6 +104,19 @@ public class RoomService {
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
         validateAlone(room);
+
+        List<RoomImage> roomImages;
+        if (!imageFiles.isEmpty()) {
+            room.getImages()
+                    .forEach(roomImage -> imageService.delete(roomImage.getImage()));
+            room.getImages().clear();
+
+            roomImages = imageService.uploadImages(imageFiles)
+                    .stream()
+                    .map(RoomImage::fromEntity)
+                    .toList();
+            room.assignImages(roomImages);
+        }
 
         room.updateRoom(
                 request.title(),
