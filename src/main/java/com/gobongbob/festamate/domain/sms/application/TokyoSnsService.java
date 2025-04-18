@@ -1,12 +1,13 @@
 package com.gobongbob.festamate.domain.sms.application;
 
-import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
-import jakarta.transaction.Transactional;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
@@ -17,22 +18,24 @@ import software.amazon.awssdk.services.sns.model.PublishResponse;
 public class TokyoSnsService {
 
     private final SnsClient snsClient; // AWS SNS 클라이언트
-    private final Map<String, VerificationInfo> verificationData = new HashMap<>();
-    // 인증 코드 유효 시간을 100일로 변경 (단위: 밀리초)
-    private static final long CODE_VALID_MILLIS =
-            100L * 24L * 60L * 60L * 1000L; // 100일 (8,640,000,000 밀리초)
-    private static final int MAX_FAIL_COUNT = 5;
-    private final MemberRepository memberRepository;
+    private final RedisTemplate<String, VerificationInfo> redisTemplate;
+
+    // 인증 코드 유효 시간을 Duration으로 정의 (100일)
+    private static final Duration CODE_VALID_DURATION = Duration.ofDays(
+            100);
+    private static final String VERIFICATION_PREFIX = "verification:"; // Redis 키 접두사
 
     public void sendVerificationCode(String phoneNumber) {
         String formattedPhone = formatToE164(phoneNumber); // <- 포맷 처리
 
         String verificationCode = generateVerificationCode();
+        String redisKey = VERIFICATION_PREFIX + phoneNumber; // Redis 키 생성 (원본 번호 기준)
 
+        // VerificationInfo 생성 (timestamp 대신 Redis TTL 사용)
         VerificationInfo info = new VerificationInfo(
-                verificationCode, System.currentTimeMillis(), 0, false
-        );
-        verificationData.put(phoneNumber, info); // 원래 입력된 번호로 저장
+                verificationCode, false);
+        redisTemplate.opsForValue().set(redisKey, info,
+                CODE_VALID_DURATION); // Redis에 인증 정보 저장 (ValueOperations 사용, 유효 시간 설정)
 
         // SNS 문자 전송
         PublishRequest request = PublishRequest.builder()
@@ -41,40 +44,57 @@ public class TokyoSnsService {
                 .build();
         PublishResponse result = snsClient.publish(request);
 
-        System.out.println("📩 인증번호 전송: " + verificationCode);
+        System.out.println(
+                "📩 Redis 저장 및 인증번호 전송: " + verificationCode + " (Key: " + redisKey + ")");
     }
 
-    @Transactional
     public void verifyCode(String phoneNumber, String inputCode) {
-        VerificationInfo info = verificationData.get(phoneNumber);
+        String redisKey = VERIFICATION_PREFIX + phoneNumber;
+        // Redis에서 인증 정보 조회
+        VerificationInfo info = redisTemplate.opsForValue().get(redisKey);
+
         if (info == null) {
-            throw new IllegalArgumentException("인증 요청이 존재하지 않습니다.");
+            // Redis에 키가 없으면 만료되었거나 요청이 없는 경우
+            throw new IllegalArgumentException("인증 요청이 존재하지 않거나 만료되었습니다.");
         }
-        if (info.verified) {
+        if (info.isVerified()) { // Getter 사용
             throw new IllegalArgumentException("이미 인증된 번호입니다.");
         }
-        if (System.currentTimeMillis() - info.timestamp > CODE_VALID_MILLIS) {
-            verificationData.remove(phoneNumber);
-            throw new IllegalArgumentException("인증번호가 만료되었습니다.");
-        }
-        if (info.failCount >= MAX_FAIL_COUNT) {
-            throw new IllegalArgumentException("실패 횟수 초과. 다시 요청해주세요.");
-        }
-        if (!info.code.equals(inputCode)) {
-            info.failCount += 1;
+        // 만료 체크는 Redis TTL이 담당하므로 제거
+
+        // 입력 코드와 저장된 코드 비교 로직
+        if (!info.getCode().equals(inputCode)) {
+            // 실패 시 failCount 업데이트 로직은 제거하고, 바로 예외 발생
             throw new IllegalArgumentException("인증번호가 틀렸습니다.");
         }
 
-        info.verified = true; // 인증 완료
+        // 인증 성공 시 로직 (코드가 일치하는 경우)
+        // verified 상태를 true로 변경하고 Redis에 업데이트 (기존 TTL 유지)
+        info.setVerified(true);
+        Long expire = redisTemplate.getExpire(redisKey, TimeUnit.SECONDS); // 남은 만료 시간 조회
+        if (expire != null && expire > 0) {
+            redisTemplate.opsForValue()
+                    .set(redisKey, info, Duration.ofSeconds(expire)); // 남은 시간으로 다시 설정
+        } else {
+            // 만료 직전이거나 TTL 조회가 안되는 경우 - 안전하게 기본 유효 시간으로 다시 설정
+            redisTemplate.opsForValue()
+                    .set(redisKey, info, CODE_VALID_DURATION);
+        }
+
+        System.out.println("✅ 인증 성공: " + phoneNumber);
     }
 
     public boolean isPhoneNumberVerified(String phoneNumber) {
-        VerificationInfo info = verificationData.get(phoneNumber);
-        return info != null && info.verified;
+        String redisKey = VERIFICATION_PREFIX + phoneNumber;
+        VerificationInfo info = redisTemplate.opsForValue().get(redisKey);
+        // Redis에 정보가 있고, verified 필드가 true이면 인증된 것
+        return info != null && info.isVerified();
     }
 
     public void removeVerificationInfo(String phoneNumber) {
-        verificationData.remove(phoneNumber); // 등록 후 제거
+        String redisKey = VERIFICATION_PREFIX + phoneNumber;
+        redisTemplate.delete(redisKey); // Redis에서 키 삭제
+        System.out.println("🗑️ Redis 인증 정보 삭제: " + phoneNumber);
     }
 
     private String generateVerificationCode() {
@@ -98,12 +118,12 @@ public class TokyoSnsService {
     }
 
     @Getter
+    @Setter
+    @NoArgsConstructor // Jackson 역직렬화를 위해 추가
     @AllArgsConstructor
-    static class VerificationInfo {
+    public static class VerificationInfo {
 
         private String code;
-        private long timestamp;
-        private int failCount;
         private boolean verified;
     }
 }
