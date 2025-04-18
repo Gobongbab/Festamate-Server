@@ -8,6 +8,9 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,6 +54,7 @@ public class TokenProvider {
     private String createToken(Member member, String tokenType, Duration duration, TokenType type) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + duration.toMillis());
+        Key key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 
         JwtBuilder builder = Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
@@ -75,7 +79,7 @@ public class TokenProvider {
             builder.claim("role", member.getRole());
         }
 
-        return builder.signWith(SignatureAlgorithm.HS256, secret).compact();
+        return builder.signWith(key, SignatureAlgorithm.HS256).compact();
     }
 
     // Refresh Token을 사용하여 새로운 Access Token을 생성할 때 사용
@@ -85,7 +89,12 @@ public class TokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
@@ -94,7 +103,11 @@ public class TokenProvider {
 
     public Claims parseClaims(String token) {
         try {
-            return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+            return Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }
