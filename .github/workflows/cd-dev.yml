@@ -84,7 +84,7 @@ jobs:
             echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
             
             # EC2 내부에 .env 파일 생성 
-            echo "ENV=${{ secrets.ENV }}" >> .env
+            echo "${{ secrets.ENV }}" >> .env
 
             # 3. 최신 이미지 받기 (docker-compose.yml에 정의된 모든 서비스를 pull)
             # docker-compose.yml 파일에 명시된 이미지(예: gobongbab/festamate:latest, redis:6.2.4-alpine)가 
