@@ -38,11 +38,11 @@ public class RedisConfig {
 
     @Bean
     public RedisTemplate<String, VerificationInfo> verificationInfoRedisTemplate(
-            RedisConnectionFactory connectionFactory) {
-        ObjectMapper objectMapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule());
+            RedisConnectionFactory connectionFactory,
+            // 설정된 ObjectMapper 빈을 주입받음
+            ObjectMapper objectMapper) {
 
-        // JSON 직렬화/역직렬화 설정
+        // 주입받은 objectMapper 사용
         GenericJackson2JsonRedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer(
                 objectMapper);
 
