@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class Test {
 
-  @GetMapping("/healthcheck")
+  @GetMapping("/health")
   public ResponseEntity<String> healthCheck() {
     return ResponseEntity.ok("Health Check");
     // test
