@@ -18,7 +18,6 @@ public class Test {
   @GetMapping("/health")
   public ResponseEntity<String> healthCheck() {
     return ResponseEntity.ok("Health Check");
-    // test
   }
 
   @GetMapping("/sentry")
