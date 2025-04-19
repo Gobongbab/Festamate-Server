@@ -10,15 +10,51 @@ services:
       - "8080:8080"
     restart: unless-stopped
     environment:
-      - USE_PROFILE=dev
+      # --- 기존 설정 유지 ---
+      - USE_PROFILE=dev # Spring 프로파일 설정
+      - TZ=Asia/Seoul   # 시간대 설정
+
+      # --- 데이터베이스 관련 ---
       - DB_URL=${DB_URL}
       - DB_USER=${DB_USER}
       - DB_PASS=${DB_PASS}
+
+      # --- Redis 관련 ---
+      # application.yml의 localhost 대신 Docker Compose 네트워크의 서비스 이름(redis) 사용
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_DATA_REDIS_PASSWORD=
-       # Spring Boot에서 Firebase 키 파일 위치를 읽는 환경 변수
-      - GOOGLE_FIREBASE_KEY=/config/festamate-firebase-key.json
+
+      # --- Firebase 관련 ---
+      # application.yml에서는 직접 사용되지 않았지만, SDK가 참조할 수 있는 표준 변수 또는 사용자 정의 변수
+      - FIREBASE_KEY_PATH=/config/festamate-firebase-key.json
+
+      # --- Kakao OAuth 관련 ---
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - KAKAO_REDIRECT_URI=${KAKAO_REDIRECT_URI}
+      - KAKAO_TOKEN_URI=${KAKAO_TOKEN_URI}
+      - KAKAO_USER_INFO_URI=${KAKAO_USER_INFO_URI}
+      - BASE_URL=${BASE_URL} # 프론트엔드에서 사용하는 URL
+
+      # --- AWS SNS 관련 ---
+      - AWS_SNS_ACCESS_KEY=${AWS_SNS_ACCESS_KEY}
+      - AWS_SNS_SECRET_KEY=${AWS_SNS_SECRET_KEY}
+
+      # --- JWT 관련 ---
+      - JWT_SECRET=${JWT_SECRET}
+
+      # --- Naver OCR 관련 ---
+      - OCR_API_URL=${OCR_API_URL}
+      - OCR_API_SECRET=${OCR_API_SECRET}
+
+      # --- Sentry 관련 ---
+      - SENTRY_DSN=${SENTRY_DSN}
+      - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+
+      # --- AWS S3 관련 ---
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - IAM_USER_ACCESS_KEY=${IAM_USER_ACCESS_KEY} # S3용 Access Key
+      - IAM_USER_SECRET_KEY=${IAM_USER_SECRET_KEY} # S3용 Secret Key
       - TZ=Asia/Seoul
     volumes: # EC2 호스트 경로와 Docker 컨테이너 내부의 특정 경로를 연결(마운트)하는 역할
       # EC2의 키 파일 경로: /home/ubuntu/festamate-firebase-key.json 컨테이너 내부 경로:/config/festamate-firebase-key.json
@@ -35,13 +71,8 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    volumes:
-      - redis-dev-data:/data # Redis 데이터 영속성을 위한 볼륨
     networks:
       - festamate-network
-
-volumes:
-  redis-dev-data: # Redis 데이터 저장용 볼륨
 
 networks:
   festamate-network: # 서비스 간 통신을 위한 브릿지 네트워크
