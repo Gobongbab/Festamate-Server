@@ -71,13 +71,8 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    volumes:
-      - redis-dev-data:/data # Redis 데이터 영속성을 위한 볼륨
     networks:
       - festamate-network
-
-volumes:
-  redis-dev-data: # Redis 데이터 저장용 볼륨
 
 networks:
   festamate-network: # 서비스 간 통신을 위한 브릿지 네트워크
