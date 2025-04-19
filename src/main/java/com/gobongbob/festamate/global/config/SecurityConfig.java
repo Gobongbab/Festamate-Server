@@ -56,7 +56,7 @@ public class SecurityConfig {
                                 "/v3/api-docs.yaml",
                                 "/swagger-resources/**",
                                 "/webjars/**",
-                                "/actuator/prometheus"
+                                "/actuator/**"
                         ).permitAll()
 
                         // 비로그인 허용 경로
