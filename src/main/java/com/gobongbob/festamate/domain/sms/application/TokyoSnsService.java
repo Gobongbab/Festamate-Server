@@ -5,8 +5,9 @@ import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sns.SnsClient;
@@ -14,11 +15,18 @@ import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 @Service
-@RequiredArgsConstructor
 public class TokyoSnsService {
 
     private final SnsClient snsClient; // AWS SNS 클라이언트
     private final RedisTemplate<String, VerificationInfo> redisTemplate;
+
+    @Autowired
+    public TokyoSnsService(SnsClient snsClient,
+            @Qualifier("verificationInfoRedisTemplate") // 주입할 빈의 이름을 명시
+            RedisTemplate<String, VerificationInfo> redisTemplate) {
+        this.snsClient = snsClient;
+        this.redisTemplate = redisTemplate;
+    }
 
     // 인증 코드 유효 시간을 Duration으로 정의 (100일)
     private static final Duration CODE_VALID_DURATION = Duration.ofDays(
