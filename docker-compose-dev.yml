@@ -28,12 +28,14 @@ services:
       # --- Firebase 관련 ---
       # application.yml에서는 직접 사용되지 않았지만, SDK가 참조할 수 있는 표준 변수 또는 사용자 정의 변수
       - GOOGLE_FIREBASE_KEY=/config/festamate-firebase-key.json
+      - FIREBASE_KEY_PATH=${FIREBASE_KEY_PATH}
 
       # --- Kakao OAuth 관련 ---
       - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
       - KAKAO_REDIRECT_URI=${KAKAO_REDIRECT_URI}
       - KAKAO_TOKEN_URI=${KAKAO_TOKEN_URI}
       - KAKAO_USER_INFO_URI=${KAKAO_USER_INFO_URI}
+      - BASE_URL=${BASE_URL} # 프론트엔드에서 사용하는 URL
 
       # --- AWS SNS 관련 ---
       - AWS_SNS_ACCESS_KEY=${AWS_SNS_ACCESS_KEY}
@@ -48,6 +50,7 @@ services:
 
       # --- Sentry 관련 ---
       - SENTRY_DSN=${SENTRY_DSN}
+      - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
       # --- AWS S3 관련 ---
       - S3_BUCKET_NAME=${S3_BUCKET_NAME}
