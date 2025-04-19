@@ -2,8 +2,9 @@ package com.gobongbob.festamate;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = RedisAutoConfiguration.class)
 public class FestamateApplication {
 
     public static void main(String[] args) {
