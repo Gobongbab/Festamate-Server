@@ -27,8 +27,7 @@ services:
 
       # --- Firebase 관련 ---
       # application.yml에서는 직접 사용되지 않았지만, SDK가 참조할 수 있는 표준 변수 또는 사용자 정의 변수
-      - GOOGLE_FIREBASE_KEY=/config/festamate-firebase-key.json
-      - FIREBASE_KEY_PATH=${FIREBASE_KEY_PATH}
+      - FIREBASE_KEY_PATH=/config/festamate-firebase-key.json
 
       # --- Kakao OAuth 관련 ---
       - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
