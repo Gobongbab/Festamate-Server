@@ -65,7 +65,7 @@ services:
       - redis
 
   # Redis 캐시 서버 설정
-  redis:
+  redis: # Redis 서비스의 이름
     image: redis:6.2.4-alpine
     container_name: redis-dev
     restart: always
