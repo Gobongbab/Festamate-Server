@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "OCR", description = "OCR 관련 API")
 public interface OcrApi {
 
-    @Operation(summary = "학생증 인증", description = "학생증 이미지를 업로드하여 학생 정보를 인증합니다.")
+    @Operation(summary = "학생증 인증 이름 바꿔본다. 이거 서버에 반영되냐? 테스트 조진다.", description = "학생증 이미지를 업로드하여 학생 정보를 인증합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
     })
