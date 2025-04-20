@@ -55,7 +55,7 @@ public class OauthController {
             @RequestBody ProfileRegisterRequest request) {
 
         // 학번 중복 여부 확인
-        memberService.checkStudentIdDuplication(request.studentId());
+        memberService.checkStudentIdDuplication(request.getStudentId());
 
         Long userId = oauthService.registerNewMember(request); // 같은 트랜잭션 내에서 실행
         Map<String, String> tokens = tokenService.generateTokens(userId,
