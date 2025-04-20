@@ -57,6 +57,13 @@ jobs:
           ./gradlew clean build -x test
         shell: bash
 
+      # 7) Docker Compose 빌드 및 푸시
+      - name: Build and push with Docker Compose
+        run: |
+          # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시 (운영 환경에 맞는 docker-compose 파일 사용)
+          docker compose -f docker-compose-dev.yml build
+          docker compose -f docker-compose-dev.yml push
+
       # 9) docker-compose-dev.yml 파일을 EC2로 복사
       - name: Copy docker-compose-dev.yml to EC2
         uses: appleboy/scp-action@v0.1.7 # scp-action을 사용하여 파일을 EC2로 복사
@@ -75,8 +82,6 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            # 0. 배포 디렉토리로 이동 (선택 사항, 예: /home/ubuntu/festamate)
-
             # 1. Docker Hub 로그인
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
