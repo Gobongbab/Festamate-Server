@@ -37,7 +37,4 @@ public interface MemberRepository extends Repository<Member, Long> {
     Optional<Member> findByKakaoId(Long kakaoId);
 
     boolean existsByKakaoId(Long kakaoId);
-
-    boolean existsByStudentId(String studentId); // 학번 중복 확인
-
 }

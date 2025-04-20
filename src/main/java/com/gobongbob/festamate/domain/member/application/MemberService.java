@@ -1,7 +1,6 @@
 package com.gobongbob.festamate.domain.member.application;
 
 import static com.gobongbob.festamate.global.response.ResponseCode.DUPLICATE_NICKNAME;
-import static com.gobongbob.festamate.global.response.ResponseCode.DUPLICATE_STUDENT_ID;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_ADMIN;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 
@@ -146,16 +145,6 @@ public class MemberService {
 
         if (isDuplicate) {
             throw new BadRequestException(DUPLICATE_NICKNAME);
-        }
-    }
-
-    // 학번 중복 체크
-    @Transactional
-    public void checkStudentIdDuplication(String studentId) {
-        boolean isDuplicate = memberRepository.existsByStudentId(studentId);
-
-        if (isDuplicate) {
-            throw new BadRequestException(DUPLICATE_STUDENT_ID);
         }
     }
 
