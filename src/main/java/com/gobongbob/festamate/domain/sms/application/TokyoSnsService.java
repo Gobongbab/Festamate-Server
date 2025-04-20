@@ -99,7 +99,7 @@ public class TokyoSnsService {
 
     @Getter
     @AllArgsConstructor
-    static class VerificationInfo {
+    public static class VerificationInfo {
 
         private String code;
         private long timestamp;
