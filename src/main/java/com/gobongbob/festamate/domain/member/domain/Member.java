@@ -119,12 +119,6 @@ public class Member {
         this.nickname = nickname;
     }
 
-    public void setStudentInfo(String studentName, String studentDepartment, String studentId) {
-        this.name = studentName;
-        this.studentDepartment = studentDepartment;
-        this.studentId = studentId;
-    }
-
     public void initializeRemainingTicket(int ticketCount) {
         this.remainingTicket = ticketCount;
     }

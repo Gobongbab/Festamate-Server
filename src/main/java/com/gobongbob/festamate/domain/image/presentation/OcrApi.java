@@ -23,8 +23,6 @@ public interface OcrApi {
     })
     @PostMapping("/api/check/student-card")
     SuccessResponse<StudentInfoResponse> checkStudentCard(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
-            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(name = "file", description = "학생증 이미지 파일", required = true)
             @RequestParam(name = "file") MultipartFile file
     ) throws IOException;
