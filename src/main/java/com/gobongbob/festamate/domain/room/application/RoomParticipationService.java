@@ -18,7 +18,9 @@ import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,13 +90,11 @@ public class RoomParticipationService {
                 .toList();
     }
 
-    private void validateRoomParticipation(Long memberId) {
-        roomParticipantRepository.findByMember_Id(memberId)
-                .stream()
-                .findFirst()
-                .ifPresent(roomParticipant -> {
-                    throw new BadRequestException(ALREADY_PARTICIPATING);
-                });
+    private void participateRoom(Member member, Room room) {
+        member.useTicket();
+        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, Role.GUEST);
+        roomParticipantRepository.save(roomParticipant);
+
     }
 
     private void validateRoomMatching(Room room) {
