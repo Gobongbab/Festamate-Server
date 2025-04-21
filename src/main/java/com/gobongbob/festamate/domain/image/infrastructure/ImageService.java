@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.StreamUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -57,5 +58,11 @@ public class ImageService {
         } catch (IOException e) {
             throw new RuntimeException("파일 업로드에 실패했습니다.", e);
         }
+    }
+
+    @Transactional
+    public void delete(Image image) {
+        String storeName = image.getStoreName();
+        amazonS3Client.deleteObject(bucket, storeName);
     }
 }

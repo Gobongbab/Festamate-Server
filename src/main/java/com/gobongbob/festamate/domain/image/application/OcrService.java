@@ -40,7 +40,7 @@ public class OcrService {
 
     private final MemberRepository memberRepository;
 
-    public StudentInfoResponse checkStudentCard(MultipartFile file, Member member) throws IOException {
+    public StudentInfoResponse checkStudentCard(MultipartFile file) throws IOException {
         // 파일이 비어있거나 null인 경우 예외 처리
         if (file == null || file.isEmpty()) {
             throw new BadRequestException(EMPTY_FILE);
@@ -60,9 +60,6 @@ public class OcrService {
 
         // 임시 파일 삭제
         Files.delete(tempFile);
-
-        member.setStudentInfo(studentName, studentDepartment, studentId);
-        memberRepository.save(member);
 
         return StudentInfoResponse.fromEntity(studentName, studentDepartment, studentId);
     }

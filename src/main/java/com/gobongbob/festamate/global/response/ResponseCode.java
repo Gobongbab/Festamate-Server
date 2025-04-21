@@ -28,6 +28,7 @@ public enum ResponseCode {
     NO_MEMBER(false, "사용자가 존재하지 않습니다."),
     NO_GENDER(false, "해당하는 성별이 없습니다."),
     DUPLICATE_NICKNAME(false, "중복된 닉네임입니다."),
+    DUPLICATE_STUDENT_ID(false, "중복된 학번입니다."),
     USER_NOT_FOUND(false, "해당 유저를 찾을 수 없습니다"),
     UNEXPECTED_TOKEN(false, "올바르지 않은 토큰입니다."),
     PHONE_NOT_VERIFIED(false, "전화번호 인증이 완료되지 않았습니다."),
