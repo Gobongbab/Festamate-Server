@@ -35,34 +35,40 @@ public class RoomParticipationService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void participateAlone(Member member, Long roomId) {
+    public void participate(Member member, Long roomId, ParticipationWithFriendRequest request) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
 
-//        validateRoomParticipation(member.getId());
-        validateRoomFull(room.getId(), 1);
+        validateRoomMatching(room); // 현재 매칭중인 방인지 확인
+        validateRoomJoinable(room, request.friendPhoneNumbers().size() + 1); // 방에 참여할 수 있는 인원인지 확인
+        validatePhoneNumberUnique(member, request.friendPhoneNumbers()); // 참여자 간의 전화번호가 중복되지 않는지 확인
 
-        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, Role.GUEST);
-        roomParticipantRepository.save(roomParticipant);
-        member.useTicket();
+        if (request.friendPhoneNumbers().isEmpty()) { // 혼자 참여
+            participateRoom(member, room);
+        }
+        if (!request.friendPhoneNumbers().isEmpty()) { // 친구와 함께 참여
+            participateRoomWithFriends(room, request);
+        }
+
+        throw new BadRequestException(ALREADY_MATCHED);
     }
 
-    @Transactional
-    public void participateWithFriends(Member member, Long roomId, ParticipationWithFriendRequest request) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
-        validateRoomFull(room.getId(), request.friendPhoneNumbers().size() + 1);
-
-        List<Member> participants = findParticipantsWithPhoneNumber(request);
-        participants.add(member);
-
-        participants.stream()
-                .map(participant -> RoomParticipant.createParticipant(room, participant, Role.GUEST))
-                .forEach(participant -> {
-                    roomParticipantRepository.save(participant);
-                    participant.getMember().useTicket();
-                });
-    }
+//    @Transactional
+//    public void participateWithFriends(Member member, Long roomId, ParticipationWithFriendRequest request) {
+//        Room room = roomRepository.findById(roomId)
+//                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
+//        validateRoomMatching(room, request.friendPhoneNumbers().size() + 1);
+//
+//        List<Member> participants = saveFriendParticipants(request);
+//        participants.add(member);
+//
+//        participants.stream()
+//                .map(participant -> RoomParticipant.createParticipant(room, participant, Role.GUEST))
+//                .forEach(participant -> {
+//                    roomParticipantRepository.save(participant);
+//                    participant.getMember().useTicket();
+//                });
+//    }
 
     @Transactional
     public void leave(Member member, Long roomId) {
@@ -82,12 +88,12 @@ public class RoomParticipationService {
         return new IsMemberHostResponse(isHost);
     }
 
-    private List<Member> findParticipantsWithPhoneNumber(ParticipationWithFriendRequest request) {
-        return request.friendPhoneNumbers()
+    private void participateRoomWithFriends(Room room, ParticipationWithFriendRequest request) {
+        request.friendPhoneNumbers()
                 .stream()
                 .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
                         .orElseThrow(() -> new BadRequestException(NO_MEMBER)))
-                .toList();
+                .forEach(participant -> participateRoom(participant, room));
     }
 
     private void participateRoom(Member member, Room room) {
