@@ -45,11 +45,9 @@ public class RoomParticipationService {
         validateRoomJoinable(room, request.friendPhoneNumbers().size() + 1); // 방에 참여할 수 있는 인원인지 확인
         validatePhoneNumberUnique(member, request.friendPhoneNumbers()); // 참여자 간의 전화번호가 중복되지 않는지 확인
 
-        if (request.friendPhoneNumbers().isEmpty()) { // 혼자 참여
-            participateRoom(member, room);
-        }
+        participateRoom(member, room);
         if (!request.friendPhoneNumbers().isEmpty()) { // 친구와 함께 참여
-            participateRoomWithFriends(room, request);
+            participateRoomForFriends(room, request);
         }
 
         throw new BadRequestException(ALREADY_MATCHED);
@@ -90,7 +88,7 @@ public class RoomParticipationService {
         return new IsMemberHostResponse(isHost);
     }
 
-    private void participateRoomWithFriends(Room room, FriendPhoneNumbersRequest request) {
+    private void participateRoomForFriends(Room room, FriendPhoneNumbersRequest request) {
         request.friendPhoneNumbers()
                 .stream()
                 .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
