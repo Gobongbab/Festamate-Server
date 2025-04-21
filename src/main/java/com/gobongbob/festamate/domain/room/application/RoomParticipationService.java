@@ -13,7 +13,7 @@ import com.gobongbob.festamate.domain.room.domain.Role;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.domain.Status;
-import com.gobongbob.festamate.domain.room.dto.request.ParticipationWithFriendRequest;
+import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest;
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
@@ -35,7 +35,7 @@ public class RoomParticipationService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void participate(Member member, Long roomId, ParticipationWithFriendRequest request) {
+    public void participate(Member member, Long roomId, FriendPhoneNumbersRequest request) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
 
@@ -88,7 +88,7 @@ public class RoomParticipationService {
         return new IsMemberHostResponse(isHost);
     }
 
-    private void participateRoomWithFriends(Room room, ParticipationWithFriendRequest request) {
+    private void participateRoomWithFriends(Room room, FriendPhoneNumbersRequest request) {
         request.friendPhoneNumbers()
                 .stream()
                 .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)

@@ -110,7 +110,8 @@ public class RoomController implements RoomApi {
     @PostMapping("/{roomId}/participations")
     public SuccessResponse<Void> participateAlone(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable("roomId") Long roomId
+            @PathVariable("roomId") Long roomId,
+            @RequestBody FriendPhoneNumbersRequest request
     ) {
         roomParticipationService.participateAlone(memberDetails.getMember(), roomId);
         chatService.sendMessage(
