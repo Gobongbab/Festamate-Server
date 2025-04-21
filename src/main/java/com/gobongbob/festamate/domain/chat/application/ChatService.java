@@ -30,8 +30,8 @@ public class ChatService {
     private final SimpMessageSendingOperations messagingTemplate;
 
     @Transactional
-    public void sendMessage(Long roomId, Member member, String message) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+    public void sendMessage(Long chatRoomId, Member member, String message) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
 
         Message savedMessage = messageRepository.save(

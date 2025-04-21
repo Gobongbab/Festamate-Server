@@ -116,7 +116,7 @@ public class RoomController implements RoomApi {
     ) {
         ChatRoom chatRoom = roomParticipationService.participate(memberDetails.getMember().getId(), roomId, request);
         chatService.sendMessage(
-                roomId,
+                chatRoom.getId(),
                 memberDetails.getMember(),
                 memberDetails.getMember().getNickname() + "님이 들어왔습니다."
         );

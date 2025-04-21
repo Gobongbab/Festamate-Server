@@ -8,6 +8,8 @@ import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPAT
 import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
 import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_NOT_JOINABLE;
 
+import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
+import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Role;
@@ -32,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RoomParticipationService {
 
     private final RoomRepository roomRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final MemberRepository memberRepository;
 
@@ -51,25 +54,9 @@ public class RoomParticipationService {
             participateRoomForFriends(room, request);
         }
 
-        throw new BadRequestException(ALREADY_MATCHED);
+        return chatRoomRepository.findByRoom(room)
+                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
     }
-
-//    @Transactional
-//    public void participateWithFriends(Member member, Long roomId, ParticipationWithFriendRequest request) {
-//        Room room = roomRepository.findById(roomId)
-//                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
-//        validateRoomMatching(room, request.friendPhoneNumbers().size() + 1);
-//
-//        List<Member> participants = saveFriendParticipants(request);
-//        participants.add(member);
-//
-//        participants.stream()
-//                .map(participant -> RoomParticipant.createParticipant(room, participant, Role.GUEST))
-//                .forEach(participant -> {
-//                    roomParticipantRepository.save(participant);
-//                    participant.getMember().useTicket();
-//                });
-//    }
 
     @Transactional
     public void leave(Member member, Long roomId) {
@@ -101,7 +88,6 @@ public class RoomParticipationService {
         member.useTicket();
         RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, Role.GUEST);
         roomParticipantRepository.save(roomParticipant);
-
     }
 
     private void validateRoomMatching(Room room) {
