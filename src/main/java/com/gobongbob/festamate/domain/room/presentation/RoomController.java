@@ -51,7 +51,7 @@ public class RoomController implements RoomApi {
             @RequestPart("request") @Valid RoomCreateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
+        ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember().getId(), request, multipartFiles);
         chatService.sendMessage(
                 createdChatRoom.getId(),
                 memberDetails.getMember(),
@@ -114,7 +114,7 @@ public class RoomController implements RoomApi {
             @PathVariable("roomId") Long roomId,
             @RequestBody FriendPhoneNumbersRequest request
     ) {
-        roomParticipationService.participate(memberDetails.getMember(), roomId, request);
+        ChatRoom chatRoom = roomParticipationService.participate(memberDetails.getMember().getId(), roomId, request);
         chatService.sendMessage(
                 roomId,
                 memberDetails.getMember(),
