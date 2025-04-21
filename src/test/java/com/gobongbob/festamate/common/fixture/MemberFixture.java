@@ -43,7 +43,7 @@ public class MemberFixture {
                 member.getLoginId(),
                 member.getLoginPassword(),
                 member.getPhoneNumber(),
-                member.getGender().getName(),
+                member.getGender(),
                 member.getMajor().getCollege(),
                 member.getMajor().getDepartment()
         );

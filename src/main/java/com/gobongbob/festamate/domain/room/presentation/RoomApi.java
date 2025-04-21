@@ -126,7 +126,7 @@ public interface RoomApi {
             @Parameter(name = "roomId", description = "모임방 ID")
             @PathVariable("roomId") Long roomId,
             @Parameter(description = "친구 전화번호 목록")
-            @RequestBody FriendPhoneNumbersRequest request
+            @RequestBody @Valid FriendPhoneNumbersRequest request
     );
 
     @Operation(summary = "모임방 나가기", description = "모임방에서 나갑니다.")

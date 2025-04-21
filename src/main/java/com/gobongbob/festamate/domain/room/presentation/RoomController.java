@@ -114,7 +114,7 @@ public class RoomController implements RoomApi {
     public SuccessResponse<Void> participate(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable("roomId") Long roomId,
-            @RequestBody FriendPhoneNumbersRequest request
+            @RequestBody @Valid FriendPhoneNumbersRequest request
     ) {
         ChatRoom chatRoom = roomParticipationService.participate(memberDetails.getMember().getId(), roomId, request);
         chatService.sendMessage(
