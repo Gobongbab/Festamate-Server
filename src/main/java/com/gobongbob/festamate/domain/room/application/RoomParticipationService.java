@@ -1,7 +1,6 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_PARTICIPATING;
-import static com.gobongbob.festamate.global.response.ResponseCode.FULL_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_MATCHED;
 import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
 import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
@@ -96,9 +95,11 @@ public class RoomParticipationService {
                 });
     }
 
-    private void validateRoomFull(Long roomId, int membersToParticipate) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
+    private void validateRoomMatching(Room room) {
+        if (room.getStatus() == Status.MATCHED) {
+            throw new BadRequestException(ALREADY_MATCHED);
+        }
+    }
 
         if (isRoomFull(membersToParticipate, room)) {
             throw new BadRequestException(FULL_ROOM);
