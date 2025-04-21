@@ -6,6 +6,7 @@ import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROO
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
 import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
+import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_NOT_JOINABLE;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
@@ -111,8 +112,8 @@ public class RoomParticipationService {
 
     private void validateRoomJoinable(Room room, int participants) {
         int guestParticipants = room.getMaxParticipants() / 2;
-        if (guestParticipants == participants) {
-            throw new BadRequestException(NOT_FOUND_ROOM);
+        if (guestParticipants != participants) {
+            throw new BadRequestException(ROOM_NOT_JOINABLE);
         }
     }
 
