@@ -5,6 +5,7 @@ import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
 import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
@@ -109,10 +110,13 @@ public class RoomParticipationService {
         }
     }
 
-    private boolean isRoomFull(int membersToParticipate, Room room) {
-        int currentParticipants = roomParticipantRepository.countByRoom_Id(room.getId());
+    private void validatePhoneNumberUnique(Member member, List<String> phoneNumbers) {
+        Set<String> participantPhoneNumbers = new HashSet<>(phoneNumbers);
+        participantPhoneNumbers.add(member.getPhoneNumber());
 
-        return membersToParticipate + currentParticipants > room.getMaxParticipants();
+        if (participantPhoneNumbers.size() != phoneNumbers.size() + 1) {
+            throw new BadRequestException(PHONE_NUMBER_DUPLICATE);
+        }
     }
 
     private void validateNotHost(Room room, Member member) {
