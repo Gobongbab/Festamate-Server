@@ -44,7 +44,7 @@ public class ChatService {
         );
         MessageResponse response = MessageResponse.fromEntity(savedMessage);
 
-        messagingTemplate.convertAndSend("/topic/room/" + roomId, response);
+        messagingTemplate.convertAndSend("/topic/room/" + chatRoomId, response);
     }
 
     public Slice<MessageResponse> findMessagesByRoomId(Long memberId, Long roomId, Pageable pageable) {

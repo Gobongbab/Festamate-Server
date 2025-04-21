@@ -15,6 +15,7 @@ public enum ResponseCode {
     ALREADY_PARTICIPATING(false, "이미 모임방에 참여하고 있습니다."),
     NO_PARTICIPATING_ROOM(false, "참여중인 모임방이 존재하지 않습니다."),
     ALREADY_MATCHED(false, "이미 매칭이 완료된 모임방입니다."),
+    ROOM_NOT_JOINABLE(false, "입장 인원이 모임의 남은 자리와 일치하지 않습니다."),
     PHONE_NUMBER_DUPLICATE(false, "같은 회원이 동시에 참여할 수 없습니다."),
     MUST_HOST(false, "방장이어야 합니다."),
     MUST_NORMAL(false, "일반 회원이어야 합니다."),
