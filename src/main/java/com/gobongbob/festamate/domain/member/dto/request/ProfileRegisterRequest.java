@@ -1,6 +1,5 @@
 package com.gobongbob.festamate.domain.member.dto.request;
 
-import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 
@@ -9,7 +8,6 @@ public record ProfileRegisterRequest(
         String name,
         String studentId,
         String phoneNumber,
-        String phoneVerificationCodes,
         Gender gender,
         String college,
         String department,
@@ -25,7 +23,7 @@ public record ProfileRegisterRequest(
                 studentId,
                 phoneNumber,
                 gender,
-                Major.findByDepartment(department)
+                department
         );
 
         return existingMember;

@@ -1,9 +1,9 @@
 package com.gobongbob.festamate.domain.member.application;
 
 import static com.gobongbob.festamate.global.response.ResponseCode.DUPLICATE_NICKNAME;
+import static com.gobongbob.festamate.global.response.ResponseCode.DUPLICATE_STUDENT_ID;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_ADMIN;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
-import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NOT_VERIFIED;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
@@ -121,11 +121,11 @@ public class MemberService {
     @Transactional
     public void registerProfile(ProfileRegisterRequest request, Long userId) {
 
-        // 전화번호 인증 여부 확인
-        String phoneNumber = request.phoneNumber();
-        if (!tokyoSnsService.isPhoneNumberVerified(phoneNumber)) {
-            throw new BadRequestException(PHONE_NOT_VERIFIED);
-        }
+//        // 전화번호 인증 여부 확인
+//        String phoneNumber = request.phoneNumber();
+//        if (!tokyoSnsService.isPhoneNumberVerified(phoneNumber)) {
+//            throw new BadRequestException(PHONE_NOT_VERIFIED);
+//        }
 
         // 회원 조회
         Member member = memberRepository.findById(userId)
@@ -135,8 +135,8 @@ public class MemberService {
         Member updatedMember = request.toEntity(member);
         memberRepository.save(updatedMember);
 
-        // 인증 기록 삭제 (더 이상 인증 재사용 안되게)
-        tokyoSnsService.removeVerificationInfo(phoneNumber);
+//        // 인증 기록 삭제 (더 이상 인증 재사용 안되게)
+//        tokyoSnsService.removeVerificationInfo(phoneNumber);
     }
 
     // 닉네임 중복 체크
@@ -146,6 +146,16 @@ public class MemberService {
 
         if (isDuplicate) {
             throw new BadRequestException(DUPLICATE_NICKNAME);
+        }
+    }
+
+    // 학번 중복 체크
+    @Transactional
+    public void checkStudentIdDuplication(String studentId) {
+        boolean isDuplicate = memberRepository.existsByStudentId(studentId);
+
+        if (isDuplicate) {
+            throw new BadRequestException(DUPLICATE_STUDENT_ID);
         }
     }
 

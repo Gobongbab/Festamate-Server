@@ -1,6 +1,5 @@
 package com.gobongbob.festamate.domain.member.dto.request;
 
-import com.gobongbob.festamate.domain.major.domain.Major;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 
@@ -25,7 +24,7 @@ public record MemberCreateRequest(
                 .loginPassword(loginPassword)
                 .phoneNumber(phoneNumber)
                 .gender(gender)
-                .major(Major.findByDepartment(department))
+                .studentDepartment(department)
                 .build();
     }
 }

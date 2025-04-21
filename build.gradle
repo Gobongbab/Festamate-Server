@@ -84,6 +84,12 @@ dependencies {
     // Spring WebFlux
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // actuator, prometheus
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {
