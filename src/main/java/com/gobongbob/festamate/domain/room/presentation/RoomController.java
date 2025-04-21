@@ -81,9 +81,10 @@ public class RoomController implements RoomApi {
     public SuccessResponse<Void> updateById(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable("roomId") Long roomId,
-            @RequestBody @Valid RoomUpdateRequest request
+            @RequestPart("request") @Valid RoomUpdateRequest request,
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        roomService.updateRoomById(memberDetails.getMember(), roomId, request);
+        roomService.updateRoomById(memberDetails.getMember(), roomId, request, multipartFiles);
 
         return new SuccessResponse<>();
     }
