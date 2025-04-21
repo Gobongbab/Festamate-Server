@@ -11,6 +11,7 @@ import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Role;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
+import com.gobongbob.festamate.domain.room.domain.Status;
 import com.gobongbob.festamate.domain.room.dto.request.ParticipationWithFriendRequest;
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
@@ -101,8 +102,10 @@ public class RoomParticipationService {
         }
     }
 
-        if (isRoomFull(membersToParticipate, room)) {
-            throw new BadRequestException(FULL_ROOM);
+    private void validateRoomJoinable(Room room, int participants) {
+        int guestParticipants = room.getMaxParticipants() / 2;
+        if (guestParticipants == participants) {
+            throw new BadRequestException(NOT_FOUND_ROOM);
         }
     }
 
