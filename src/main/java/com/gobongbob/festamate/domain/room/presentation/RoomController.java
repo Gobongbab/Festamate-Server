@@ -6,6 +6,7 @@ import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
+import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
@@ -108,12 +109,12 @@ public class RoomController implements RoomApi {
 
     @Override
     @PostMapping("/{roomId}/participations")
-    public SuccessResponse<Void> participateAlone(
+    public SuccessResponse<Void> participate(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable("roomId") Long roomId,
             @RequestBody FriendPhoneNumbersRequest request
     ) {
-        roomParticipationService.participateAlone(memberDetails.getMember(), roomId);
+        roomParticipationService.participate(memberDetails.getMember(), roomId, request);
         chatService.sendMessage(
                 roomId,
                 memberDetails.getMember(),
