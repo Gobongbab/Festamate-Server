@@ -1,12 +1,6 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_MATCHED;
-import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
-import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_NOT_JOINABLE;
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
