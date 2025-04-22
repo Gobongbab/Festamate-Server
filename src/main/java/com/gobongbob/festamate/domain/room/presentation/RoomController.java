@@ -124,9 +124,9 @@ public class RoomController implements RoomApi {
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable("roomId") Long roomId
     ) {
-        roomParticipationService.leave(memberDetails.getMember(), roomId);
+        ChatRoom chatRoom = roomParticipationService.leave(memberDetails.getMember(), roomId);
         chatService.sendMessage(
-                roomId,
+                chatRoom.getId(),
                 memberDetails.getMember(),
                 memberDetails.getMember().getNickname() + "님이 나갔습니다."
         );

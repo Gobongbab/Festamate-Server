@@ -55,17 +55,20 @@ public class RoomParticipationService {
         }
 
         return chatRoomRepository.findByRoom(room)
-                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
+                .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
     }
 
     @Transactional
-    public void leave(Member member, Long roomId) {
+    public ChatRoom leave(Member member, Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateNotHost(room, member);
 
         List<RoomParticipant> guestParticipants = roomParticipantRepository.findByRoomAndRole(roomId, Role.GUEST);
         roomParticipantRepository.deleteAll(guestParticipants);
+
+        return chatRoomRepository.findByRoom(room)
+                .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
     }
 
     public IsMemberHostResponse isMemberHost(Long roomId, Member member) {
