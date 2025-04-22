@@ -22,6 +22,7 @@ public record RoomResponse(
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime meetingDateTime,
         int maxParticipants,
+        int currentParticipants,
         RoomAuthority roomAuthority,
         List<ParticipantResponse> hostParticipants,
         List<ParticipantResponse> guestParticipants,
@@ -30,6 +31,7 @@ public record RoomResponse(
 
     public static RoomResponse fromEntity(
             Room room,
+            int currentParticipants,
             RoomAuthority roomAuthority,
             List<RoomParticipant> hostParticipants,
             List<RoomParticipant> guestParticipants
@@ -45,6 +47,7 @@ public record RoomResponse(
                 room.getPreferredStudentIdMax(),
                 room.getMeetingDateTime(),
                 room.getMaxParticipants(),
+                currentParticipants,
                 roomAuthority,
                 toParticipantResponse(hostParticipants),
                 toParticipantResponse(guestParticipants),

@@ -95,6 +95,7 @@ public class RoomService {
         return roomRepository.findById(roomId)
                 .map(room -> RoomResponse.fromEntity(
                         room,
+                        roomParticipantRepository.countByRoom_Id(room.getId()),
                         findRoomAuthorityByMember(room, memberDetails),
                         roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.HOST),
                         roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.GUEST)
