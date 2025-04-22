@@ -91,10 +91,11 @@ public class RoomService {
                 )).toList();
     }
 
-    public RoomResponse findRoomById(Long roomId) {
+    public RoomResponse findRoomById(CustomMemberDetails memberDetails, Long roomId) {
         return roomRepository.findById(roomId)
                 .map(room -> RoomResponse.fromEntity(
                         room,
+                        findRoomAuthorityByMember(room, memberDetails),
                         roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.HOST),
                         roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.GUEST)
                 )).orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
