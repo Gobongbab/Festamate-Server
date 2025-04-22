@@ -2,6 +2,7 @@ package com.gobongbob.festamate.domain.room.application;
 
 import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
@@ -12,6 +13,7 @@ import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.domain.RoomAuthority;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
@@ -151,6 +153,18 @@ public class RoomService {
         /*
         추후 방 삭제 시, 방에 참여중인 사용자들에게 알림을 보내는 로직 추가 필요
          */
+    }
+
+    private RoomAuthority findRoomAuthorityByMember(Room room, CustomMemberDetails memberDetails) {
+        if (memberDetails == null) {
+            return RoomAuthority.NON_MEMBER;
+        }
+
+        return roomParticipantRepository.findByRoom_IdAndMember_Id(room.getId(), memberDetails.getMember().getId())
+                .stream()
+                .findFirst()
+                .map(participant -> participant.isHost() ? RoomAuthority.HOST : RoomAuthority.PARTICIPANT)
+                .orElse(RoomAuthority.NON_PARTICIPANT);
     }
 
     private void validateRoomParticipation(Long memberId) {
