@@ -6,6 +6,7 @@ import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
+import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
@@ -20,16 +21,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -49,7 +43,7 @@ public class RoomController implements RoomApi {
             @RequestPart("request") @Valid RoomCreateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
+        ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember().getId(), request, multipartFiles);
         chatService.sendMessage(
                 createdChatRoom.getId(),
                 memberDetails.getMember(),
@@ -107,14 +101,16 @@ public class RoomController implements RoomApi {
     }
 
     @Override
+    @Transactional
     @PostMapping("/{roomId}/participations")
-    public SuccessResponse<Void> participateAlone(
+    public SuccessResponse<Void> participate(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable("roomId") Long roomId
+            @PathVariable("roomId") Long roomId,
+            @RequestBody FriendPhoneNumbersRequest request
     ) {
-        roomParticipationService.participateAlone(memberDetails.getMember(), roomId);
+        ChatRoom chatRoom = roomParticipationService.participate(memberDetails.getMember().getId(), roomId, request);
         chatService.sendMessage(
-                roomId,
+                chatRoom.getId(),
                 memberDetails.getMember(),
                 memberDetails.getMember().getNickname() + "님이 들어왔습니다."
         );

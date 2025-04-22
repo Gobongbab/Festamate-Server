@@ -30,8 +30,8 @@ public class ChatService {
     private final SimpMessageSendingOperations messagingTemplate;
 
     @Transactional
-    public void sendMessage(Long roomId, Member member, String message) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+    public void sendMessage(Long chatRoomId, Member member, String message) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
 
         Message savedMessage = messageRepository.save(
@@ -44,7 +44,7 @@ public class ChatService {
         );
         MessageResponse response = MessageResponse.fromEntity(savedMessage);
 
-        messagingTemplate.convertAndSend("/topic/room/" + roomId, response);
+        messagingTemplate.convertAndSend("/topic/room/" + chatRoomId, response);
     }
 
     public Slice<MessageResponse> findMessagesByRoomId(Long memberId, Long roomId, Pageable pageable) {

@@ -2,6 +2,7 @@ package com.gobongbob.festamate.domain.room.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
+import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
@@ -20,13 +21,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Room", description = "방 관련 API")
@@ -120,10 +115,13 @@ public interface RoomApi {
             @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
     })
     @PostMapping("/{roomId}/participations")
-    SuccessResponse<Void> participateAlone(
+    SuccessResponse<Void> participate(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
+            @Parameter(name = "roomId", description = "모임방 ID")
+            @PathVariable("roomId") Long roomId,
+            @Parameter(description = "친구 전화번호 목록")
+            @RequestBody FriendPhoneNumbersRequest request
     );
 
     @Operation(summary = "모임방 나가기", description = "모임방에서 나갑니다.")

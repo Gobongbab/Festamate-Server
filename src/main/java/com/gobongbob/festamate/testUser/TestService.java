@@ -53,6 +53,10 @@ public class TestService {
         Member adminMember = createAdminMemberEntity("Admin User", "admin_nickname",
                 "admin_student_id");
 
+        // 초기 프로필 이미지 설정
+        profileImageRepository.findByStoreName("default_profile_image.png")
+                .ifPresent(adminMember::initializeProfileImage);
+
         // DB에 관리자 회원 저장
         memberRepository.save(adminMember);  // 관리자 회원을 DB에 저장
 

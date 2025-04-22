@@ -85,7 +85,7 @@ class RoomServiceTest extends serviceSliceTest {
             doNothing().when(imageService).uploadImages(any());
 
             // when
-            Room createdRoom = roomService.createRoom(member, request, imageFiles).getRoom();
+            Room createdRoom = roomService.createRoom(member.getId(), request, imageFiles).getRoom();
 
             // then
             assertAll(

@@ -147,7 +147,7 @@ class MemberServiceTest extends serviceSliceTest {
             String loginPasswordToUpdate = "updatedLoginPassword";
 
             // when
-            ProfileUpdateRequest request = new ProfileUpdateRequest(nicknameToUpdate);
+            ProfileUpdateRequest request = new ProfileUpdateRequest(nicknameToUpdate, loginPasswordToUpdate);
             memberService.updateMemberProfileById(member, request);
 
             // then

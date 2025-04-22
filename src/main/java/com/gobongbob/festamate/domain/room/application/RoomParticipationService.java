@@ -1,23 +1,29 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_PARTICIPATING;
-import static com.gobongbob.festamate.global.response.ResponseCode.FULL_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_MATCHED;
 import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
 import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
+import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_NOT_JOINABLE;
 
+import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
+import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Role;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
-import com.gobongbob.festamate.domain.room.dto.request.ParticipationWithFriendRequest;
+import com.gobongbob.festamate.domain.room.domain.Status;
+import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest;
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,37 +34,28 @@ import org.springframework.transaction.annotation.Transactional;
 public class RoomParticipationService {
 
     private final RoomRepository roomRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void participateAlone(Member member, Long roomId) {
+    public ChatRoom participate(Long memberId, Long roomId, FriendPhoneNumbersRequest request) {
+        Member member = memberRepository.findById(memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
 
-//        validateRoomParticipation(member.getId());
-        validateRoomFull(room.getId(), 1);
+        validateRoomMatching(room); // 현재 매칭중인 방인지 확인
+        validateRoomJoinable(room, request.friendPhoneNumbers().size() + 1); // 방에 참여할 수 있는 인원인지 확인
+        validatePhoneNumberUnique(member, request.friendPhoneNumbers()); // 참여자 간의 전화번호가 중복되지 않는지 확인
 
-        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, Role.GUEST);
-        roomParticipantRepository.save(roomParticipant);
-        member.useTicket();
-    }
+        participateRoom(member, room);
+        if (!request.friendPhoneNumbers().isEmpty()) { // 친구와 함께 참여
+            participateRoomForFriends(room, request);
+        }
 
-    @Transactional
-    public void participateWithFriends(Member member, Long roomId, ParticipationWithFriendRequest request) {
-        Room room = roomRepository.findById(roomId)
+        return chatRoomRepository.findByRoom(room)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
-        validateRoomFull(room.getId(), request.friendPhoneNumbers().size() + 1);
-
-        List<Member> participants = findParticipantsWithPhoneNumber(request);
-        participants.add(member);
-
-        participants.stream()
-                .map(participant -> RoomParticipant.createParticipant(room, participant, Role.GUEST))
-                .forEach(participant -> {
-                    roomParticipantRepository.save(participant);
-                    participant.getMember().useTicket();
-                });
     }
 
     @Transactional
@@ -79,36 +76,40 @@ public class RoomParticipationService {
         return new IsMemberHostResponse(isHost);
     }
 
-    private List<Member> findParticipantsWithPhoneNumber(ParticipationWithFriendRequest request) {
-        return request.friendPhoneNumbers()
+    private void participateRoomForFriends(Room room, FriendPhoneNumbersRequest request) {
+        request.friendPhoneNumbers()
                 .stream()
                 .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
                         .orElseThrow(() -> new BadRequestException(NO_MEMBER)))
-                .toList();
+                .forEach(participant -> participateRoom(participant, room));
     }
 
-    private void validateRoomParticipation(Long memberId) {
-        roomParticipantRepository.findByMember_Id(memberId)
-                .stream()
-                .findFirst()
-                .ifPresent(roomParticipant -> {
-                    throw new BadRequestException(ALREADY_PARTICIPATING);
-                });
+    private void participateRoom(Member member, Room room) {
+        member.useTicket();
+        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, Role.GUEST);
+        roomParticipantRepository.save(roomParticipant);
     }
 
-    private void validateRoomFull(Long roomId, int membersToParticipate) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
-
-        if (isRoomFull(membersToParticipate, room)) {
-            throw new BadRequestException(FULL_ROOM);
+    private void validateRoomMatching(Room room) {
+        if (room.getStatus() == Status.MATCHED) {
+            throw new BadRequestException(ALREADY_MATCHED);
         }
     }
 
-    private boolean isRoomFull(int membersToParticipate, Room room) {
-        int currentParticipants = roomParticipantRepository.countByRoom_Id(room.getId());
+    private void validateRoomJoinable(Room room, int participants) {
+        int guestParticipants = room.getMaxParticipants() / 2;
+        if (guestParticipants != participants) {
+            throw new BadRequestException(ROOM_NOT_JOINABLE);
+        }
+    }
 
-        return membersToParticipate + currentParticipants > room.getMaxParticipants();
+    private void validatePhoneNumberUnique(Member member, List<String> phoneNumbers) {
+        Set<String> participantPhoneNumbers = new HashSet<>(phoneNumbers);
+        participantPhoneNumbers.add(member.getPhoneNumber());
+
+        if (participantPhoneNumbers.size() != phoneNumbers.size() + 1) {
+            throw new BadRequestException(PHONE_NUMBER_DUPLICATE);
+        }
     }
 
     private void validateNotHost(Room room, Member member) {

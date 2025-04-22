@@ -4,6 +4,7 @@ import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_PARTI
 import static com.gobongbob.festamate.global.response.ResponseCode.CAN_NOT_UPDATE;
 import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
 import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
@@ -12,6 +13,7 @@ import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
 import com.gobongbob.festamate.domain.image.persistence.RoomImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Role;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
@@ -43,10 +45,12 @@ public class RoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
     private final ImageService imageService;
+    private final MemberRepository memberRepository;
 
     @Transactional
-    public ChatRoom createRoom(Member member, RoomCreateRequest request, List<MultipartFile> imageFiles) {
-//        validateRoomParticipation(member.getId());
+    public ChatRoom createRoom(Long memberId, RoomCreateRequest request, List<MultipartFile> imageFiles) {
+        Member member = memberRepository.findById(memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
         List<RoomImage> roomImages = new ArrayList<>();
         if (!imageFiles.isEmpty()) {

@@ -25,6 +25,8 @@ class RoomTest {
                 room.getPlace(),
                 room.getContent(),
                 Gender.FEMALE,
+                room.getPreferredStudentIdMin(),
+                room.getPreferredStudentIdMax(),
                 room.getMeetingDateTime(),
                 6
 
