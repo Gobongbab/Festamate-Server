@@ -75,6 +75,8 @@ public interface RoomApi {
     })
     @GetMapping("/{roomId}")
     SuccessResponse<RoomResponse> findRoomById(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
     );
 
