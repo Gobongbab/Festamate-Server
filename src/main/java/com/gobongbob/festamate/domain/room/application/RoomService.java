@@ -178,7 +178,7 @@ public class RoomService {
     }
 
     private void validateIsHost(Room room, Member member) {
-        if (!member.isHost(room) || !member.isAdmin()) {
+        if (!member.isHost(room) && !member.isAdmin()) {
             throw new BadRequestException(MUST_HOST);
         }
     }
