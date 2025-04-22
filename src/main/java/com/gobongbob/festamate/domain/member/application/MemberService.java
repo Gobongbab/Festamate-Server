@@ -8,6 +8,7 @@ import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.domain.Role;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
@@ -58,9 +59,9 @@ public class MemberService {
 
     // 관리자용 유저 조회
     public MemberResponse findMemberByIdForAdmin(CustomMemberDetails memberDetails, Long memberId) {
-        String role = memberDetails.getMember().getRole();
+        Role requesterRole = memberDetails.getMember().getRole();
 
-        if (!"ADMIN".equals(role)) {
+        if (requesterRole != Role.ADMIN) {
             throw new BadRequestException(NO_ADMIN);
         }
 
