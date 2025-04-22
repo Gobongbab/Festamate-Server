@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.domain.RoomAuthority;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.domain.Status;
 import java.time.LocalDateTime;
@@ -21,6 +22,8 @@ public record RoomResponse(
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime meetingDateTime,
         int maxParticipants,
+        int currentParticipants,
+        RoomAuthority roomAuthority,
         List<ParticipantResponse> hostParticipants,
         List<ParticipantResponse> guestParticipants,
         List<ImageResponse> images
@@ -28,6 +31,8 @@ public record RoomResponse(
 
     public static RoomResponse fromEntity(
             Room room,
+            int currentParticipants,
+            RoomAuthority roomAuthority,
             List<RoomParticipant> hostParticipants,
             List<RoomParticipant> guestParticipants
     ) {
@@ -42,6 +47,8 @@ public record RoomResponse(
                 room.getPreferredStudentIdMax(),
                 room.getMeetingDateTime(),
                 room.getMaxParticipants(),
+                currentParticipants,
+                roomAuthority,
                 toParticipantResponse(hostParticipants),
                 toParticipantResponse(guestParticipants),
                 toImageResponse(room)

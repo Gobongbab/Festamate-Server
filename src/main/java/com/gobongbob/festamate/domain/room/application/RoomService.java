@@ -1,11 +1,8 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_PARTICIPATING;
-import static com.gobongbob.festamate.global.response.ResponseCode.CAN_NOT_UPDATE;
-import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
@@ -14,8 +11,9 @@ import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
 import com.gobongbob.festamate.domain.image.persistence.RoomImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
-import com.gobongbob.festamate.domain.room.domain.Role;
+import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.domain.RoomAuthority;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
@@ -93,12 +91,14 @@ public class RoomService {
                 )).toList();
     }
 
-    public RoomResponse findRoomById(Long roomId) {
+    public RoomResponse findRoomById(CustomMemberDetails memberDetails, Long roomId) {
         return roomRepository.findById(roomId)
                 .map(room -> RoomResponse.fromEntity(
                         room,
-                        roomParticipantRepository.findByRoomAndRole(room.getId(), Role.HOST),
-                        roomParticipantRepository.findByRoomAndRole(room.getId(), Role.GUEST)
+                        roomParticipantRepository.countByRoom_Id(room.getId()),
+                        findRoomAuthorityByMember(room, memberDetails),
+                        roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.HOST),
+                        roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.GUEST)
                 )).orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
     }
 
@@ -157,6 +157,18 @@ public class RoomService {
          */
     }
 
+    private RoomAuthority findRoomAuthorityByMember(Room room, CustomMemberDetails memberDetails) {
+        if (memberDetails == null) {
+            return RoomAuthority.NON_MEMBER;
+        }
+
+        return roomParticipantRepository.findByRoom_IdAndMember_Id(room.getId(), memberDetails.getMember().getId())
+                .stream()
+                .findFirst()
+                .map(participant -> participant.isHost() ? RoomAuthority.HOST : RoomAuthority.PARTICIPANT)
+                .orElse(RoomAuthority.NON_PARTICIPANT);
+    }
+
     private void validateRoomParticipation(Long memberId) {
         roomParticipantRepository.findByMember_Id(memberId)
                 .stream()
@@ -167,7 +179,7 @@ public class RoomService {
     }
 
     private void validateIsHost(Room room, Member member) {
-        if (!member.isHost(room)) {
+        if (!member.isHost(room) && !member.isAdmin()) {
             throw new BadRequestException(MUST_HOST);
         }
     }

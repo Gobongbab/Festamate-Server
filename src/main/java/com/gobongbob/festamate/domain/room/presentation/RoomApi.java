@@ -68,13 +68,18 @@ public interface RoomApi {
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     );
 
-    @Operation(summary = "모임방 상세 조회", description = "모임방 ID로 방 상세 정보를 조회합니다.")
+    @Operation(summary = "모임방 상세 조회", description = """
+            모임방 ID로 방 상세 정보를 조회합니다. roomAuthority로 전달되는 값은 다음과 같습니다.
+            <br><br>roomAuthority: [HOST, PARTICIPANT, NON_PARTICIPANT, NON_MEMBER] (방장, 참여자, 비참여 회원, 비회원)
+            """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
             @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
     })
     @GetMapping("/{roomId}")
     SuccessResponse<RoomResponse> findRoomById(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(name = "roomId", description = "모임방 ID") @PathVariable("roomId") Long roomId
     );
 

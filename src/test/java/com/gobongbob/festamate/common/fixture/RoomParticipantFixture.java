@@ -1,7 +1,7 @@
 package com.gobongbob.festamate.common.fixture;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
-import com.gobongbob.festamate.domain.room.domain.Role;
+import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import java.util.List;
@@ -12,8 +12,8 @@ public class RoomParticipantFixture {
         return RoomParticipant.createHost(room, member);
     }
 
-    public static RoomParticipant createParticipant(Room room, Member member, Role role) {
-        return RoomParticipant.createParticipant(room, member, role);
+    public static RoomParticipant createParticipant(Room room, Member member, ParticipantRole participantRole) {
+        return RoomParticipant.createParticipant(room, member, participantRole);
     }
 
     public static List<RoomParticipant> createParticipants(Room room) {
@@ -24,10 +24,10 @@ public class RoomParticipantFixture {
     }
 
     public static RoomParticipant ROOM_PARTICIPANT_1(Room room) {
-        return createParticipant(room, MemberFixture.MEMBER2(), Role.HOST);
+        return createParticipant(room, MemberFixture.MEMBER2(), ParticipantRole.HOST);
     }
 
     public static RoomParticipant ROOM_PARTICIPANT_2(Room room) {
-        return createParticipant(room, MemberFixture.MEMBER3(), Role.GUEST);
+        return createParticipant(room, MemberFixture.MEMBER3(), ParticipantRole.GUEST);
     }
 }

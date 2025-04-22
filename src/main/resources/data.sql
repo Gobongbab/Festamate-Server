@@ -270,7 +270,7 @@ VALUES (2, 1, 1, 'UNHEALTHY', '2025-04-18 10:00:00', false),
 -- boolean 타입(is_host)의 값은 DB에 따라 true/false 또는 1/0으로 입력해야 할 수 있습니다. (여기서는 true/false 사용)
 -- 1. 모든 방에 대한 호스트(Host) 정보 추가
 -- Room 테이블 생성 시 사용된 host_id를 기반으로 합니다.
-INSERT INTO room_participant (room_id, member_id, role, is_host)
+INSERT INTO room_participant (room_id, member_id, participant_role, is_host)
 VALUES (1, 1, 'HOST', true),   -- Room 1, Host 1
        (2, 2, 'HOST', true),   -- Room 2, Host 3
        (3, 3, 'HOST', true),   -- Room 3, Host 4
@@ -305,7 +305,7 @@ VALUES (1, 1, 'HOST', true),   -- Room 1, Host 1
 -- Room 31, Host 10
 
 -- 2. 일부 방에 대한 참여자(Participant) 정보 추가 (예시)
-INSERT INTO room_participant (room_id, member_id, role, is_host)
+INSERT INTO room_participant (room_id, member_id, participant_role, is_host)
 VALUES
     -- Room 1 (Host: 1) 에 참여자 추가
     (1, 2, 'GUEST', false),
