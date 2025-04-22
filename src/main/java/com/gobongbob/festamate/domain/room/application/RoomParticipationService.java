@@ -1,18 +1,12 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_MATCHED;
-import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
-import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_NOT_JOINABLE;
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
-import com.gobongbob.festamate.domain.room.domain.Role;
+import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.domain.Status;
@@ -55,17 +49,21 @@ public class RoomParticipationService {
         }
 
         return chatRoomRepository.findByRoom(room)
-                .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
+                .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
     }
 
     @Transactional
-    public void leave(Member member, Long roomId) {
+    public ChatRoom leave(Member member, Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateNotHost(room, member);
 
-        List<RoomParticipant> guestParticipants = roomParticipantRepository.findByRoomAndRole(roomId, Role.GUEST);
+        List<RoomParticipant> guestParticipants = roomParticipantRepository.findByRoomAndRole(roomId,
+                ParticipantRole.GUEST);
         roomParticipantRepository.deleteAll(guestParticipants);
+
+        return chatRoomRepository.findByRoom(room)
+                .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
     }
 
     public IsMemberHostResponse isMemberHost(Long roomId, Member member) {
@@ -86,7 +84,7 @@ public class RoomParticipationService {
 
     private void participateRoom(Member member, Room room) {
         member.useTicket();
-        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, Role.GUEST);
+        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, ParticipantRole.GUEST);
         roomParticipantRepository.save(roomParticipant);
     }
 

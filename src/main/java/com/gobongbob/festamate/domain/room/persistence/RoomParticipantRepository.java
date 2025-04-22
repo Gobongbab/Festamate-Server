@@ -1,6 +1,6 @@
 package com.gobongbob.festamate.domain.room.persistence;
 
-import com.gobongbob.festamate.domain.room.domain.Role;
+import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import java.util.List;
 import java.util.Optional;
@@ -28,8 +28,8 @@ public interface RoomParticipantRepository extends JpaRepository<RoomParticipant
 
     List<RoomParticipant> findByRoom_Id(Long roomId);
 
-    @Query("select r from RoomParticipant r where r.room.id = ?1 and r.role = ?2")
-    List<RoomParticipant> findByRoomAndRole(Long id, Role role);
+    @Query("SELECT r FROM RoomParticipant r WHERE r.room.id = ?1 AND r.participantRole = ?2")
+    List<RoomParticipant> findByRoomAndRole(Long id, ParticipantRole participantRole);
 
     List<RoomParticipant> findByMember_Id(Long memberId);
 

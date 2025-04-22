@@ -47,19 +47,13 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             Authentication authentication = tokenProvider.getAuthentication(token);
             Object principal = authentication.getPrincipal();
 
-            // CustomMemberDetails 타입인지 확인
-            if (!(principal instanceof CustomMemberDetails)) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            } else {
-                // 인증 정보 설정
+            if (principal instanceof CustomMemberDetails) {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        } else {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 인증 실패 처리
-            return;
+            // principal 타입이 아니어도 그냥 인증 안 된 채로 통과시킴
         }
 
+        // ✅ 인증 실패해도 그냥 다음 필터로 넘긴다
         filterChain.doFilter(request, response);
     }
 
@@ -98,10 +92,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         if (HttpMethod.GET.matches(method)) {
             // GET /api/rooms (모임방 목록 조회) 경로 확인
             if (uri.equals("/api/rooms")) {
-                return true;
-            }
-            // GET /api/rooms/{rooms_id} (모임방 상세 조회) 경로 패턴 확인
-            if (pathMatcher.match("/api/rooms/{rooms_id}", uri)) {
                 return true;
             }
         }
