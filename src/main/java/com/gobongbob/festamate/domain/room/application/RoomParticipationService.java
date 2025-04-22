@@ -59,6 +59,7 @@ public class RoomParticipationService {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateNotHost(room, member);
+        validateRoomMatching(room);
 
         List<RoomParticipant> guestParticipants = roomParticipantRepository.findByRoomAndRole(roomId,
                 ParticipantRole.GUEST);
