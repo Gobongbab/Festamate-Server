@@ -169,5 +169,4 @@ public class MemberService {
         return memberRepository.findByIdWithProfileImage(memberId)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
-
 }
