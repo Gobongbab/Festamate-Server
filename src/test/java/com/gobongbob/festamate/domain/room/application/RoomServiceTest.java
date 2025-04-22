@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import com.gobongbob.festamate.common.fixture.MemberFixture;
 import com.gobongbob.festamate.common.fixture.RoomFixture;
 import com.gobongbob.festamate.common.fixture.RoomParticipantFixture;
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
@@ -110,7 +111,7 @@ class RoomServiceTest extends serviceSliceTest {
             Room room = testFixtureBuilder.buildRoom(RoomFixture.ROOM1(member));
 
             // when
-            RoomResponse findRoom = roomService.findRoomById(room.getId());
+            RoomResponse findRoom = roomService.findRoomById(new CustomMemberDetails(member), room.getId());
 
             // then
             assertThat(room.getId()).isEqualTo(findRoom.id());
@@ -169,7 +170,17 @@ class RoomServiceTest extends serviceSliceTest {
                     room.getMeetingDateTime(),
                     maxParticipantsToUpdate
             );
-            roomService.updateRoomById(member, room.getId(), request);
+
+            MultipartFile imageFile = new MockMultipartFile(
+                    "imageFiles",
+                    "test-image.jpg",
+                    "image/jpeg",
+                    "fake-image-content".getBytes()
+            );
+            List<MultipartFile> imageFiles = List.of(imageFile);
+            doNothing().when(imageService).uploadImages(any());
+
+            roomService.updateRoomById(member, room.getId(), request, imageFiles);
 
             // then
             assertAll(
