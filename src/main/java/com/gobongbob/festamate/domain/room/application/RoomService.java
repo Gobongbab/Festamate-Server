@@ -1,10 +1,6 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_PARTICIPATING;
-import static com.gobongbob.festamate.global.response.ResponseCode.CAN_NOT_UPDATE;
-import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
@@ -14,7 +10,7 @@ import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
 import com.gobongbob.festamate.domain.image.persistence.RoomImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
-import com.gobongbob.festamate.domain.room.domain.Role;
+import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
@@ -97,8 +93,8 @@ public class RoomService {
         return roomRepository.findById(roomId)
                 .map(room -> RoomResponse.fromEntity(
                         room,
-                        roomParticipantRepository.findByRoomAndRole(room.getId(), Role.HOST),
-                        roomParticipantRepository.findByRoomAndRole(room.getId(), Role.GUEST)
+                        roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.HOST),
+                        roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.GUEST)
                 )).orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
     }
 
