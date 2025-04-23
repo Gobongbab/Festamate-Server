@@ -5,6 +5,7 @@ import static com.gobongbob.festamate.global.response.ResponseCode.*;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
+import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
@@ -19,6 +20,7 @@ import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +47,7 @@ public class RoomParticipationService {
         validateRoomFull(room); // 방에 참여자가 다 찼는지 확인
         validateRoomJoinable(room, request.friendPhoneNumbers().size() + 1); // 방에 참여할 수 있는 인원인지 확인
         validatePhoneNumberUnique(member, request.friendPhoneNumbers()); // 참여자 간의 전화번호가 중복되지 않는지 확인
+        validateGender(member, room, request);
 
         participateRoom(member, room);
         if (!request.friendPhoneNumbers().isEmpty()) { // 친구와 함께 참여
@@ -127,6 +130,24 @@ public class RoomParticipationService {
             throw new BadRequestException(PHONE_NUMBER_DUPLICATE);
         }
     }
+
+    private void validateGender(Member member, Room room, FriendPhoneNumbersRequest request) {
+        List<Gender> genders = request.friendPhoneNumbers()
+                .stream()
+                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
+                        .orElseThrow(() -> new BadRequestException(NO_MEMBER)))
+                .map(Member::getGender)
+                .collect(Collectors.toList());
+        genders.add(member.getGender());
+
+        boolean hasInvalidGender = genders.stream()
+                .anyMatch(gender -> !gender.equals(room.getPreferredGender()));
+
+        if (hasInvalidGender) {
+            throw new BadRequestException(GENDER_NOT_MATCH); // 여기에 원하는 에러 코드를 넣어줘
+        }
+    }
+
 
     private void validateNotHost(Room room, Member member) {
         if (member.isHost(room)) {
