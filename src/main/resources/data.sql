@@ -17,7 +17,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 INSERT INTO profile_image (upload_name, store_name, url)
 VALUES ('profile1.jpg', 'uuid_profile1.jpg', 'http://example.com/images/profile1.jpg'),
        ('swimBong.png', 'swimBong.png', 'https://festamate-bucket.s3.ap-northeast-2.amazonaws.com/swimBong.png'),
-       ('adminBong.png ', 'adminBong.png ', 'https://festamate-bucket.s3.ap-northeast-2.amazonaws.com/adminBong.png'),
+       ('adminBong.png', 'adminBong.png', 'https://festamate-bucket.s3.ap-northeast-2.amazonaws.com/adminBong.png'),
        ('profile2.png', 'uuid_profile2.png', 'http://example.com/images/profile2.png');
 
 -- Member 테이블 더미 데이터
