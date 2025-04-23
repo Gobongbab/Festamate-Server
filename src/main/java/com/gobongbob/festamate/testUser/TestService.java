@@ -12,7 +12,6 @@ import com.gobongbob.festamate.global.util.TokenProvider;
 import jakarta.transaction.Transactional;
 import java.util.Map;
 import java.util.Optional;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,18 +25,20 @@ public class TestService {
     private final TokenProvider tokenProvider;
 
     /**
-     * 테스트용 회원 생성 및 토큰 반환
-     * 이미 존재하는 경우 해당 회원의 토큰 반환 (기본적으로는 매번 새로 생성 시도)
+     * 테스트용 회원 생성 및 토큰 반환 이미 존재하는 경우 해당 회원의 토큰 반환 (기본적으로는 매번 새로 생성 시도)
      */
     @Transactional
     public TestTokens createTestMember() {
         // 고유 식별자를 사용하여 중복 방지 (예: 타임스탬프 또는 랜덤 문자열)
         String uniqueSuffix = String.valueOf(System.currentTimeMillis());
         String nickname = "수영하는 봉밥이" + uniqueSuffix;
-        String studentId = String.format("%d%05d", (2018 + (int)(Math.random() * 8)), (int)(Math.random() * 100000));
+        String studentId = String.format("%d%05d", (2018 + (int) (Math.random() * 8)),
+                (int) (Math.random() * 100000));
         String loginId = "test_login_" + uniqueSuffix;
         // 전화번호 형식 유지하며 고유하게 생성 (마지막 8자리를 타임스탬프 일부로 사용)
-        String phoneNumber = "010-" + uniqueSuffix.substring(uniqueSuffix.length() - 8, uniqueSuffix.length() - 4) + "-" + uniqueSuffix.substring(uniqueSuffix.length() - 4);
+        String phoneNumber = "010-" + uniqueSuffix.substring(uniqueSuffix.length() - 8,
+                uniqueSuffix.length() - 4) + "-" + uniqueSuffix.substring(
+                uniqueSuffix.length() - 4);
         // kakaoId도 고유해야 함
         Long kakaoId = Long.parseLong(uniqueSuffix);
 
@@ -51,27 +52,29 @@ public class TestService {
                 "test_password", // 테스트용 비밀번호는 고정값 사용 가능
                 phoneNumber,
                 kakaoId,
-                randomGender, 
+                randomGender,
                 "컴퓨터 공학과",
-                Role.ROLE_USER// 테스트 유저는 USER 역할 부여
+                Role.USER// 테스트 유저는 USER 역할 부여
         );
 
         return createAndSaveMember(testMember, TokenType.TEST_ACCESS);
     }
 
     /**
-     * 관리자 회원 생성 및 토큰 반환
-     * 이미 존재하는 경우 해당 회원의 토큰 반환 (기본적으로는 매번 새로 생성 시도)
+     * 관리자 회원 생성 및 토큰 반환 이미 존재하는 경우 해당 회원의 토큰 반환 (기본적으로는 매번 새로 생성 시도)
      */
     @Transactional
     public TestTokens createAdminMember() {
         // 고유 식별자를 사용하여 중복 방지
         String uniqueSuffix = String.valueOf(System.currentTimeMillis());
         String nickname = "관리자 봉밥이" + uniqueSuffix;
-        String studentId = String.format("%d%05d", (2018 + (int)(Math.random() * 8)), (int)(Math.random() * 100000));
+        String studentId = String.format("%d%05d", (2018 + (int) (Math.random() * 8)),
+                (int) (Math.random() * 100000));
         String loginId = "admin_login_" + uniqueSuffix;
         // 전화번호 형식 유지하며 고유하게 생성
-        String phoneNumber = "010-" + uniqueSuffix.substring(uniqueSuffix.length() - 8, uniqueSuffix.length() - 4) + "-" + uniqueSuffix.substring(uniqueSuffix.length() - 4);
+        String phoneNumber = "010-" + uniqueSuffix.substring(uniqueSuffix.length() - 8,
+                uniqueSuffix.length() - 4) + "-" + uniqueSuffix.substring(
+                uniqueSuffix.length() - 4);
         // kakaoId도 고유해야 함
         Long kakaoId = Long.parseLong(uniqueSuffix);
 
@@ -87,7 +90,7 @@ public class TestService {
                 kakaoId,
                 randomGender,
                 "컴퓨터 공학과",
-                Role.ROLE_ADMIN// 관리자는 ADMIN 역할 부여
+                Role.ADMIN// 관리자는 ADMIN 역할 부여
         );
 
         return createAndSaveMember(adminMember, TokenType.ADMIN_ACCESS);
@@ -99,12 +102,13 @@ public class TestService {
     private TestTokens createAndSaveMember(Member member, TokenType tokenType) {
 
         String profileImageName = "swimBong.png";
-        if (tokenType == TokenType.ADMIN_ACCESS ) {
+        if (tokenType == TokenType.ADMIN_ACCESS) {
             profileImageName = "adminBong.png";
         }
 
         // 초기 프로필 이미지 설정 (DB에 기본 이미지가 있다고 가정)
-        Optional<ProfileImage> defaultProfileImage = profileImageRepository.findByStoreName(profileImageName);
+        Optional<ProfileImage> defaultProfileImage = profileImageRepository.findByStoreName(
+                profileImageName);
         if (defaultProfileImage.isPresent()) {
             member.initializeProfileImage(defaultProfileImage.get());
         }
@@ -123,10 +127,11 @@ public class TestService {
     }
 
     /**
-     * Member 엔티티 생성을 위한 헬퍼 메서드
-     * Member 엔티티의 @Unique 제약 조건 필드들을 파라미터로 받음
+     * Member 엔티티 생성을 위한 헬퍼 메서드 Member 엔티티의 @Unique 제약 조건 필드들을 파라미터로 받음
      */
-    private Member createMemberEntity(String name, String nickname, String studentId, String loginId, String password, String phoneNumber, Long kakaoId, Gender gender, String department, Role role) {
+    private Member createMemberEntity(String name, String nickname, String studentId,
+            String loginId, String password, String phoneNumber, Long kakaoId, Gender gender,
+            String department, Role role) {
         return Member.builder()
                 .name(name)
                 .nickname(nickname)          // Unique
