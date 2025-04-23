@@ -1,14 +1,6 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_MATCHED;
-import static com.gobongbob.festamate.global.response.ResponseCode.CHAT_ROOM_NOT_FOUND;
-import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
-import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_FULL;
-import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_NOT_JOINABLE;
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
@@ -167,7 +159,7 @@ public class RoomParticipationService {
                 .anyMatch(gender -> gender != room.getPreferredGender());
 
         if (hasMismatchedGender) {
-            throw new BadRequestException(GENDER_NOT_MATCH); // 여기에 원하는 에러 코드를 넣어줘
+            throw new BadRequestException(GENDER_NOT_MATCH);
         }
     }
 
