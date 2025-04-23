@@ -8,6 +8,7 @@ import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.domain.Role;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
@@ -16,6 +17,7 @@ import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
 import com.gobongbob.festamate.domain.sms.application.TokyoSnsService;
+import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,8 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
+    // 모든 회원 조회
+    @CheckActiveUser
     public List<MemberResponse> findAllMembers() {
         return memberRepository.findAllWithProfileImage()
                 .stream()
@@ -49,7 +53,8 @@ public class MemberService {
                 .toList();
     }
 
-    // 유저 조회
+    // 회원 상세 조회
+    @CheckActiveUser
     public MemberResponse findMemberById(Long memberId) {
         return memberRepository.findByIdWithProfileImage(memberId)
                 .map(MemberResponse::fromEntity)
@@ -58,9 +63,9 @@ public class MemberService {
 
     // 관리자용 유저 조회
     public MemberResponse findMemberByIdForAdmin(CustomMemberDetails memberDetails, Long memberId) {
-        String role = memberDetails.getMember().getRole();
+        Role requesterRole = memberDetails.getMember().getRole();
 
-        if (!"ADMIN".equals(role)) {
+        if (requesterRole != Role.ADMIN) {
             throw new BadRequestException(NO_ADMIN);
         }
 
@@ -78,12 +83,16 @@ public class MemberService {
         return MemberProfileResponse.fromEntity(member);
     }
 
+    // 나의 프로필 수정
     @Transactional
+    @CheckActiveUser
     public void updateMemberProfileById(Member member, ProfileUpdateRequest request) {
         member.updateProfile(request.nickname());
     }
 
+    // 회원 삭제
     @Transactional
+    @CheckActiveUser
     public void deleteMemberById(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
@@ -121,12 +130,6 @@ public class MemberService {
     @Transactional
     public void registerProfile(ProfileRegisterRequest request, Long userId) {
 
-//        // 전화번호 인증 여부 확인
-//        String phoneNumber = request.phoneNumber();
-//        if (!tokyoSnsService.isPhoneNumberVerified(phoneNumber)) {
-//            throw new BadRequestException(PHONE_NOT_VERIFIED);
-//        }
-
         // 회원 조회
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
@@ -135,8 +138,6 @@ public class MemberService {
         Member updatedMember = request.toEntity(member);
         memberRepository.save(updatedMember);
 
-//        // 인증 기록 삭제 (더 이상 인증 재사용 안되게)
-//        tokyoSnsService.removeVerificationInfo(phoneNumber);
     }
 
     // 닉네임 중복 체크
@@ -159,6 +160,7 @@ public class MemberService {
         }
     }
 
+    // 회원 존재 여부 확인
     public MemberExistResponse checkMemberExist(String phoneNumber) {
         return new MemberExistResponse(memberRepository.existsByPhoneNumber(phoneNumber));
     }
@@ -168,5 +170,4 @@ public class MemberService {
         return memberRepository.findByIdWithProfileImage(memberId)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
-
 }

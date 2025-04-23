@@ -47,12 +47,14 @@ public class MemberController implements MemberApi {
 //        return new SuccessResponse<>();
 //    }
 
+    // 모든 회원 조회
     @Override
     @GetMapping("/members")
     public SuccessResponse<List<MemberResponse>> findAllMembers() {
         return new SuccessResponse<>(memberService.findAllMembers());
     }
 
+    // 회원 상세 조회
     @Override
     @GetMapping("/members/{memberId}")
     public SuccessResponse<MemberResponse> findMemberById(
@@ -69,6 +71,7 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>(memberService.findProfile(memberDetails.getMember()));
     }
 
+    // 나의 프로필 수정
     @Override
     @PatchMapping("/members/profile")
     public SuccessResponse<Void> updateProfile(
@@ -79,6 +82,7 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>();
     }
 
+    // 회원 삭제
     @Override
     @DeleteMapping("/members/{memberId}")
     public SuccessResponse<Void> deleteMemberById(
@@ -88,27 +92,7 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>();
     }
 
-//    @Operation(summary = "프로필 등록", description = "회원의 프로필 정보를 등록하고 토큰을 발급합니다.")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-//            @ApiResponse(responseCode = "400", description = "중복된 닉네임이 존재합니다.")
-//    })
-//    @PostMapping("/api/auth/register/profile") // 추후 /api/auth를 상위 경로에 작성하도록 변경 필요
-//    public SuccessResponse<Map<String, String>> registerProfile(
-//            @Parameter(description = "프로필 등록 요청 정보")
-//            @RequestBody ProfileRegisterRequest request,
-//            @Parameter(description = "인증된 사용자 정보", hidden = true)
-//            @AuthenticationPrincipal CustomMemberDetails memberDetails // 최소 JWT 정보
-//    ) {
-//        Long userId = memberDetails.getMember().getId();
-//        memberService.registerProfile(request, userId);
-//
-//        // TokenService를 이용하여 최종 JWT(access, refresh) 생성
-//        Map<String, String> tokens = tokenService.generateTokens(userId);
-//        // 최종 JWT 반환
-//        return new SuccessResponse<>(tokens);
-//    }
-
+    // 회원 존재 여부 확인
     @Override
     @PostMapping("/api/members/exist")
     public SuccessResponse<MemberExistResponse> checkMemberExist(
@@ -118,6 +102,7 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>(memberService.checkMemberExist(request.phoneNumber()));
     }
 
+    // 닉네임 중복 확인
     @Override
     @GetMapping("/api/auth/register/check/nickname")
     public SuccessResponse<String> checkNickname(

@@ -79,6 +79,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/rooms/{rooms_id}")
                         .permitAll() // 모임방 상세 조회 (GET) 허용
 
+                        // == 관리자 API 경로 (ADMIN 권한 필요) ==
+                        .requestMatchers("/api/admin/**")
+                        .hasAuthority("ROLE_ADMIN") // "ROLE_ADMIN" 권한 필요
+
                         // 로그인 + JWT 인증이 필요한 경로
                         .requestMatchers(
                                 "/api/auth/members/profile", // 프로필 조회는 JWT 필요
