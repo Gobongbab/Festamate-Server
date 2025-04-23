@@ -42,6 +42,7 @@ public class RoomParticipationService {
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
 
         validateRoomMatching(room); // 현재 매칭중인 방인지 확인
+        validateRoomFull(room); // 방에 참여자가 다 찼는지 확인
         validateRoomJoinable(room, request.friendPhoneNumbers().size() + 1); // 방에 참여할 수 있는 인원인지 확인
         validatePhoneNumberUnique(member, request.friendPhoneNumbers()); // 참여자 간의 전화번호가 중복되지 않는지 확인
 
@@ -106,9 +107,14 @@ public class RoomParticipationService {
         }
     }
 
+    private void validateRoomFull(Room room) {
+        if (roomParticipantRepository.countByRoom_Id(room.getId()) >= (room.getMaxParticipants() / 2)) {
+            throw new BadRequestException(ROOM_FULL);
+        }
+    }
+
     private void validateRoomJoinable(Room room, int participants) {
-        int guestParticipants = room.getMaxParticipants() / 2;
-        if (guestParticipants != participants) {
+        if (participants != (room.getMaxParticipants() / 2)) { // 모임의 남은 자리 수와 참여하려는 인원의 수가 맞는지
             throw new BadRequestException(ROOM_NOT_JOINABLE);
         }
     }
