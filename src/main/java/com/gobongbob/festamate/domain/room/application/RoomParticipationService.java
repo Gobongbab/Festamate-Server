@@ -49,6 +49,9 @@ public class RoomParticipationService {
         if (!request.friendPhoneNumbers().isEmpty()) { // 친구와 함께 참여
             participateRoomForFriends(room, request);
         }
+        if (roomParticipantRepository.countByRoom_Id(roomId) == room.getMaxParticipants()) { // 방에 참여자가 다 찼을 때
+            room.updateStatus(Status.MATCHED);
+        }
 
         return chatRoomRepository.findByRoom(room)
                 .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
