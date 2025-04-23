@@ -7,6 +7,7 @@ import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROO
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
 import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
+import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_FULL;
 import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_NOT_JOINABLE;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
@@ -126,7 +127,8 @@ public class RoomParticipationService {
     }
 
     private void validateRoomFull(Room room) {
-        if (roomParticipantRepository.countByRoom_Id(room.getId()) >= (room.getMaxParticipants() / 2)) {
+        if (roomParticipantRepository.countByRoom_Id(room.getId()) >= (room.getMaxParticipants()
+                / 2)) {
             throw new BadRequestException(ROOM_FULL);
         }
     }
