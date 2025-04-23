@@ -5,6 +5,7 @@ import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.domain.Role;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.global.util.TokenProvider;
 import jakarta.transaction.Transactional;
@@ -91,11 +92,11 @@ public class TestService {
                 .nickname(nickname)
                 .studentId(studentId)
                 .loginId("admin_login_id")
-                .loginPassword("admin_password")
+                .loginPassword("admin_password") // 추후 암호화 필요
                 .phoneNumber("010-1111-1111")
                 .gender(Gender.MALE)
                 .studentDepartment("컴퓨터 공학부")
-                .role("ADMIN")
+                .role(Role.ADMIN)
                 .build();
     }
 
