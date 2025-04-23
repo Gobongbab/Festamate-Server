@@ -6,7 +6,10 @@ import com.gobongbob.festamate.domain.auth.oauth.domain.OauthInfo;
 import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
+import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -99,10 +102,32 @@ public class Member {
         this.studentDepartment = studentDepartment;
     }
 
-    @Enumerated(EnumType.STRING) // Enum 이름을 DB에 문자열로 저장 (예: "USER", "ADMIN")
+    @Convert(converter = RoleConverter.class) // <--- @Enumerated 대신 @Convert 사용
     @Column(nullable = false)    // Role은 필수 값으로 설정
     @Builder.Default             // Lombok Builder 사용 시 기본값 설정
-    private Role role = Role.ROLE_USER; // 기본값은 일반 사용자로 설정
+    private Role role = Role.USER; // 기본값은 일반 사용자로 설정
+
+    @Converter(autoApply = true) // 모든 Role 타입 필드에 자동 적용
+    public static class RoleConverter implements AttributeConverter<Role, String> {
+
+        @Override
+        public String convertToDatabaseColumn(Role attribute) {
+            // Enum 객체 -> DB 저장 값 (권한 문자열 "ROLE_USER")
+            if (attribute == null) {
+                return null;
+            }
+            return attribute.getValue(); // Role Enum의 value 필드 사용
+        }
+
+        @Override
+        public Role convertToEntityAttribute(String dbData) {
+            // DB 저장 값 (권한 문자열 "ROLE_USER") -> Enum 객체
+            if (dbData == null) {
+                return Role.USER;
+            }
+            return Role.fromValue(dbData); // Role Enum의 fromValue 메서드 사용
+        }
+    }
 
     public void initializeProfileImage(ProfileImage profileImage) {
         this.profileImage = profileImage;
