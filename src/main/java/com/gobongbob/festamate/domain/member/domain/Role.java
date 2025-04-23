@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor // 각 Enum 상수에 대한 생성자 자동 생성
 public enum Role {
-    USER("ROLE_USER"), // 일반 사용자 (Spring Security의 기본 Prefix "ROLE_")
-    ADMIN("ROLE_ADMIN"); // 관리자
+    ROLE_USER("ROLE_USER"), // 일반 사용자 (Spring Security의 기본 Prefix "ROLE_")
+    ROLE_ADMIN("ROLE_ADMIN"); // 관리자
 
     private final String value; // 권한 값 (Spring Security에서 사용될 실제 문자열)
 

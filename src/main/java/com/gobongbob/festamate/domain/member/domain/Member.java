@@ -102,7 +102,7 @@ public class Member {
     @Enumerated(EnumType.STRING) // Enum 이름을 DB에 문자열로 저장 (예: "USER", "ADMIN")
     @Column(nullable = false)    // Role은 필수 값으로 설정
     @Builder.Default             // Lombok Builder 사용 시 기본값 설정
-    private Role role = Role.USER; // 기본값은 일반 사용자로 설정
+    private Role role = Role.ROLE_USER; // 기본값은 일반 사용자로 설정
 
     public void initializeProfileImage(ProfileImage profileImage) {
         this.profileImage = profileImage;
