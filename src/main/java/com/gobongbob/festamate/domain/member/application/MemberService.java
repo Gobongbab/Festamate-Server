@@ -61,7 +61,7 @@ public class MemberService {
     public MemberResponse findMemberByIdForAdmin(CustomMemberDetails memberDetails, Long memberId) {
         Role requesterRole = memberDetails.getMember().getRole();
 
-        if (requesterRole != Role.ADMIN) {
+        if (requesterRole != Role.ROLE_ADMIN) {
             throw new BadRequestException(NO_ADMIN);
         }
 

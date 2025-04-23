@@ -53,7 +53,7 @@ public class TestService {
                 kakaoId,
                 randomGender, 
                 "컴퓨터 공학과",
-                Role.USER // 테스트 유저는 USER 역할 부여
+                Role.ROLE_USER// 테스트 유저는 USER 역할 부여
         );
 
         return createAndSaveMember(testMember, TokenType.TEST_ACCESS);
@@ -87,7 +87,7 @@ public class TestService {
                 kakaoId,
                 randomGender,
                 "컴퓨터 공학과",
-                Role.ADMIN // 관리자는 ADMIN 역할 부여
+                Role.ROLE_ADMIN// 관리자는 ADMIN 역할 부여
         );
 
         return createAndSaveMember(adminMember, TokenType.ADMIN_ACCESS);
