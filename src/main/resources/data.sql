@@ -16,6 +16,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- ProfileImage 엔티티는 Image 엔티티를 @Embedded 하므로, image의 필드들이 ProfileImage 테이블 컬럼으로 존재한다고 가정합니다.
 INSERT INTO profile_image (upload_name, store_name, url)
 VALUES ('profile1.jpg', 'uuid_profile1.jpg', 'http://example.com/images/profile1.jpg'),
+       ('swimBong.png', 'swimBong.png', 'https://festamate-bucket.s3.ap-northeast-2.amazonaws.com/swimBong.png'),
        ('profile2.png', 'uuid_profile2.png', 'http://example.com/images/profile2.png');
 
 -- Member 테이블 더미 데이터
