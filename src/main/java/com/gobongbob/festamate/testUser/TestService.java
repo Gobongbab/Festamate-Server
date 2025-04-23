@@ -53,7 +53,7 @@ public class TestService {
                 kakaoId,
                 randomGender, 
                 "컴퓨터 공학과",
-                Role.USER.getValue() // 테스트 유저는 USER 역할 부여
+                Role.ROLE_USER// 테스트 유저는 USER 역할 부여
         );
 
         return createAndSaveMember(testMember, TokenType.TEST_ACCESS);
@@ -87,7 +87,7 @@ public class TestService {
                 kakaoId,
                 randomGender,
                 "컴퓨터 공학과",
-                Role.ADMIN.getValue() // 관리자는 ADMIN 역할 부여
+                Role.ROLE_ADMIN// 관리자는 ADMIN 역할 부여
         );
 
         return createAndSaveMember(adminMember, TokenType.ADMIN_ACCESS);
@@ -126,7 +126,7 @@ public class TestService {
      * Member 엔티티 생성을 위한 헬퍼 메서드
      * Member 엔티티의 @Unique 제약 조건 필드들을 파라미터로 받음
      */
-    private Member createMemberEntity(String name, String nickname, String studentId, String loginId, String password, String phoneNumber, Long kakaoId, Gender gender, String department, String role) {
+    private Member createMemberEntity(String name, String nickname, String studentId, String loginId, String password, String phoneNumber, Long kakaoId, Gender gender, String department, Role role) {
         return Member.builder()
                 .name(name)
                 .nickname(nickname)          // Unique
@@ -137,7 +137,7 @@ public class TestService {
                 .kakaoId(kakaoId)            // Unique
                 .gender(gender)
                 .studentDepartment(department)
-                .role(Role.valueOf(role))                  // 역할 명시적 설정
+                .role(role)                  // 역할 명시적 설정
                 .isProfileCompleted(true)    // 테스트 유저는 프로필 작성이 완료된 것으로 가정
                 // .maximumTicket(2) // Builder.Default로 설정됨
                 // .remainingTicket(2) // Builder.Default로 설정됨
