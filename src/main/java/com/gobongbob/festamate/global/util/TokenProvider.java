@@ -68,16 +68,15 @@ public class TokenProvider {
                 .claim("studentId", member.getStudentId())
                 .claim("phoneNumber", member.getPhoneNumber())
                 .claim("type", tokenType)
-                .claim("memberType", type.name());
+                .claim("memberType", type.name())
+                .claim("role",
+                        member.getRole().getAuthority()); // "ROLE_USER", "ROLE_ADMIN" 등 권한 문자열 추가
 
         if (member.getGender() != null) {
             builder.claim("gender", member.getGender().name());
         }
         if (member.getStudentDepartment() != null) {
             builder.claim("department", member.getStudentDepartment());
-        }
-        if (type.isAdmin()) {
-            builder.claim("role", member.getRole());
         }
 
         return builder.signWith(key, SignatureAlgorithm.HS256).compact();

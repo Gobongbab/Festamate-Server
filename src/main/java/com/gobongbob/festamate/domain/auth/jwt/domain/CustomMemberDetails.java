@@ -1,8 +1,10 @@
 package com.gobongbob.festamate.domain.auth.jwt.domain;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.domain.Member.MemberStatus;
+import com.gobongbob.festamate.domain.member.domain.Role;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,8 +33,8 @@ public class CustomMemberDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String role = member.getRole();
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        Role role = this.member.getRole();
+        return Collections.singletonList(new SimpleGrantedAuthority(role.getAuthority()));
     }
 
     @Override
@@ -55,7 +57,6 @@ public class CustomMemberDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        // 계정 활성화 여부 (true: 활성화됨)
-        return true;
+        return this.member.getStatus() == MemberStatus.ACTIVE;
     }
 }

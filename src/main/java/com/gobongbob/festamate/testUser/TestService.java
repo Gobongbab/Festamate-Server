@@ -6,6 +6,7 @@ import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.domain.Role;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.global.util.TokenProvider;
 import jakarta.transaction.Transactional;
@@ -52,7 +53,7 @@ public class TestService {
                 kakaoId,
                 randomGender, 
                 "컴퓨터 공학과",
-                "USER" // 테스트 유저는 USER 역할 부여
+                Role.USER // 테스트 유저는 USER 역할 부여
         );
 
         return createAndSaveMember(testMember, TokenType.TEST_ACCESS);
@@ -86,7 +87,7 @@ public class TestService {
                 kakaoId,
                 randomGender,
                 "컴퓨터 공학과",
-                "ADMIN" // 관리자는 ADMIN 역할 부여
+                Role.ADMIN // 관리자는 ADMIN 역할 부여
         );
 
         return createAndSaveMember(adminMember, TokenType.ADMIN_ACCESS);
@@ -125,7 +126,7 @@ public class TestService {
      * Member 엔티티 생성을 위한 헬퍼 메서드
      * Member 엔티티의 @Unique 제약 조건 필드들을 파라미터로 받음
      */
-    private Member createMemberEntity(String name, String nickname, String studentId, String loginId, String password, String phoneNumber, Long kakaoId, Gender gender, String department, String role) {
+    private Member createMemberEntity(String name, String nickname, String studentId, String loginId, String password, String phoneNumber, Long kakaoId, Gender gender, String department, Role role) {
         return Member.builder()
                 .name(name)
                 .nickname(nickname)          // Unique
