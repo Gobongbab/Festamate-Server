@@ -50,6 +50,7 @@ public class RoomService {
     private final ImageService imageService;
     private final MemberRepository memberRepository;
 
+    // 방 생성
     @Transactional
     @CheckActiveUser // 메서드 실행 전 현재 사용자가 ACTIVE 상태인지 AOP로 확인 (BLOCKED 시 AccessDeniedException 발생)
     public ChatRoom createRoom(Long memberId, RoomCreateRequest request,
