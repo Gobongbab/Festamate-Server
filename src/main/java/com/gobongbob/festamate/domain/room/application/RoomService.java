@@ -1,10 +1,6 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_PARTICIPATING;
-import static com.gobongbob.festamate.global.response.ResponseCode.CAN_NOT_UPDATE;
-import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
@@ -28,7 +24,6 @@ import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -53,22 +48,21 @@ public class RoomService {
     // 방 생성
     @Transactional
     @CheckActiveUser // 메서드 실행 전 현재 사용자가 ACTIVE 상태인지 AOP로 확인 (BLOCKED 시 AccessDeniedException 발생)
-    public ChatRoom createRoom(Long memberId, RoomCreateRequest request,
-            List<MultipartFile> imageFiles) {
-        Member member = memberRepository.findById(
-                        memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
+    public ChatRoom createRoom(Long memberId, RoomCreateRequest request, List<MultipartFile> imageFiles) {
+        Member member = memberRepository.findById(memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
-        List<RoomImage> roomImages = new ArrayList<>();
-        if (!imageFiles.isEmpty()) {
-            roomImages = imageService.uploadImages(imageFiles)
+        Room createdRoom = roomRepository.save(request.toEntity(member));
+
+        boolean isImageFileExist = imageFiles.stream()
+                .allMatch(imageFile -> imageFile != null && !imageFile.isEmpty());
+        if (isImageFileExist) {
+            List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
                     .stream()
                     .map(RoomImage::fromEntity)
                     .toList();
+            createdRoom.assignImages(roomImages);
         }
-
-        Room createdRoom = roomRepository.save(request.toEntity(member));
-        createdRoom.assignImages(roomImages);
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(createdRoom.getTitle())
@@ -126,25 +120,19 @@ public class RoomService {
         validateIsHost(room, member);
         validateAlone(room);
 
-        imageFiles.stream()
-                .filter(imageFile -> imageFile == null || imageFile.isEmpty())
-                .findAny()
-                .ifPresentOrElse(
-                        imageFile -> {
-                        },
-                        () -> {
-                            room.getImages()
-                                    .forEach(
-                                            roomImage -> imageService.delete(roomImage.getImage()));
-                            room.getImages().clear();
+        boolean isImageFileExist = imageFiles.stream()
+                .allMatch(imageFile -> imageFile != null && !imageFile.isEmpty());
 
-                            List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
-                                    .stream()
-                                    .map(RoomImage::fromEntity)
-                                    .toList();
-                            room.assignImages(roomImages);
-                        }
-                );
+        if (isImageFileExist) {
+            room.getImages().forEach(roomImage -> imageService.delete(roomImage.getImage()));
+            room.getImages().clear();
+
+            List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
+                    .stream()
+                    .map(RoomImage::fromEntity)
+                    .toList();
+            room.assignImages(roomImages);
+        }
 
         room.updateRoom(
                 request.title(),
