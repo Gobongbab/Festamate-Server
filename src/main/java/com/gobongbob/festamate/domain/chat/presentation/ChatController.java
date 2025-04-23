@@ -38,6 +38,7 @@ public class ChatController implements ChatApi {
         return new SuccessResponse<>();
     }
 
+    // 메시지 조회
     @Override
     @GetMapping("/api/messages/room/{roomId}")
     public SuccessResponse<Slice<MessageResponse>> findMessages(
@@ -45,7 +46,8 @@ public class ChatController implements ChatApi {
             @PathVariable("roomId") Long roomId,
             @PageableDefault(size = 100, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Slice<MessageResponse> messages = chatService.findMessagesByRoomId(member.getId(), roomId, pageable);
+        Slice<MessageResponse> messages = chatService.findMessagesByRoomId(member.getId(), roomId,
+                pageable);
 
         return new SuccessResponse<>(messages);
     }

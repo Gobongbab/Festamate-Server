@@ -1,6 +1,10 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.*;
+import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_PARTICIPATING;
+import static com.gobongbob.festamate.global.response.ResponseCode.CAN_NOT_UPDATE;
+import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
@@ -22,6 +26,7 @@ import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
+import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +51,11 @@ public class RoomService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public ChatRoom createRoom(Long memberId, RoomCreateRequest request, List<MultipartFile> imageFiles) {
-        Member member = memberRepository.findById(memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
+    @CheckActiveUser // 메서드 실행 전 현재 사용자가 ACTIVE 상태인지 AOP로 확인 (BLOCKED 시 AccessDeniedException 발생)
+    public ChatRoom createRoom(Long memberId, RoomCreateRequest request,
+            List<MultipartFile> imageFiles) {
+        Member member = memberRepository.findById(
+                        memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
         List<RoomImage> roomImages = new ArrayList<>();
@@ -74,7 +82,8 @@ public class RoomService {
         return chatRoom;
     }
 
-    public Slice<RoomListResponse> findBySearchCondition(Pageable pageable, FilteringCondition filteringCondition) {
+    public Slice<RoomListResponse> findBySearchCondition(Pageable pageable,
+            FilteringCondition filteringCondition) {
         return roomRepository.findBySearchCondition(pageable, filteringCondition)
                 .map(room -> RoomListResponse.fromEntity(
                         room,
@@ -82,6 +91,8 @@ public class RoomService {
                 ));
     }
 
+    // 참여 중인 모임방 조회
+    @CheckActiveUser
     public List<RoomListResponse> findParticipatingRooms(Long memberId) {
         return roomParticipantRepository.findByMember_Id(memberId)
                 .stream()
@@ -97,13 +108,18 @@ public class RoomService {
                         room,
                         roomParticipantRepository.countByRoom_Id(room.getId()),
                         findRoomAuthorityByMember(room, memberDetails),
-                        roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.HOST),
-                        roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.GUEST)
+                        roomParticipantRepository.findByRoomAndRole(room.getId(),
+                                ParticipantRole.HOST),
+                        roomParticipantRepository.findByRoomAndRole(room.getId(),
+                                ParticipantRole.GUEST)
                 )).orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
     }
 
+    // 모임방 정보 수정
     @Transactional
-    public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request, List<MultipartFile> imageFiles) {
+    @CheckActiveUser
+    public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request,
+            List<MultipartFile> imageFiles) {
         Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
@@ -117,7 +133,8 @@ public class RoomService {
                         },
                         () -> {
                             room.getImages()
-                                    .forEach(roomImage -> imageService.delete(roomImage.getImage()));
+                                    .forEach(
+                                            roomImage -> imageService.delete(roomImage.getImage()));
                             room.getImages().clear();
 
                             List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
@@ -142,6 +159,7 @@ public class RoomService {
 
     // 방 삭제(일반, admin)
     @Transactional
+    @CheckActiveUser
     public void deleteRoomById(Member member, Long roomId) {
         Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
@@ -162,10 +180,12 @@ public class RoomService {
             return RoomAuthority.NON_MEMBER;
         }
 
-        return roomParticipantRepository.findByRoom_IdAndMember_Id(room.getId(), memberDetails.getMember().getId())
+        return roomParticipantRepository.findByRoom_IdAndMember_Id(room.getId(),
+                        memberDetails.getMember().getId())
                 .stream()
                 .findFirst()
-                .map(participant -> participant.isHost() ? RoomAuthority.HOST : RoomAuthority.PARTICIPANT)
+                .map(participant -> participant.isHost() ? RoomAuthority.HOST
+                        : RoomAuthority.PARTICIPANT)
                 .orElse(RoomAuthority.NON_PARTICIPANT);
     }
 

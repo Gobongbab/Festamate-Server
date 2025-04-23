@@ -18,6 +18,7 @@ public class CouponController implements CouponApi {
 
     private final CouponService couponService;
 
+    // 쿠폰 사용
     @Override
     @PostMapping("")
     public SuccessResponse<Void> useCoupon(
@@ -29,6 +30,7 @@ public class CouponController implements CouponApi {
         return new SuccessResponse<>();
     }
 
+    // 쿠폰 초기화
     @Override
     @PostMapping("/init")
     public SuccessResponse<Void> initializeCoupons(

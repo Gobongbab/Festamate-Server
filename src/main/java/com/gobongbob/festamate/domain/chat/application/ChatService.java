@@ -10,6 +10,7 @@ import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
+import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,10 @@ public class ChatService {
         messagingTemplate.convertAndSend("/topic/room/" + chatRoomId, response);
     }
 
-    public Slice<MessageResponse> findMessagesByRoomId(Long memberId, Long roomId, Pageable pageable) {
+    // 메시지 조회
+    @CheckActiveUser
+    public Slice<MessageResponse> findMessagesByRoomId(Long memberId, Long roomId,
+            Pageable pageable) {
         validateRoomParticipation(memberId, roomId);
 
         return messageRepository.findByRoomId(roomId, pageable)
