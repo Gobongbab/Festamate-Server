@@ -33,8 +33,8 @@ public class TestService {
     public TestTokens createTestMember() {
         // 고유 식별자를 사용하여 중복 방지 (예: 타임스탬프 또는 랜덤 문자열)
         String uniqueSuffix = String.valueOf(System.currentTimeMillis());
-        String nickname = "test_nick_" + uniqueSuffix;
-        String studentId = "test_sid_" + uniqueSuffix;
+        String nickname = "수영하는 봉밥이" + uniqueSuffix;
+        String studentId = String.format("%d%05d", (2018 + (int)(Math.random() * 8)), (int)(Math.random() * 100000));
         String loginId = "test_login_" + uniqueSuffix;
         // 전화번호 형식 유지하며 고유하게 생성 (마지막 8자리를 타임스탬프 일부로 사용)
         String phoneNumber = "010-" + uniqueSuffix.substring(uniqueSuffix.length() - 8, uniqueSuffix.length() - 4) + "-" + uniqueSuffix.substring(uniqueSuffix.length() - 4);
@@ -67,8 +67,8 @@ public class TestService {
     public TestTokens createAdminMember() {
         // 고유 식별자를 사용하여 중복 방지
         String uniqueSuffix = String.valueOf(System.currentTimeMillis());
-        String nickname = "admin_nick_" + uniqueSuffix;
-        String studentId = "admin_sid_" + uniqueSuffix;
+        String nickname = "관리자 봉밥이" + uniqueSuffix;
+        String studentId = String.format("%d%05d", (2018 + (int)(Math.random() * 8)), (int)(Math.random() * 100000));
         String loginId = "admin_login_" + uniqueSuffix;
         // 전화번호 형식 유지하며 고유하게 생성
         String phoneNumber = "010-" + uniqueSuffix.substring(uniqueSuffix.length() - 8, uniqueSuffix.length() - 4) + "-" + uniqueSuffix.substring(uniqueSuffix.length() - 4);
