@@ -5,7 +5,6 @@ import static com.gobongbob.festamate.global.response.ResponseCode.*;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
-import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
@@ -17,9 +16,7 @@ import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,17 +39,11 @@ public class RoomParticipationService {
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
+        List<Member> participants = collectParticipants(member, request);
 
-        validateRoomMatching(room); // 현재 매칭중인 방인지 확인
-        validateRoomFull(room); // 방에 참여자가 다 찼는지 확인
-        validateRoomJoinable(room, request.friendPhoneNumbers().size() + 1); // 방에 참여할 수 있는 인원인지 확인
-        validatePhoneNumberUnique(member, request.friendPhoneNumbers()); // 참여자 간의 전화번호가 중복되지 않는지 확인
-        validateGender(member, room, request);
+        validateParticipation(room, participants);
 
-        participateRoom(member, room);
-        if (!request.friendPhoneNumbers().isEmpty()) { // 친구와 함께 참여
-            participateRoomForFriends(room, request);
-        }
+        participants.forEach(participant -> participateRoom(participant, room));
         if (roomParticipantRepository.countByRoom_Id(roomId) == room.getMaxParticipants()) { // 방에 참여자가 다 찼을 때
             room.updateStatus(Status.MATCHED);
         }
@@ -104,6 +95,25 @@ public class RoomParticipationService {
         roomParticipantRepository.save(roomParticipant);
     }
 
+    private List<Member> collectParticipants(Member member, FriendPhoneNumbersRequest request) {
+        List<Member> members = request.friendPhoneNumbers()
+                .stream()
+                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
+                        .orElseThrow(() -> new BadRequestException(NO_MEMBER))
+                ).collect(Collectors.toList());
+        members.add(member);
+
+        return members;
+    }
+
+    private void validateParticipation(Room room, List<Member> participants) {
+        validateRoomMatching(room); // 현재 매칭중인 방인지 확인
+        validateRoomFull(room); // 방에 참여자가 다 찼는지 확인
+        validateRoomJoinable(room, participants.size()); // 방에 참여할 수 있는 인원인지 확인
+        validatePhoneNumberUnique(participants); // 참여자 간의 전화번호가 중복되지 않는지 확인
+        validateGender(room, participants); // 방의 성별과 참여자의 성별이 일치하는지 확인
+    }
+
     private void validateRoomMatching(Room room) {
         if (room.getStatus() == Status.MATCHED) {
             throw new BadRequestException(ALREADY_MATCHED);
@@ -122,32 +132,26 @@ public class RoomParticipationService {
         }
     }
 
-    private void validatePhoneNumberUnique(Member member, List<String> phoneNumbers) {
-        Set<String> participantPhoneNumbers = new HashSet<>(phoneNumbers);
-        participantPhoneNumbers.add(member.getPhoneNumber());
+    private void validatePhoneNumberUnique(List<Member> participants) {
+        int phoneNumberCount = (int) participants.stream()
+                .map(Member::getPhoneNumber)
+                .distinct()
+                .count();
 
-        if (participantPhoneNumbers.size() != phoneNumbers.size() + 1) {
+        if (phoneNumberCount != participants.size()) {
             throw new BadRequestException(PHONE_NUMBER_DUPLICATE);
         }
     }
 
-    private void validateGender(Member member, Room room, FriendPhoneNumbersRequest request) {
-        List<Gender> genders = request.friendPhoneNumbers()
-                .stream()
-                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
-                        .orElseThrow(() -> new BadRequestException(NO_MEMBER)))
+    private void validateGender(Room room, List<Member> participants) {
+        boolean hasMismatchedGender = participants.stream()
                 .map(Member::getGender)
-                .collect(Collectors.toList());
-        genders.add(member.getGender());
+                .anyMatch(gender -> gender != room.getPreferredGender());
 
-        boolean hasInvalidGender = genders.stream()
-                .anyMatch(gender -> !gender.equals(room.getPreferredGender()));
-
-        if (hasInvalidGender) {
+        if (hasMismatchedGender) {
             throw new BadRequestException(GENDER_NOT_MATCH); // 여기에 원하는 에러 코드를 넣어줘
         }
     }
-
 
     private void validateNotHost(Room room, Member member) {
         if (member.isHost(room)) {
