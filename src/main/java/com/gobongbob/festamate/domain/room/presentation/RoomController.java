@@ -23,7 +23,16 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -36,6 +45,7 @@ public class RoomController implements RoomApi {
     private final RoomParticipationService roomParticipationService;
     private final ChatService chatService;
 
+    // 방 생성
     @Override
     @PostMapping("")
     public SuccessResponse<Void> create(
@@ -43,7 +53,8 @@ public class RoomController implements RoomApi {
             @RequestPart("request") @Valid RoomCreateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember().getId(), request, multipartFiles);
+        ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember().getId(),
+                request, multipartFiles);
         chatService.sendMessage(
                 createdChatRoom.getId(),
                 memberDetails.getMember(),
@@ -59,15 +70,18 @@ public class RoomController implements RoomApi {
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @ModelAttribute FilteringCondition filteringCondition
     ) {
-        return new SuccessResponse<>(roomService.findBySearchCondition(pageable, filteringCondition));
+        return new SuccessResponse<>(
+                roomService.findBySearchCondition(pageable, filteringCondition));
     }
 
+    // 참여 중인 모임방 조회
     @Override
     @GetMapping("/participations")
     public SuccessResponse<List<RoomListResponse>> findParticipatingRooms(
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
-        return new SuccessResponse<>(roomService.findParticipatingRooms(memberDetails.getMember().getId()));
+        return new SuccessResponse<>(
+                roomService.findParticipatingRooms(memberDetails.getMember().getId()));
     }
 
     @Override
@@ -79,6 +93,7 @@ public class RoomController implements RoomApi {
         return new SuccessResponse<>(roomService.findRoomById(memberDetails, roomId));
     }
 
+    // 모임방 정보 수정
     @Override
     @PatchMapping("/{roomId}")
     public SuccessResponse<Void> updateById(
@@ -92,6 +107,7 @@ public class RoomController implements RoomApi {
         return new SuccessResponse<>();
     }
 
+    // 모임방 삭제
     @Override
     @DeleteMapping("/{roomId}")
     public SuccessResponse<Void> deleteById(
@@ -103,6 +119,7 @@ public class RoomController implements RoomApi {
         return new SuccessResponse<>();
     }
 
+    // 방 참여
     @Override
     @Transactional
     @PostMapping("/{roomId}/participations")
@@ -111,7 +128,8 @@ public class RoomController implements RoomApi {
             @PathVariable("roomId") Long roomId,
             @RequestBody FriendPhoneNumbersRequest request
     ) {
-        ChatRoom chatRoom = roomParticipationService.participate(memberDetails.getMember().getId(), roomId, request);
+        ChatRoom chatRoom = roomParticipationService.participate(memberDetails.getMember().getId(),
+                roomId, request);
         chatService.sendMessage(
                 chatRoom.getId(),
                 memberDetails.getMember(),
@@ -121,6 +139,7 @@ public class RoomController implements RoomApi {
         return new SuccessResponse<>();
     }
 
+    // 모임방 나가기
     @Override
     @PostMapping("/{roomId}/leave")
     public SuccessResponse<Void> leave(
@@ -137,12 +156,14 @@ public class RoomController implements RoomApi {
         return new SuccessResponse<>();
     }
 
+    // 방장 여부 확인
     @Override
     @GetMapping("/{roomId}/host")
     public SuccessResponse<IsMemberHostResponse> isMemberHost(
             @PathVariable("roomId") Long roomId,
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
-        return new SuccessResponse<>(roomParticipationService.isMemberHost(roomId, memberDetails.getMember()));
+        return new SuccessResponse<>(
+                roomParticipationService.isMemberHost(roomId, memberDetails.getMember()));
     }
 }

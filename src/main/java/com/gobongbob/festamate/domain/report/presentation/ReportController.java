@@ -26,6 +26,7 @@ public class ReportController implements ReportApi {
 
     private final ReportService reportService;
 
+    // 모임방 신고
     @Override
     @PostMapping("/room/{roomId}")
     public SuccessResponse<Void> reportRoom(
@@ -37,6 +38,7 @@ public class ReportController implements ReportApi {
         return new SuccessResponse<>();
     }
 
+    // 사용자 신고
     @Override
     @PostMapping("/member/{memberId}")
     public SuccessResponse<Void> reportMember(
@@ -48,6 +50,7 @@ public class ReportController implements ReportApi {
         return new SuccessResponse<>();
     }
 
+    // 모든 신고 조회
     @Override
     @GetMapping("")
     public SuccessResponse<List<ReportRoomResponse>> getAllReports(
@@ -56,6 +59,7 @@ public class ReportController implements ReportApi {
         return new SuccessResponse<>(reportService.getAllReports());
     }
 
+    // 미처리 신고 조회
     @Override
     @GetMapping("/unprocessed")
     public SuccessResponse<List<ReportRoomResponse>> getUnprocessedReports(
