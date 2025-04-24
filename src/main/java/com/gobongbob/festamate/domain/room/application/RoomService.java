@@ -55,14 +55,14 @@ public class RoomService {
 
         Room createdRoom = roomRepository.save(request.toEntity(member));
 
-        if (imageFiles != null) {
+        if (imageFiles != null && !imageFiles.isEmpty()) {
             List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
                     .stream()
                     .map(RoomImage::fromEntity)
                     .toList();
             createdRoom.assignImages(roomImages);
         }
-        if (imageFiles == null) {
+        if (imageFiles == null || imageFiles.isEmpty()) {
             Image image = pickRandomImage();
             RoomImage roomImage = RoomImage.fromEntity(image);
             createdRoom.assignImages(List.of(roomImage));
@@ -124,7 +124,7 @@ public class RoomService {
         validateIsHost(room, member);
         validateAlone(room);
 
-        if (imageFiles != null) {
+        if (imageFiles != null && !imageFiles.isEmpty()) {
             room.getImages().forEach(roomImage -> imageService.delete(roomImage.getImage()));
             room.getImages().clear();
 
