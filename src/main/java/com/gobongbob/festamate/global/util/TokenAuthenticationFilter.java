@@ -43,7 +43,13 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         String token = getAccessToken(authorizationHeader);
 
         // 토큰 유효성 검사
-        if (token != null && tokenProvider.validateToken(token)) {
+        if (token != null) {
+            if (!tokenProvider.validateToken(token)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+                return;
+            }
+
             Authentication authentication = tokenProvider.getAuthentication(token);
             Object principal = authentication.getPrincipal();
 
