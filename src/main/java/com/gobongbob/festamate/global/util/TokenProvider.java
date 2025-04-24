@@ -2,12 +2,7 @@ package com.gobongbob.festamate.global.util;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.member.domain.Member;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -35,9 +30,9 @@ public class TokenProvider {
 
     // 토큰 생성 (TokenType에 따라 다르게 생성)
     public Map<String, String> generateTokens(Member member, TokenType type) {
-        String accessToken = createToken(member, "access", TokenType.FINAL_ACCESS.getDuration(),
+        String accessToken = createToken(member, "access", type.getDuration(),
                 TokenType.FINAL_ACCESS);
-        String refreshToken = createToken(member, "refresh", TokenType.FINAL_REFRESH.getDuration(),
+        String refreshToken = createToken(member, "refresh", type.getDuration(),
                 TokenType.FINAL_REFRESH);
 
         Map<String, String> tokens = new HashMap<>();
@@ -88,8 +83,7 @@ public class TokenProvider {
     }
 
     /**
-     * 토큰의 유효성을 검증합니다.
-     * 유효하지 않은 경우 BadCredentialsException을 던져 JwtAuthenticationEntryPoint가 동작하도록 유도합니다.
+     * 토큰의 유효성을 검증합니다. 유효하지 않은 경우 BadCredentialsException을 던져 JwtAuthenticationEntryPoint가 동작하도록 유도합니다.
      *
      * @param token 검증할 JWT 토큰
      * @throws BadCredentialsException 토큰이 유효하지 않을 때 (서명 오류, 만료, 형식 오류 등)
