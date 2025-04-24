@@ -6,9 +6,9 @@ import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
+import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
-import com.gobongbob.festamate.domain.image.persistence.RoomImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
@@ -25,6 +25,7 @@ import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -38,7 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class RoomService {
 
     private final RoomRepository roomRepository;
-    private final RoomImageRepository roomImageRepository;
+    private final RoomImagePicker roomImagePicker;
     private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
@@ -54,14 +55,17 @@ public class RoomService {
 
         Room createdRoom = roomRepository.save(request.toEntity(member));
 
-        boolean isImageFileExist = imageFiles.stream()
-                .allMatch(imageFile -> imageFile != null && !imageFile.isEmpty());
-        if (isImageFileExist) {
+        if (imageFiles != null) {
             List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
                     .stream()
                     .map(RoomImage::fromEntity)
                     .toList();
             createdRoom.assignImages(roomImages);
+        }
+        if (imageFiles == null) {
+            Image image = pickRandomImage();
+            RoomImage roomImage = RoomImage.fromEntity(image);
+            createdRoom.assignImages(List.of(roomImage));
         }
 
         ChatRoom chatRoom = ChatRoom.builder()
@@ -120,10 +124,7 @@ public class RoomService {
         validateIsHost(room, member);
         validateAlone(room);
 
-        boolean isImageFileExist = imageFiles.stream()
-                .allMatch(imageFile -> imageFile != null && !imageFile.isEmpty());
-
-        if (isImageFileExist) {
+        if (imageFiles != null) {
             room.getImages().forEach(roomImage -> imageService.delete(roomImage.getImage()));
             room.getImages().clear();
 
@@ -176,6 +177,16 @@ public class RoomService {
                 .map(participant -> participant.isHost() ? RoomAuthority.HOST
                         : RoomAuthority.PARTICIPANT)
                 .orElse(RoomAuthority.NON_PARTICIPANT);
+    }
+
+    private Image pickRandomImage() {
+        String randomImageUrl = roomImagePicker.getRandomImageUrl();
+
+        return Image.builder()
+                .url(randomImageUrl)
+                .uploadName(UUID.randomUUID().toString())
+                .storeName(UUID.randomUUID().toString())
+                .build();
     }
 
     private void validateRoomParticipation(Long memberId) {
