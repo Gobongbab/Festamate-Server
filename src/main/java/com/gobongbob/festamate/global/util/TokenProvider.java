@@ -97,17 +97,8 @@ public class TokenProvider {
                     .getBody();
 
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            // JwtException 또는 IllegalArgumentException 발생 시
-            // BadCredentialsException을 던져 인증 실패를 알림
-            // 이 예외는 Spring Security의 ExceptionTranslationFilter에 의해 처리되어
-            // 설정된 JwtAuthenticationEntryPoint의 commence 메소드를 호출하게 됨
-            throw new BadCredentialsException("유효하지 않은 토큰입니다.", e); // 수정된 부분: BadCredentialsException 던지기
-//            이 BadCredentialsException은 필터 밖으로 전파됩니다.
-//            중요: 필터 내에서 이 예외를 잡아서 다른 처리를 하면 안 됩니다. 예외가 Spring Security의 기본 필터 체인으로 넘어가야 합니다.
-//            Spring Security의 ExceptionTranslationFilter가 이 AuthenticationException을 감지합니다.(BadCredentialsException은 AuthenticationException의 하위 클래스)
-//            ExceptionTranslationFilter는 설정된 AuthenticationEntryPoint (즉, 사용자가 만든 JwtAuthenticationEntryPoint)의 commence 메소드를 호출합니다.
-//            JwtAuthenticationEntryPoint.commence() 메소드가 실행되어 response.sendError(HttpServletResponse.SC_UNAUTHORIZED)를 통해 클라이언트에게 401 에러를 반환합니다.
+        } catch (ExpiredJwtException | JwtException | IllegalArgumentException e) {
+            return false;
         }
     }
 
