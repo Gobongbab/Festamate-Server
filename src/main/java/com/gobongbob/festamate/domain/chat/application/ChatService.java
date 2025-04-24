@@ -1,24 +1,24 @@
 package com.gobongbob.festamate.domain.chat.application;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.CHAT_ROOM_NOT_FOUND;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_AUTHORITY_CHAT_ROOM;
+
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.domain.Message;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
-import com.gobongbob.festamate.domain.room.presentation.RoomParticipantRepository;
-import java.time.LocalDateTime;
-
+import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
+import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.gobongbob.festamate.global.response.ResponseCode.CHAT_ROOM_NOT_FOUND;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_AUTHORITY_CHAT_ROOM;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,8 +31,8 @@ public class ChatService {
     private final SimpMessageSendingOperations messagingTemplate;
 
     @Transactional
-    public void sendMessage(Long roomId, Member member, String message) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+    public void sendMessage(Long chatRoomId, Member member, String message) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
 
         Message savedMessage = messageRepository.save(
@@ -45,10 +45,13 @@ public class ChatService {
         );
         MessageResponse response = MessageResponse.fromEntity(savedMessage);
 
-        messagingTemplate.convertAndSend("/topic/room/" + roomId, response);
+        messagingTemplate.convertAndSend("/topic/room/" + chatRoomId, response);
     }
 
-    public Slice<MessageResponse> findMessagesByRoomId(Long memberId, Long roomId, Pageable pageable) {
+    // 메시지 조회
+    @CheckActiveUser
+    public Slice<MessageResponse> findMessagesByRoomId(Long memberId, Long roomId,
+            Pageable pageable) {
         validateRoomParticipation(memberId, roomId);
 
         return messageRepository.findByRoomId(roomId, pageable)

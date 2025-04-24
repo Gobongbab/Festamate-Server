@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.Authentication;
@@ -22,13 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class ChatController {
+public class ChatController implements ChatApi {
 
     private final ChatService chatService;
 
-    @MessageMapping("/chat/room/{roomId}") // Spring App 을 거쳐서 메시지 전송. 앞에 "app" prefix 를 붙여야 함
+    @Override
+    @MessageMapping("/chat/room/{roomId}")
     public SuccessResponse<Void> sendMessage(
-            @DestinationVariable Long roomId,
+            @DestinationVariable("roomId") Long roomId,
             Authentication authentication,
             MessageRequest request
     ) {
@@ -38,13 +38,16 @@ public class ChatController {
         return new SuccessResponse<>();
     }
 
-    @GetMapping("api/messages/room/{roomId}")
+    // 메시지 조회
+    @Override
+    @GetMapping("/api/messages/room/{roomId}")
     public SuccessResponse<Slice<MessageResponse>> findMessages(
             @AuthenticationPrincipal Member member,
-            @PathVariable Long roomId,
+            @PathVariable("roomId") Long roomId,
             @PageableDefault(size = 100, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Slice<MessageResponse> messages = chatService.findMessagesByRoomId(member.getId(), roomId, pageable);
+        Slice<MessageResponse> messages = chatService.findMessagesByRoomId(member.getId(), roomId,
+                pageable);
 
         return new SuccessResponse<>(messages);
     }

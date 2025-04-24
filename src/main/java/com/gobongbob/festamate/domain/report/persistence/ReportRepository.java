@@ -10,4 +10,5 @@ import java.util.List;
 public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findByProcessed(Boolean processed);
     List<Report> findByRoomIdAndReporterId(Long roomId, Long reporterId);
+    List<Report> findByReportedMemberIdAndReporterId(Long reportedMemberId, Long reporterId);
 }

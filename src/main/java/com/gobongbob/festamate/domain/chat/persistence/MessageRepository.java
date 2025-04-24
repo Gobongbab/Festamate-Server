@@ -4,10 +4,17 @@ import com.gobongbob.festamate.domain.chat.domain.Message;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
     @Query("select m from Message m where m.chatRoom.room.id = ?1")
     Slice<Message> findByRoomId(Long id, Pageable pageable);
+
+    @Transactional
+    @Modifying
+    @Query("delete from Message m where m.chatRoom.room.id = ?1")
+    void deleteByRoomId(Long id);
 }

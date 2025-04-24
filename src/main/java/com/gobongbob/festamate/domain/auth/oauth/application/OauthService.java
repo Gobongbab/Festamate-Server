@@ -1,237 +1,220 @@
 package com.gobongbob.festamate.domain.auth.oauth.application;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gobongbob.festamate.domain.auth.jwt.domain.RefreshJwtToken;
-import com.gobongbob.festamate.domain.auth.jwt.persistence.RefreshTokenRepository;
-import com.gobongbob.festamate.domain.auth.oauth.domain.OauthInfo;
+import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
+import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
+import com.gobongbob.festamate.domain.auth.oauth.dto.request.KakaoUserInfo;
+import com.gobongbob.festamate.domain.auth.oauth.dto.response.KakaoCheckResponse;
+import com.gobongbob.festamate.domain.auth.oauth.dto.response.KakaoTokenResponse;
+import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
-import com.gobongbob.festamate.global.util.CookieUtil;
-import com.gobongbob.festamate.global.util.OauthProvider;
-import com.gobongbob.festamate.global.util.TokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.time.Duration;
+import jakarta.transaction.Transactional;
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
+// 소그인 핵심 로직
 // 인가 코드를 받아서 액세스 토큰을 요청하고, 사용자 정보를 가져오는 서비스로 카카오 로그인 페이지로 리다이렉션 됨.
 
 @Service
-@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class OauthService {
 
+    private final WebClient webClient;
     private final MemberRepository memberRepository;
-    private final TokenProvider tokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenService tokenService;
+    private final ObjectMapper objectMapper;
+    private final ProfileImageRepository profileImageRepository;
+    private static final String DEFAULT_PROFILE_IMAGE_NAME = "default_profile_image.png";
 
-    private final String CLIENT_ID;
-    private final String REDIRECT_URI;
-    private final String ACCESS_HEADER;
+    @Value("${kakao.client-id}")
+    private String clientId;
 
-    private static final Duration REFRESH_TOKEN_DURATION = Duration.ofDays(14);
-    private static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
+    @Value("${kakao.redirect-uri}")
+    private String redirectUri;
 
-    @Autowired
-    public OauthService(MemberRepository memberRepository,
-            TokenProvider tokenProvider,
-            RefreshTokenRepository refreshTokenRepository,
-            @Value("${KAKAO_CLIENT_ID}") String CLIENT_ID,
-            @Value("${KAKAO_REDIRECT_URI}") String REDIRECT_URI,
-            @Value("${jwt.header}") String ACCESS_HEADER) {
-        this.memberRepository = memberRepository;
-        this.tokenProvider = tokenProvider;
-        this.refreshTokenRepository = refreshTokenRepository;
-        this.CLIENT_ID = CLIENT_ID;
-        this.REDIRECT_URI = REDIRECT_URI;
-        this.ACCESS_HEADER = ACCESS_HEADER;
+    @Value("${kakao.token-uri}")
+    private String tokenUri;
+
+    @Value("${kakao.user-info-uri}")
+    private String userInfoUri;
+
+    /**
+     * 1️⃣ 카카오 인가 코드로 access token 요청 후, 2️⃣ 해당 access token으로 사용자 정보를 조회해서 3️⃣ DB에 kakaoId가 존재하는지
+     * 여부를 반환
+     */
+    public KakaoCheckResponse checkKakaoUser(String code) {
+        // 1. 카카오 인가 코드를 통해 access token 발급
+        String kakaoAccessToken = getKakaoAccessToken(code).get("accessToken");
+
+        // 2. access token으로 사용자 정보 요청 (KakaoUserInfo 객체 반환)
+        KakaoUserInfo userInfo = getKakaoUserInfo(kakaoAccessToken); // 캐스팅 제거
+
+        // 3. DB에 해당 kakaoId가 존재하는지 여부 확인
+        boolean isMember = memberRepository.existsByKakaoId(userInfo.getId());
+
+        return new KakaoCheckResponse(isMember, kakaoAccessToken);
     }
 
-    // 인가 코드를 사용하여 액세스 토큰을 요청하고, 사용자 정보를 가져와 리턴함
+    /**
+     * 기존 회원 로그인 시, Kakao Access Token으로 kakaoId 추출 후 사용자 ID 반환
+     */
+    public Long findUserIdByKakaoToken(String kakaoAccessToken) {
+        KakaoUserInfo userInfo = getKakaoUserInfo(kakaoAccessToken); // 캐스팅 제거
+        Member member = memberRepository.findByKakaoId(userInfo.getId())
+                .orElseThrow(() -> {
+                    return new IllegalArgumentException("존재하지 않는 회원입니다.");
+                });
+        return member.getId();
+    }
+
+    /**
+     * 카카오 정보 기반 로그인 처리 및 JWT 발급
+     */
+    public Map<String, String> loginWithKakao(String kakaoAccessToken) {
+        Long userId = findUserIdByKakaoToken(kakaoAccessToken); // 사용자 ID 조회
+
+        // 유저 정보 가져오기
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> { // findUserIdByKakaoToken 에서 이미 확인했지만, 방어적으로 추가
+                    return new IllegalArgumentException("유저를 찾을 수 없습니다.");
+                });
+
+        // 프로필 완료 여부 확인
+        if (member.isProfileCompleted()) {
+            // 프로필 등록이 완료된 경우 JWT 반환
+            return tokenService.generateTokens(userId, TokenType.FINAL_ACCESS);
+        } else {
+            // 프로필 등록이 안 된 경우 예외 처리
+            throw new IllegalStateException("프로필 등록이 필요합니다.");
+        }
+    }
+
+    /**
+     * 신규 회원 프로필 등록: Kakao ID 기반 회원 생성 및 프로필 정보 저장
+     */
     @Transactional
-    public Map<String, String> kakaoLogin(String code, HttpServletRequest request,
-            HttpServletResponse response) {
-        try {
-            // 1. 인가 코드로 OAuth2 액세스 토큰 요청
-            String oauthAccessToken = getAccessToken(code);
+    public Long registerNewMember(ProfileRegisterRequest request) {
+        KakaoUserInfo userInfo = getKakaoUserInfo(request.kakaoAccessToken()); // 캐스팅 제거
 
-            // 2. 카카오 서버로부터 받은 OAuth2 액세스 토큰으로 사용자 정보를 요청
-            JsonNode userInfo = getKakaoUserInfo(oauthAccessToken);
-
-            // 3. 사용자 정보 저장 또는 업데이트
-            Member member = registerKakaoUser(userInfo, oauthAccessToken);
-
-            // 4. 초기 JWT 생성 및 저장
-            Map<String, String> tokens = generateInitialJwtTokens(member, request, response);
-
-            return tokens;
-
-        } catch (Exception e) {
-            throw new RuntimeException("카카오 로그인 처리 중 오류가 발생했습니다.", e);
+        if (memberRepository.existsByKakaoId(userInfo.getId())) {
+            throw new IllegalStateException("이미 존재하는 회원입니다.");
         }
+
+        // 새로운 Member 객체 생성
+        Member newMember = Member.builder()
+                .kakaoId(userInfo.getId())
+                .build();
+
+        // 요청에서 받은 데이터를 Member 객체에 세팅
+        request.toEntity(newMember);  // nickname은 랜덤 생성
+
+        // DB에서 기본 프로필 이미지 조회하여 기본 이미지 설정
+        profileImageRepository.findByStoreName(DEFAULT_PROFILE_IMAGE_NAME) // 상수를 사용하여 조회
+                .ifPresent(defaultImage -> {
+                    // 테스트 코드에서 확인된 initializeProfileImage 메서드 사용
+                    newMember.initializeProfileImage(defaultImage);
+                    System.out.println("✅ 기본 프로필 이미지 설정됨 ✅: " + defaultImage.getId());
+                });
+
+        // 프로필 등록 완료 처리
+        newMember.completeProfile();
+
+        // DB에 저장
+        Member savedMember = memberRepository.save(newMember);
+
+        return savedMember.getId();
     }
 
-    private Map<String, String> generateInitialJwtTokens(Member member, HttpServletRequest request,
-            HttpServletResponse response) {
-        // 초기 JWT 액세스 토큰 생성
-        String accessToken = tokenProvider.generateInitialAccessToken(member);
-        response.setHeader(ACCESS_HEADER, accessToken);
+    // 🔹 카카오 인가 코드로 Access Token 발급
+    private Map<String, String> getKakaoAccessToken(String code) {
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "authorization_code");
+        body.add("client_id", clientId);
+        body.add("redirect_uri", redirectUri);
+        body.add("code", code);
 
-        // 초기 JWT 리프레시 토큰 생성 및 저장
-        String refreshToken = tokenProvider.generateInitialRefreshToken(member);
-        saveRefreshToken(member.getId(), refreshToken);
-        addRefreshTokenToCookie(request, response, refreshToken);
+        KakaoTokenResponse response = webClient.post()
+                .uri(tokenUri)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE
+                        + ";charset=utf-8") // charset 추가
+                .body(BodyInserters.fromFormData(body))
+                .retrieve()
+                // 응답 상태 코드 에러 처리 (4xx, 5xx)
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    System.err.println(
+                                            "❌ 카카오 토큰 발급 API 오류: " + clientResponse.statusCode()
+                                                    + ", 응답: " + errorBody);
+                                    return Mono.error(
+                                            new RuntimeException("카카오 토큰 발급 실패: " + errorBody));
+                                }))
+                .bodyToMono(KakaoTokenResponse.class)
+                .block(); // 동기 처리
 
-        // 응답 데이터 구성
+        // Null 체크 및 토큰 추출
+        if (response == null || response.getAccessToken() == null) {
+            throw new RuntimeException("카카오 액세스 토큰을 가져오는데 실패했습니다.");
+        }
+
         Map<String, String> tokens = new HashMap<>();
-        tokens.put("access_token", accessToken);
-        tokens.put("refresh_token", refreshToken);
+        tokens.put("accessToken", response.getAccessToken());
         return tokens;
     }
 
-    private Map<String, String> generateFinalJwtTokens(Member member, HttpServletRequest request,
-            HttpServletResponse response) {
-        // 최종 JWT 액세스 토큰 생성
-        String accessToken = tokenProvider.generateFinalAccessToken(member);
-        response.setHeader(ACCESS_HEADER, accessToken);
+    // 🔹 Kakao Access Token으로 사용자 정보 조회 (반환 타입을 KakaoUserInfo로 변경)
+    private KakaoUserInfo getKakaoUserInfo(String accessToken) {
+        String json = webClient.get()
+                .uri(userInfoUri)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .retrieve()
+                // 응답 상태 코드 에러 처리 (4xx, 5xx)
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    System.err.println(
+                                            "❌ 카카오 사용자 정보 API 오류: " + clientResponse.statusCode()
+                                                    + ", 응답: " + errorBody);
+                                    // 401 Unauthorized 경우 토큰 만료 가능성 있음
+                                    if (clientResponse.statusCode().value() == 401) {
+                                        return Mono.error(
+                                                new RuntimeException("카카오 토큰이 만료되었거나 유효하지 않습니다."));
+                                    }
+                                    return Mono.error(
+                                            new RuntimeException("카카오 사용자 정보 조회 실패: " + errorBody));
+                                }))
+                .bodyToMono(String.class)
+                .block(); // 동기 처리
 
-        // 최종 JWT 리프레시 토큰 생성 및 저장
-        String refreshToken = tokenProvider.generateFinalRefreshToken(member);
-        saveRefreshToken(member.getId(), refreshToken);
-        addRefreshTokenToCookie(request, response, refreshToken);
-
-        // 응답 데이터 구성
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("access_token", accessToken);
-        tokens.put("refresh_token", refreshToken);
-        return tokens;
-    }
-
-    private Map<String, String> generateTestJwtTokens(Member member, HttpServletRequest request,
-            HttpServletResponse response) {
-        // 테스트용 JWT 액세스 토큰 생성
-        String accessToken = tokenProvider.generateTestAccessToken(member);
-        response.setHeader(ACCESS_HEADER, accessToken);
-
-        // 테스트용 JWT 리프레시 토큰 생성 및 저장
-        String refreshToken = tokenProvider.generateTestRefreshToken(member);
-        saveRefreshToken(member.getId(), refreshToken);
-        addRefreshTokenToCookie(request, response, refreshToken);
-
-        // 응답 데이터 구성
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("access_token", accessToken);
-        tokens.put("refresh_token", refreshToken);
-        return tokens;
-    }
-
-    private void addRefreshTokenToCookie(HttpServletRequest request, HttpServletResponse response,
-            String refreshToken) {
-        int cookieMaxAge = (int) REFRESH_TOKEN_DURATION.toSeconds();
-        CookieUtil.deleteCookie(request, response, REFRESH_TOKEN_COOKIE_NAME);
-        CookieUtil.addHttpOnlyCookie(response, REFRESH_TOKEN_COOKIE_NAME, refreshToken,
-                cookieMaxAge);
-    }
-
-    private void saveRefreshToken(Long memberId, String newRefreshToken) {
-        RefreshJwtToken refreshToken = refreshTokenRepository.findByMemberId(memberId)
-                .map(entity -> entity.update(newRefreshToken))
-                .orElse(new RefreshJwtToken(memberId, newRefreshToken));
-        refreshTokenRepository.save(refreshToken);
-    }
-
-    // 인가 코드로 카카오 서버에 액세스 토큰을 요청
-    private String getAccessToken(String code) {
-        try {
-            // HTTP Header 생성
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
-
-            // HTTP Body 생성
-            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-            body.add("grant_type", "authorization_code");
-            body.add("client_id", CLIENT_ID);
-            body.add("redirect_uri", REDIRECT_URI);
-            body.add("code", code);
-
-            // HTTP 요청 보내기
-            HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(body,
-                    headers);
-            RestTemplate restTemplate = new RestTemplate();
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                    "https://kauth.kakao.com/oauth/token",
-                    HttpMethod.POST,
-                    tokenRequest,
-                    String.class
-            );
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(response.getBody());
-            return jsonNode.get("access_token").asText();
-
-        } catch (Exception e) {
-            throw new RuntimeException("카카오 액세스 토큰 요청 중 오류가 발생했습니다.", e);
+        if (json == null) {
+            throw new RuntimeException("카카오 사용자 정보 응답이 비어있습니다.");
         }
-    }
 
-    private JsonNode getKakaoUserInfo(String accessToken) {
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", "Bearer " + accessToken);
-            headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+            // ObjectMapper를 사용하여 JSON 문자열을 KakaoUserInfo DTO 객체로 변환
+            KakaoUserInfo userInfo = objectMapper.readValue(json, KakaoUserInfo.class);
 
-            HttpEntity<MultiValueMap<String, String>> userInfoRequest = new HttpEntity<>(headers);
-            RestTemplate restTemplate = new RestTemplate();
+            // 필수 정보인 ID가 파싱되었는지 확인
+            if (userInfo == null || userInfo.getId() == null) {
+                throw new RuntimeException("카카오 사용자 정보 파싱 실패: 사용자 ID를 찾을 수 없습니다.");
+            }
 
-            ResponseEntity<String> response = restTemplate.exchange(
-                    "https://kapi.kakao.com/v2/user/me",
-                    HttpMethod.POST,
-                    userInfoRequest,
-                    String.class
-            );
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readTree(response.getBody());
-
-        } catch (Exception e) {
-            throw new RuntimeException("카카오 사용자 정보 요청 중 오류가 발생했습니다.", e);
-        }
-    }
-
-    // 카카오 회원 정보를 데이터베이스에 저장하는 메서드
-    private Member registerKakaoUser(JsonNode userInfoJson, String kakaoAccessToken) {
-        try {
-            String oauthId = userInfoJson.get("id").asText();
-            JsonNode profileJson = userInfoJson.get("kakao_account").get("profile");
-            String nickname = profileJson.get("nickname").asText();
-
-            OauthInfo oauthInfo = new OauthInfo(oauthId, OauthProvider.KAKAO);
-
-            Member member = memberRepository.findByOauthInfo(oauthInfo)
-                    .map(entity -> entity.update(kakaoAccessToken))
-                    .orElse(Member.builder()
-                            .kakaoAccessToken(kakaoAccessToken)
-                            .nickname(nickname)
-                            .oauthInfo(oauthInfo)
-                            .build());
-
-            return memberRepository.save(member);
-
-        } catch (Exception e) {
-            throw new RuntimeException("카카오 사용자 정보 저장 중 오류가 발생했습니다.", e);
+            return userInfo;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("카카오 사용자 정보 파싱 실패", e);
         }
     }
 }

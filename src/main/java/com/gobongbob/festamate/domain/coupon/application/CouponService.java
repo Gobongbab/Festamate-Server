@@ -4,6 +4,8 @@ import com.gobongbob.festamate.domain.coupon.domain.Coupon;
 import com.gobongbob.festamate.domain.coupon.dto.request.UseCouponRequest;
 import com.gobongbob.festamate.domain.coupon.persistence.CouponRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Random;
@@ -18,21 +20,27 @@ import org.springframework.transaction.annotation.Transactional;
 public class CouponService {
 
     private final CouponRepository couponRepository;
+    private final MemberRepository memberRepository;
     private static final int COUPON_COUNT = 1000;
     private static final int COUPON_LENGTH = 6;
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
+    // 쿠폰 사용
     @Transactional
+    @CheckActiveUser
     public void useCoupon(Member member, UseCouponRequest request) {
         Coupon coupon = couponRepository.findByCode(request.code())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 쿠폰입니다."));
+        Member findMember = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         coupon.useCoupon();
-        coupon.assignToMember(member);
-        member.increaseMaximumTicket();
-        member.initializeRemainingTicket(member.getMaximumTicket());
+        coupon.assignToMember(findMember);
+        findMember.increaseMaximumTicket();
+        findMember.initializeRemainingTicket(findMember.getMaximumTicket());
     }
 
+    // 쿠폰 초기화
     @Transactional
     public void initializeCoupons(Member member) {
         // 요청자가 관리자인지 확인하는 로직 필요

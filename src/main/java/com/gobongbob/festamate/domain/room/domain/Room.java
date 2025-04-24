@@ -3,23 +3,11 @@ package com.gobongbob.festamate.domain.room.domain;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -34,39 +22,60 @@ public class Room {
 
     private String title;
 
+    private String place;
+
     private String content;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Status status = Status.MATCHING;
 
     private int maxParticipants;
 
+    @Enumerated(EnumType.STRING)
     private Gender preferredGender;
 
-    private LocalDateTime meetingDateTime;
+    private String preferredStudentIdMin;
 
+    private String preferredStudentIdMax;
+
+    private LocalDateTime meetingDateTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host_id")
     private Member host;
 
-    @OneToMany(mappedBy = "room", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<RoomImage> images = new ArrayList<>();
 
     // 연관관계 편의 메서드
     public void assignImages(List<RoomImage> roomImages) {
-        this.images = roomImages;
+        this.images.addAll(roomImages);
         roomImages.forEach(roomImage -> roomImage.setRoom(this));
     }
 
     public void updateRoom(
             String title,
+            String place,
             String content,
             Gender preferredGender,
+            String preferredStudentIdMin,
+            String preferredStudentIdMax,
             LocalDateTime meetingDateTime,
             int maxParticipants
     ) {
         this.title = title;
+        this.place = place;
         this.content = content;
         this.preferredGender = preferredGender;
+        this.preferredStudentIdMin = preferredStudentIdMin;
+        this.preferredStudentIdMax = preferredStudentIdMax;
         this.meetingDateTime = meetingDateTime;
         this.maxParticipants = maxParticipants;
+    }
+
+    public void updateStatus(Status status) {
+        this.status = status;
     }
 }

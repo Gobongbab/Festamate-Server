@@ -5,7 +5,6 @@ import com.gobongbob.festamate.domain.coupon.application.CouponService;
 import com.gobongbob.festamate.domain.coupon.dto.request.UseCouponRequest;
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,10 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/coupons")
-public class CouponController {
+public class CouponController implements CouponApi {
 
     private final CouponService couponService;
 
+    // 쿠폰 사용
+    @Override
     @PostMapping("")
     public SuccessResponse<Void> useCoupon(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
@@ -29,6 +30,8 @@ public class CouponController {
         return new SuccessResponse<>();
     }
 
+    // 쿠폰 초기화
+    @Override
     @PostMapping("/init")
     public SuccessResponse<Void> initializeCoupons(
             @AuthenticationPrincipal CustomMemberDetails memberDetails

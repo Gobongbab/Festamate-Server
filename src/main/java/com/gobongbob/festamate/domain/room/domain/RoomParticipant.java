@@ -1,18 +1,8 @@
 package com.gobongbob.festamate.domain.room.domain;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Getter
@@ -33,20 +23,25 @@ public class RoomParticipant {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Enumerated(EnumType.STRING)
+    private ParticipantRole participantRole;
+
     private boolean isHost;
 
     public static RoomParticipant createHost(Room room, Member member) {
         return RoomParticipant.builder()
                 .room(room)
                 .member(member)
+                .participantRole(ParticipantRole.HOST)
                 .isHost(true)
                 .build();
     }
 
-    public static RoomParticipant createParticipant(Room room, Member member) {
+    public static RoomParticipant createParticipant(Room room, Member member, ParticipantRole participantRole) {
         return RoomParticipant.builder()
                 .room(room)
                 .member(member)
+                .participantRole(participantRole)
                 .isHost(false)
                 .build();
     }

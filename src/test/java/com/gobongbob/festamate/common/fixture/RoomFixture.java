@@ -31,8 +31,11 @@ public class RoomFixture {
     public static RoomCreateRequest createRoomCreateRequest(Room room) {
         return new RoomCreateRequest(
                 room.getTitle(),
+                room.getPlace(),
                 room.getContent(),
-                room.getPreferredGender().getName(),
+                room.getPreferredGender(),
+                room.getPreferredStudentIdMin(),
+                room.getPreferredStudentIdMax(),
                 room.getMeetingDateTime(),
                 room.getMaxParticipants()
         );

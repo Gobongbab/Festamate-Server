@@ -11,11 +11,12 @@ public record ReportRoomRequest(
         String reason
 ) {
 
-    public Report toEntity(Member member, Room room) {
+    public Report toEntity(Member reporter, Room room, Member reportedMember) {
         return Report.builder()
                 .room(room)
                 .reason(ReportReason.findByName(reason))
-                .reporter(member)
+                .reporter(reporter)
+                .reportedMember(reportedMember)
                 .reportDate(LocalDateTime.now())
                 .processed(false)
                 .build();

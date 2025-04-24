@@ -2,6 +2,7 @@ package com.gobongbob.festamate.domain.member.dto.response;
 
 import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
+import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 
 public record MemberResponse(
@@ -12,7 +13,7 @@ public record MemberResponse(
         String loginId,
         String loginPassword,
         String phoneNumber,
-        String gender,
+        Gender gender,
         String major,
         ImageResponse profileImage
 ) {
@@ -28,8 +29,8 @@ public record MemberResponse(
                 member.getLoginId(),
                 member.getLoginPassword(),
                 member.getPhoneNumber(),
-                member.getGender().getName(),
-                member.getMajor().getDepartment(),
+                member.getGender(),
+                member.getStudentDepartment(),
                 ImageResponse.fromEntity(profileImage)
         );
     }

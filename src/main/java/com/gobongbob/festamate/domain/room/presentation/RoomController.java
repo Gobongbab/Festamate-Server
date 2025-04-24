@@ -2,27 +2,30 @@ package com.gobongbob.festamate.domain.room.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
+import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
-import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
+import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
+import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
-import java.util.List;
-
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,76 +39,99 @@ import org.springframework.web.multipart.MultipartFile;
 @Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/rooms")
-public class RoomController {
+public class RoomController implements RoomApi {
 
     private final RoomService roomService;
     private final RoomParticipationService roomParticipationService;
     private final ChatService chatService;
 
+    // 방 생성
+    @Override
     @PostMapping("")
-    public SuccessResponse<Void> createRoom(
+    public SuccessResponse<Void> create(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestPart("request") @Valid RoomCreateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        Room createdRoom = roomService.createRoom(memberDetails.getMember(), request, multipartFiles);
+        ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember().getId(),
+                request, multipartFiles);
         chatService.sendMessage(
-                createdRoom.getId(),
+                createdChatRoom.getId(),
                 memberDetails.getMember(),
-                "안녕하세요! " + createdRoom.getTitle() + "에 오신 것을 환영합니다!"
+                "안녕하세요! " + createdChatRoom.getName() + "에 오신 것을 환영합니다!"
         );
 
         return new SuccessResponse<>();
     }
 
+    @Override
     @GetMapping("")
-    public SuccessResponse<Page<RoomListResponse>> findAllRooms(
-            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    public SuccessResponse<Slice<RoomListResponse>> findBySearchCondition(
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @ModelAttribute FilteringCondition filteringCondition
     ) {
-        return new SuccessResponse<>(roomService.findAllRooms(pageable));
+        return new SuccessResponse<>(
+                roomService.findBySearchCondition(pageable, filteringCondition));
     }
 
-    @GetMapping("/participate")
+    // 참여 중인 모임방 조회
+    @Override
+    @GetMapping("/participations")
     public SuccessResponse<List<RoomListResponse>> findParticipatingRooms(
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
-        return new SuccessResponse<>(roomService.findParticipatingRooms(memberDetails.getMember().getId()));
+        return new SuccessResponse<>(
+                roomService.findParticipatingRooms(memberDetails.getMember().getId()));
     }
 
+    @Override
     @GetMapping("/{roomId}")
-    public SuccessResponse<RoomResponse> findRoomById(@PathVariable Long roomId) {
-        return new SuccessResponse<>(roomService.findRoomById(roomId));
+    public SuccessResponse<RoomResponse> findRoomById(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @PathVariable("roomId") Long roomId
+    ) {
+        return new SuccessResponse<>(roomService.findRoomById(memberDetails, roomId));
     }
 
+    // 모임방 정보 수정
+    @Override
     @PatchMapping("/{roomId}")
-    public SuccessResponse<Void> updateRoomById(
+    public SuccessResponse<Void> updateById(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId,
-            @RequestBody @Valid RoomUpdateRequest request
+            @PathVariable("roomId") Long roomId,
+            @RequestPart("request") @Valid RoomUpdateRequest request,
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        roomService.updateRoomById(memberDetails.getMember(), roomId, request);
+        roomService.updateRoomById(memberDetails.getMember(), roomId, request, multipartFiles);
 
         return new SuccessResponse<>();
     }
 
+    // 모임방 삭제
+    @Override
     @DeleteMapping("/{roomId}")
-    public SuccessResponse<Void> deleteRoomById(
+    public SuccessResponse<Void> deleteById(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId
+            @PathVariable("roomId") Long roomId
     ) {
         roomService.deleteRoomById(memberDetails.getMember(), roomId);
 
         return new SuccessResponse<>();
     }
 
-    @PostMapping("/{roomId}/participate")
-    public SuccessResponse<Void> participateRoom(
+    // 방 참여
+    @Override
+    @Transactional
+    @PostMapping("/{roomId}/participations")
+    public SuccessResponse<Void> participate(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId
+            @PathVariable("roomId") Long roomId,
+            @RequestBody FriendPhoneNumbersRequest request
     ) {
-        roomParticipationService.participateRoom(memberDetails.getMember(), roomId);
+        ChatRoom chatRoom = roomParticipationService.participate(memberDetails.getMember().getId(),
+                roomId, request);
         chatService.sendMessage(
-                roomId,
+                chatRoom.getId(),
                 memberDetails.getMember(),
                 memberDetails.getMember().getNickname() + "님이 들어왔습니다."
         );
@@ -113,14 +139,16 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
+    // 모임방 나가기
+    @Override
     @PostMapping("/{roomId}/leave")
-    public SuccessResponse<Void> leaveRoom(
+    public SuccessResponse<Void> leave(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId
+            @PathVariable("roomId") Long roomId
     ) {
-        roomParticipationService.leaveRoomById(memberDetails.getMember(), roomId);
+        ChatRoom chatRoom = roomParticipationService.leave(memberDetails.getMember(), roomId);
         chatService.sendMessage(
-                roomId,
+                chatRoom.getId(),
                 memberDetails.getMember(),
                 memberDetails.getMember().getNickname() + "님이 나갔습니다."
         );
@@ -128,11 +156,14 @@ public class RoomController {
         return new SuccessResponse<>();
     }
 
-    @GetMapping("/{roomId}/isHost")
-    public SuccessResponse<Boolean> isMemberHost(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId
+    // 방장 여부 확인
+    @Override
+    @GetMapping("/{roomId}/host")
+    public SuccessResponse<IsMemberHostResponse> isMemberHost(
+            @PathVariable("roomId") Long roomId,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
-        return new SuccessResponse<>(roomParticipationService.isMemberHost(memberDetails.getMember().getId(), roomId));
+        return new SuccessResponse<>(
+                roomParticipationService.isMemberHost(roomId, memberDetails.getMember()));
     }
 }
