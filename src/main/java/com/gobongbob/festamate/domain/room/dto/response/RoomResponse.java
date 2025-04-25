@@ -74,7 +74,8 @@ public record RoomResponse(
             String studentId,
             String gender,
             String major,
-            boolean isHost
+            boolean isHost,
+            String profileImageUrl
     ) {
 
         private static ParticipantResponse fromEntity(RoomParticipant participant, boolean isHost) {
@@ -84,7 +85,10 @@ public record RoomResponse(
                     participant.getMember().getStudentId().substring(2, 4),
                     participant.getMember().getGender().name(),
                     participant.getMember().getStudentDepartment(),
-                    isHost
+                    isHost,
+                    participant.getMember().getProfileImage() != null
+                            ? participant.getMember().getProfileImage().getImage().getUrl()
+                            : null
             );
         }
     }
