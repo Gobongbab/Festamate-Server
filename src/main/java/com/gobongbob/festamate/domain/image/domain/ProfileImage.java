@@ -21,6 +21,6 @@ public class ProfileImage {
     private Image image;
 
     public String getUrl() {
-        return this.image.getUrl();
+        return image.getUrl();
     }
 }
