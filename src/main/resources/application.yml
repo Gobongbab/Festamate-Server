@@ -94,3 +94,8 @@ management:
   # metrics: # 필요한 경우 세부 메트릭 설정 추가
   #   tags:
   #     application: ${spring.application.name}
+admin:
+  loginId: ${ADMIN_LOGIN_ID}
+  password: ${ADMIN_PASSWORD}
+  kakaoId: ${ADMIN_KAKAO_ID}
+
