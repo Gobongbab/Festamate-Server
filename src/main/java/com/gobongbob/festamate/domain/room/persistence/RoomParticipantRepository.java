@@ -28,8 +28,13 @@ public interface RoomParticipantRepository extends JpaRepository<RoomParticipant
 
     List<RoomParticipant> findByRoom_Id(Long roomId);
 
-    @Query("SELECT r FROM RoomParticipant r WHERE r.room.id = ?1 AND r.participantRole = ?2")
-    List<RoomParticipant> findByRoomAndRole(Long id, ParticipantRole participantRole);
+    @Query("""
+            SELECT DISTINCT p FROM RoomParticipant p
+            JOIN FETCH p.member m
+            JOIN FETCH m.profileImage
+            WHERE p.room.id = :roomId AND p.participantRole = :participantRole
+            """)
+    List<RoomParticipant> findByRoomAndRole(Long roomId, ParticipantRole participantRole);
 
     List<RoomParticipant> findByMember_Id(Long memberId);
 
