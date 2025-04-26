@@ -40,4 +40,8 @@ public interface MemberRepository extends Repository<Member, Long> {
 
     boolean existsByStudentId(String studentId); // 학번 중복 확인
 
+    Optional<Member> findByLoginId(String loginId); // 일반 로그인 아이디 조회
+
+    boolean existsByLoginId(String loginId); // 일반 로그인 아이디 확인
+
 }
