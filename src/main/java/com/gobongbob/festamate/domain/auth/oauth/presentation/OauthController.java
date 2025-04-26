@@ -3,7 +3,7 @@ package com.gobongbob.festamate.domain.auth.oauth.presentation;
 import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
 import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.auth.oauth.application.OauthService;
-import com.gobongbob.festamate.domain.auth.oauth.dto.request.LoginRequest;
+import com.gobongbob.festamate.domain.auth.oauth.dto.request.KakaoLoginRequest;
 import com.gobongbob.festamate.domain.auth.oauth.dto.request.LoginWithKakaoRequest;
 import com.gobongbob.festamate.domain.auth.oauth.dto.response.KakaoCheckResponse;
 import com.gobongbob.festamate.domain.member.application.MemberService;
@@ -34,9 +34,9 @@ public class OauthController {
     // 1️⃣ 회원 여부 확인용 (카카오 인가코드로)
     @PostMapping("/kakao")
     public SuccessResponse<KakaoCheckResponse> kakaoCheck(
-            @RequestBody @Valid LoginRequest loginRequest) {
+            @RequestBody @Valid KakaoLoginRequest kakaoLoginRequest) {
 
-        KakaoCheckResponse response = oauthService.checkKakaoUser(loginRequest.getCode());
+        KakaoCheckResponse response = oauthService.checkKakaoUser(kakaoLoginRequest.getCode());
         return new SuccessResponse<>(response);
     }
 
