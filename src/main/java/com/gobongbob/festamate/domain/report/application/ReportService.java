@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReportService {
 
@@ -32,6 +32,7 @@ public class ReportService {
     private final RoomRepository roomRepository;
 
     // 방 신고하기
+    @Transactional
     @CheckActiveUser
     public void reportRoom(Member reporter, Long roomId, ReportRoomRequest request) {
         Room room = roomRepository.findById(roomId)
@@ -58,6 +59,7 @@ public class ReportService {
     }
 
     // 유저 신고하기
+    @Transactional
     @CheckActiveUser
     public void reportMember(Member reporter, Long memberId, ReportMemberRequest request) {
         Member reportedMember = memberRepository.findById(memberId)
@@ -77,7 +79,6 @@ public class ReportService {
     }
 
     // 모든 신고 목록 조회
-    @Transactional(readOnly = true)
     @CheckActiveUser
     public List<ReportRoomResponse> getAllReports() {
         List<Report> reports = reportRepository.findAll();
@@ -89,7 +90,6 @@ public class ReportService {
     }
 
     // 신고 처리되지 않은 신고 목록 조회
-    @Transactional(readOnly = true)
     @CheckActiveUser
     public List<ReportRoomResponse> getUnprocessedReports() {
         List<Report> reports = reportRepository.findByProcessed(false);

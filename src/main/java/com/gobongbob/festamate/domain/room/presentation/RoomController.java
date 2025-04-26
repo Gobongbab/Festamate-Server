@@ -64,6 +64,7 @@ public class RoomController implements RoomApi {
         return new SuccessResponse<>();
     }
 
+    // 방 전체 조회
     @Override
     @GetMapping("")
     public SuccessResponse<Slice<RoomListResponse>> findBySearchCondition(

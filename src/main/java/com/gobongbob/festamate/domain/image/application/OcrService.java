@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import static com.gobongbob.festamate.global.response.ResponseCode.EMPTY_FILE;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OcrService {
 
