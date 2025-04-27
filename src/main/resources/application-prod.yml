@@ -97,3 +97,7 @@ management:
       show-details: always
     prometheus:
       enabled: true # Prometheus 엔드포인트 활성화
+admin:
+  loginId: ${ADMIN_LOGIN_ID}
+  password: ${ADMIN_PASSWORD}
+  kakaoId: ${ADMIN_KAKAO_ID}
