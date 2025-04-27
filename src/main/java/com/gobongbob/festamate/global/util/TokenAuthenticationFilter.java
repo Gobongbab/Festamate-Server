@@ -45,7 +45,10 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         // 토큰 유효성 검사
         if (token != null) {
             if (!tokenProvider.validateToken(token)) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"message\": \"유효하지 않거나 만료된 토큰입니다.\"}");
 
                 return;
             }

@@ -3,6 +3,7 @@ package com.gobongbob.festamate.domain.room.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
 import com.gobongbob.festamate.domain.member.domain.Gender;
+import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomAuthority;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
@@ -79,16 +80,16 @@ public record RoomResponse(
     ) {
 
         private static ParticipantResponse fromEntity(RoomParticipant participant, boolean isHost) {
+            Member member = participant.getMember();
+
             return new ParticipantResponse(
-                    participant.getMember().getId(),
-                    participant.getMember().getNickname(),
-                    participant.getMember().getStudentId().substring(2, 4),
-                    participant.getMember().getGender().name(),
-                    participant.getMember().getStudentDepartment(),
+                    member.getId(),
+                    member.getNickname(),
+                    member.getStudentId().substring(2, 4),
+                    member.getGender().name(),
+                    member.getStudentDepartment(),
                     isHost,
-                    participant.getMember().getProfileImage() != null
-                            ? participant.getMember().getProfileImage().getImage().getUrl()
-                            : null
+                    member.getProfileImage().getUrl()
             );
         }
     }
