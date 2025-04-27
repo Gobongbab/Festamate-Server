@@ -126,7 +126,8 @@ public class SecurityConfig {
         ));
 
         // 사용할 HTTP 메서드 명시
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(
+                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
         // 허용할 헤더 설정
         configuration.setAllowedHeaders(Arrays.asList(
