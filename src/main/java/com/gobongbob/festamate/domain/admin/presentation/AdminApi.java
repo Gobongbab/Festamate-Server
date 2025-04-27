@@ -1,13 +1,18 @@
 package com.gobongbob.festamate.domain.admin.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.auth.jwt.dto.request.LoginRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Map;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,5 +68,18 @@ public interface AdminApi {
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(name = "userId", description = "제재 해제할 회원 ID")
             @PathVariable("userId") Long userId
+    );
+
+    @Operation(summary = "관리자 일반 로그인", description = "관리자 아이디와 비밀번호로 로그인하여 JWT 토큰을 발급받습니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (사용자 없음 또는 비밀번호 불일치)"),
+            @ApiResponse(responseCode = "403", description = "접근 거부 (관리자 권한 없음)")
+    })
+    @PostMapping("/login")
+    SuccessResponse<Map<String, String>> loginAdmin(
+            @RequestBody(description = "로그인 요청 정보 (아이디, 비밀번호)", required = true,
+                    content = @Content(schema = @Schema(implementation = LoginRequest.class)))
+            LoginRequest loginRequest
     );
 }

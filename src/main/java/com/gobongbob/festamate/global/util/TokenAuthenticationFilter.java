@@ -94,7 +94,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             return true;
         }
 
-        // 2. HTTP 메서드(GET)를 고려해야 하는 Public 경로 체크
+        // 2. 관리자 로그인 경로 체크
+        if (uri.equals("/api/admin/login") && HttpMethod.POST.matches(method)) {
+            return true;
+        }
+
+        // 3. HTTP 메서드(GET)를 고려해야 하는 Public 경로 체크
         if (HttpMethod.GET.matches(method)) {
             // GET /api/rooms (모임방 목록 조회) 경로 확인
             if (uri.equals("/api/rooms")) {

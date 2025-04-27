@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,6 +22,7 @@ public class TestService {
     private final MemberRepository memberRepository;
     private final ProfileImageRepository profileImageRepository;
     private final TokenProvider tokenProvider;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 테스트용 회원 생성 및 토큰 반환 이미 존재하는 경우 해당 회원의 토큰 반환 (기본적으로는 매번 새로 생성 시도)
@@ -42,12 +44,17 @@ public class TestService {
 
         // Member 엔티티 생성
         Gender randomGender = Math.random() < 0.5 ? Gender.MALE : Gender.FEMALE;
+
+        // 비밀번호 암호화 적용
+        String rawPassword = "test_password";
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+
         Member testMember = createMemberEntity(
                 "수영하는 봉밥이 " + uniqueSuffix,
                 nickname,
                 studentId,
                 loginId,
-                "test_password", // 테스트용 비밀번호는 고정값 사용 가능
+                encodedPassword,
                 phoneNumber,
                 kakaoId,
                 randomGender,
@@ -61,6 +68,7 @@ public class TestService {
     /**
      * 관리자 회원 생성 및 토큰 반환 이미 존재하는 경우 해당 회원의 토큰 반환 (기본적으로는 매번 새로 생성 시도)
      */
+    // 테스트 관리자 비활성화
     @Transactional
     public TestTokens createAdminMember() {
         // 고유 식별자를 사용하여 중복 방지
@@ -78,12 +86,17 @@ public class TestService {
 
         // Member 엔티티 생성
         Gender randomGender = Math.random() < 0.5 ? Gender.MALE : Gender.FEMALE;
+
+        // 비밀번호 암호화 적용
+        String rawPassword = "admin_password";
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+
         Member adminMember = createMemberEntity(
                 "Admin User " + uniqueSuffix,
                 nickname,
                 studentId,
                 loginId,
-                "admin_password", // 테스트용 비밀번호는 고정값 사용 가능
+                encodedPassword,
                 phoneNumber,
                 kakaoId,
                 randomGender,
@@ -125,22 +138,22 @@ public class TestService {
      * Member 엔티티 생성을 위한 헬퍼 메서드 Member 엔티티의 @Unique 제약 조건 필드들을 파라미터로 받음
      */
     private Member createMemberEntity(String name, String nickname, String studentId,
-            String loginId, String password, String phoneNumber, Long kakaoId, Gender gender,
+            String loginId, String encodedPassword, String phoneNumber, Long kakaoId, Gender gender,
             String department, Role role) {
         return Member.builder()
                 .name(name)
                 .nickname(nickname)          // Unique
                 .studentId(studentId)        // Unique
                 .loginId(loginId)            // Unique
-                .loginPassword(password)     // 비밀번호는 Unique 제약 조건 없음
+                .loginPassword(encodedPassword)     // 비밀번호 암호화
                 .phoneNumber(phoneNumber)    // Unique
                 .kakaoId(kakaoId)            // Unique
                 .gender(gender)
                 .studentDepartment(department)
                 .role(role)                  // 역할 명시적 설정
                 .isProfileCompleted(true)    // 테스트 유저는 프로필 작성이 완료된 것으로 가정
-                // .maximumTicket(2) // Builder.Default로 설정됨
-                // .remainingTicket(2) // Builder.Default로 설정됨
+                .maximumTicket(1000) // 테스트 유저는 티켓 1000장으로 설정
+                .remainingTicket(1000) // 테스트 유저는 티켓 1000장으로 설정
                 // .status(MemberStatus.ACTIVE) // Builder.Default 또는 @PrePersist로 설정됨
                 .build();
     }

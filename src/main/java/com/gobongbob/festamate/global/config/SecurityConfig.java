@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.global.config;
 
+import com.gobongbob.festamate.domain.member.domain.Role;
 import com.gobongbob.festamate.global.util.JwtAccessDeniedHandler;
 import com.gobongbob.festamate.global.util.JwtAuthenticationEntryPoint;
 import com.gobongbob.festamate.global.util.TokenAuthenticationFilter;
@@ -15,6 +16,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -27,6 +30,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider; // JWT 토큰을 생성하고 검증하는 역할
+
+    @Bean // 비밀번호 암호화에 사용할 PasswordEncoder 빈 등록
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public WebSecurityCustomizer configure() {
@@ -73,15 +81,18 @@ public class SecurityConfig {
                                 "/api/check/student-card" // OCR 학생증 인증
                         ).permitAll()
 
-                        // == 모임방 관련 경로 (HttpMethod 명시) ==
+                        // 모임방 관련 경로 (HttpMethod 명시)
                         .requestMatchers(HttpMethod.GET, "/api/rooms")
                         .permitAll()       // 모임방 목록 조회 (GET) 허용
                         .requestMatchers(HttpMethod.GET, "/api/rooms/{rooms_id}")
                         .permitAll() // 모임방 상세 조회 (GET) 허용
 
-                        // == 관리자 API 경로 (ADMIN 권한 필요) ==
+                        // 관리자 API 경로 (HttpMethod 명시)
+                        .requestMatchers(HttpMethod.POST, "/api/admin/login").permitAll()
+
+                        // 관리자 API 경로 (ADMIN 권한 필요)
                         .requestMatchers("/api/admin/**")
-                        .hasAuthority("ROLE_ADMIN") // "ROLE_ADMIN" 권한 필요
+                        .hasAuthority(Role.ADMIN.getAuthority()) // "ROLE_ADMIN" 권한 필요
 
                         // 로그인 + JWT 인증이 필요한 경로
                         .requestMatchers(
