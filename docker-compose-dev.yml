@@ -62,6 +62,11 @@ services:
       - IAM_USER_ACCESS_KEY=${IAM_USER_ACCESS_KEY} # S3용 Access Key
       - IAM_USER_SECRET_KEY=${IAM_USER_SECRET_KEY} # S3용 Secret Key
       - TZ=Asia/Seoul
+
+      # --- 관리자 관련 ---
+      - ADMIN_LOGIN_ID=${ADMIN_LOGIN_ID}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_KAKAO_ID=${ADMIN_KAKAO_ID}
     volumes: # EC2 호스트 경로와 Docker 컨테이너 내부의 특정 경로를 연결(마운트)하는 역할
       # EC2의 키 파일 경로: /home/ubuntu/festamate-firebase-key.json 컨테이너 내부 경로:/config/festamate-firebase-key.json
       - /home/ubuntu/festamate-firebase-key.json:/config/festamate-firebase-key.json:ro # 읽기 전용(ro)으로 마운트 권장
