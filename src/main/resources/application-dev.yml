@@ -6,14 +6,9 @@ spring:
     time-zone: Asia/Seoul
   datasource:
     master:
-      jdbc-url: ${MASTER_DB_URL}
-      username: ${PROD_DB_USER}
-      password: ${PROD_DB_PASS}
-      driver-class-name: com.mysql.cj.jdbc.Driver
-    slave:
-      jdbc-url: ${SLAVE_DB_URL}
-      username: ${PROD_DB_USER}
-      password: ${PROD_DB_PASS}
+      jdbc-url: ${DB_URL}
+      username: ${DB_USER}
+      password: ${DB_PASS}
       driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
