@@ -78,7 +78,8 @@ public class SecurityConfig {
                                 "/login/oauth2/**",
                                 "/test/**",
                                 "/api/auth/phone/**", // 인증번호 요청 및 확인
-                                "/api/check/student-card" // OCR 학생증 인증
+                                "/api/check/student-card", // OCR 학생증 인증
+                                "/api/auth/refresh" // 리프레시 토큰 재발급
                         ).permitAll()
 
                         // 모임방 관련 경로 (HttpMethod 명시)

@@ -88,6 +88,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 || uri.startsWith("/test/") // `/test/`로 시작하는 모든 경로를 공용 경로로 추가
                 || uri.startsWith("/api/auth/phone/") // 인증번호 요청 및 확인
                 || uri.startsWith("/api/check/student-card") // OCR 학생증 인증
+                || uri.equals("/api/auth/refresh") // 리프레시 토큰 재발급
                 || uri.startsWith("/swagger-ui/")
                 || uri.startsWith("/v3/api-docs")
                 || uri.startsWith("/swagger-resources")
