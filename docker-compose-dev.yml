@@ -13,11 +13,17 @@ services:
       # --- 기존 설정 유지 ---
       - USE_PROFILE=dev # Spring 프로파일 설정
       - TZ=Asia/Seoul   # 시간대 설정
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} # Spring 프로파일 설정
 
       # --- 데이터베이스 관련 ---
       - DB_URL=${DB_URL}
       - DB_USER=${DB_USER}
       - DB_PASS=${DB_PASS}
+      - MASTER_DB_URL=${MASTER_DB_URL}
+      - SLAVE_DB_URL=${SLAVE_DB_URL}
+      - PROD_DB_USER=${PROD_DB_USER}
+      - PROD_DB_PASS=${PROD_DB_PASS}
+
 
       # --- Redis 관련 ---
       # application.yml의 localhost 대신 Docker Compose 네트워크의 서비스 이름(redis) 사용

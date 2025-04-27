@@ -11,7 +11,6 @@ import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
-import jakarta.transaction.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -29,6 +29,7 @@ import reactor.core.publisher.Mono;
 // 인가 코드를 받아서 액세스 토큰을 요청하고, 사용자 정보를 가져오는 서비스로 카카오 로그인 페이지로 리다이렉션 됨.
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OauthService {
 

@@ -2,7 +2,6 @@ package com.gobongbob.festamate.testUser;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
-import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
@@ -11,7 +10,6 @@ import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.global.util.TokenProvider;
 import jakarta.transaction.Transactional;
 import java.util.Map;
-import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -120,11 +118,8 @@ public class TestService {
         }
 
         // 초기 프로필 이미지 설정 (DB에 기본 이미지가 있다고 가정)
-        Optional<ProfileImage> defaultProfileImage = profileImageRepository.findByStoreName(
-                profileImageName);
-        if (defaultProfileImage.isPresent()) {
-            member.initializeProfileImage(defaultProfileImage.get());
-        }
+        profileImageRepository.findByStoreName(profileImageName)
+                .ifPresent(member::initializeProfileImage);
 
         // DB에 회원 저장
         Member savedMember = memberRepository.save(member);

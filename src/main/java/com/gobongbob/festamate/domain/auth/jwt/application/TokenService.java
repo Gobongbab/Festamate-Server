@@ -7,9 +7,10 @@ import com.gobongbob.festamate.global.util.TokenProvider;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class TokenService { // generateToken()
 
     private final TokenProvider tokenProvider;
@@ -17,12 +18,14 @@ public class TokenService { // generateToken()
     private final MemberService memberService;
 
     // 토큰 생성 메서드 (사용자별로 토큰을 생성)
+    @Transactional
     public Map<String, String> generateTokens(Long memberId, TokenType type) {
         Member member = memberService.findById(memberId);
         return tokenProvider.generateTokens(member, type);
     }
 
     // Refresh Token을 사용하여 새로운 Access Token 생성
+    @Transactional
     public String createNewAccessToken(String refreshToken, TokenType type) {
         validateRefreshToken(refreshToken);
         Long memberId = tokenProvider.getMemberIdFromRefreshToken(refreshToken);

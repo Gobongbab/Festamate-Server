@@ -2,12 +2,7 @@ package com.gobongbob.festamate.global.util;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.member.domain.Member;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -35,9 +30,9 @@ public class TokenProvider {
 
     // 토큰 생성 (TokenType에 따라 다르게 생성)
     public Map<String, String> generateTokens(Member member, TokenType type) {
-        String accessToken = createToken(member, "access", TokenType.FINAL_ACCESS.getDuration(),
+        String accessToken = createToken(member, "access", type.getDuration(),
                 TokenType.FINAL_ACCESS);
-        String refreshToken = createToken(member, "refresh", TokenType.FINAL_REFRESH.getDuration(),
+        String refreshToken = createToken(member, "refresh", type.getDuration(),
                 TokenType.FINAL_REFRESH);
 
         Map<String, String> tokens = new HashMap<>();
@@ -88,8 +83,7 @@ public class TokenProvider {
     }
 
     /**
-     * 토큰의 유효성을 검증합니다.
-     * 유효하지 않은 경우 BadCredentialsException을 던져 JwtAuthenticationEntryPoint가 동작하도록 유도합니다.
+     * 토큰의 유효성을 검증합니다. 유효하지 않은 경우 BadCredentialsException을 던져 JwtAuthenticationEntryPoint가 동작하도록 유도합니다.
      *
      * @param token 검증할 JWT 토큰
      * @throws BadCredentialsException 토큰이 유효하지 않을 때 (서명 오류, 만료, 형식 오류 등)
@@ -103,17 +97,8 @@ public class TokenProvider {
                     .getBody();
 
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            // JwtException 또는 IllegalArgumentException 발생 시
-            // BadCredentialsException을 던져 인증 실패를 알림
-            // 이 예외는 Spring Security의 ExceptionTranslationFilter에 의해 처리되어
-            // 설정된 JwtAuthenticationEntryPoint의 commence 메소드를 호출하게 됨
-            throw new BadCredentialsException("유효하지 않은 토큰입니다.", e); // 수정된 부분: BadCredentialsException 던지기
-//            이 BadCredentialsException은 필터 밖으로 전파됩니다.
-//            중요: 필터 내에서 이 예외를 잡아서 다른 처리를 하면 안 됩니다. 예외가 Spring Security의 기본 필터 체인으로 넘어가야 합니다.
-//            Spring Security의 ExceptionTranslationFilter가 이 AuthenticationException을 감지합니다.(BadCredentialsException은 AuthenticationException의 하위 클래스)
-//            ExceptionTranslationFilter는 설정된 AuthenticationEntryPoint (즉, 사용자가 만든 JwtAuthenticationEntryPoint)의 commence 메소드를 호출합니다.
-//            JwtAuthenticationEntryPoint.commence() 메소드가 실행되어 response.sendError(HttpServletResponse.SC_UNAUTHORIZED)를 통해 클라이언트에게 401 에러를 반환합니다.
+        } catch (ExpiredJwtException | JwtException | IllegalArgumentException e) {
+            return false;
         }
     }
 
