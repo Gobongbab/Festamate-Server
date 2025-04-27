@@ -81,6 +81,7 @@ public class RoomService {
         return chatRoom;
     }
 
+    // 방 전체 조회
     public Slice<RoomListResponse> findBySearchCondition(Pageable pageable,
             FilteringCondition filteringCondition) {
         return roomRepository.findBySearchCondition(pageable, filteringCondition)
@@ -189,6 +190,7 @@ public class RoomService {
                 .build();
     }
 
+    // chatService에 있는 validateRoomParticipation와 중복됩니다. 이 부분 확인 부탁드려요!
     private void validateRoomParticipation(Long memberId) {
         roomParticipantRepository.findByMember_Id(memberId)
                 .stream()

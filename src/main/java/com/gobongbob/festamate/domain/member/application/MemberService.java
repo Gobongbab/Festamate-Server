@@ -141,7 +141,6 @@ public class MemberService {
     }
 
     // 닉네임 중복 체크
-    @Transactional
     public void checkNicknameDuplication(String nickname) {
         boolean isDuplicate = memberRepository.existsByNickname(nickname);
 
@@ -151,7 +150,6 @@ public class MemberService {
     }
 
     // 학번 중복 체크
-    @Transactional
     public void checkStudentIdDuplication(String studentId) {
         boolean isDuplicate = memberRepository.existsByStudentId(studentId);
 
