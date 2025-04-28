@@ -138,7 +138,8 @@ public class SecurityConfig {
                 "Content-Type",
                 "Authorization",
                 "X-XSRF-token",
-                "Accept"
+                "Accept",
+                "Cookie"
         ));
 
         // 인증 정보 포함 여부
