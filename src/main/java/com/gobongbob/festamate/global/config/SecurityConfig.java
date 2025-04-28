@@ -124,6 +124,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "https://festamate-web.vercel.app",
                 "http://localhost:5173",
+                "http://localhost:8080",
                 "https://www.festamate.shop",
                 "https://stomp-practice.vercel.app"
         ));
