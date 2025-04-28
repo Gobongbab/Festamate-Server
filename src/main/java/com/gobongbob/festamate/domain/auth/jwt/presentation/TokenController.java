@@ -42,7 +42,7 @@ public class TokenController {
 
         try {
             // 2. TokenService 호출하여 토큰 재발급 시도 (RTR 포함)
-            TokenService.TokenRefreshResult result = tokenService.refreshTokensViaRedis(
+            TokenService.TokenRefreshResult result = tokenService.regenerateAccessToken(
                     refreshTokenCookie);
 
             // 3. 성공 시: 새 리프레시 토큰 HttpOnly 쿠키 설정

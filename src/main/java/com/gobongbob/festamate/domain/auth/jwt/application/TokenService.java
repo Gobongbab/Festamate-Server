@@ -37,7 +37,7 @@ public class TokenService {
 
     // 액세스 토큰 재발급 (Refresh Token Rotation 적용)
     @Transactional // Redis 조회/삭제/저장 및 DB 조회
-    public TokenRefreshResult refreshTokensViaRedis(String refreshTokenValueFromCookie) {
+    public TokenRefreshResult regenerateAccessToken(String refreshTokenValueFromCookie) {
         // 1. Redis에서 리프레시 토큰 조회 (값으로 조회)
         RefreshToken foundRefreshToken = refreshRepository.findByRefreshTokenValue(
                         refreshTokenValueFromCookie)
