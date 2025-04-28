@@ -70,6 +70,7 @@ public class SecurityConfig {
                         // 비로그인 허용 경로
                         .requestMatchers(
                                 "/ws",
+                                "/ws/**",
                                 "/api/auth/kakao",         // JWT 필요 없음
                                 "/api/auth/login",         // JWT 필요 없음
                                 "/api/auth/register/**",   // 회원가입 관련 전체 경로 (프로필 포함) JWT 필요 없음
