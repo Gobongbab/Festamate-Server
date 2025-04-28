@@ -52,7 +52,7 @@ public class TokenController {
                     .secure(true)           // HTTPS 환경에서만 전송 (로컬 HTTP 테스트 시 임시 주석 처리 고려)
                     .path("/")              // 전체 경로에서 쿠키 사용 가능
                     .maxAge(Duration.ofDays(14)) // 쿠키 만료 시간 (Redis TTL과 일치 권장)
-                    .sameSite("Strict")      // 동일 출처 요청에만 쿠키 전송 (CSRF 방지)
+                    .sameSite("None")      // 동일 출처 요청에만 쿠키 전송 (CSRF 방지)
                     .build();
 
             // 4. 응답 반환 (200 OK + 새 액세스 토큰 + 새 쿠키)

@@ -48,7 +48,7 @@ public class TestController {
                 .secure(true) // 로컬 HTTP 테스트 시 임시 주석 처리 고려
                 .path("/")
                 .maxAge(Duration.ofDays(14))
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
     }
 
