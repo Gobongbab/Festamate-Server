@@ -30,12 +30,23 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("*")
-                .setAllowedOriginPatterns("*")
+                .setAllowedOriginPatterns(
+                        "https://festamate-web.vercel.app",
+                        "http://localhost:5173",
+                        "http://localhost:8080",
+                        "https://www.festamate.shop",
+                        "https://stomp-practice.vercel.app"
+                )
                 .withSockJS();
 
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*");
+                .setAllowedOriginPatterns(
+                        "https://festamate-web.vercel.app",
+                        "http://localhost:5173",
+                        "http://localhost:8080",
+                        "https://www.festamate.shop",
+                        "https://stomp-practice.vercel.app"
+                );
 
         registry.setErrorHandler(chatErrorHandler);
     }
