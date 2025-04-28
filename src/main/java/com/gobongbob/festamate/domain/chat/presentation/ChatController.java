@@ -26,27 +26,27 @@ public class ChatController implements ChatApi {
     private final ChatService chatService;
 
     @Override
-    @MessageMapping("/chat/room/{roomId}")
+    @MessageMapping("/messages/chatRooms/{chatRoomId}")
     public SuccessResponse<Void> sendMessage(
-            @DestinationVariable("roomId") Long roomId,
+            @DestinationVariable("chatRoomId") Long chatRoomId,
             Authentication authentication,
             MessageRequest request
     ) {
         Member member = ((CustomMemberDetails) authentication.getPrincipal()).getMember();
-        chatService.sendMessage(roomId, member, request.message());
+        chatService.sendMessage(chatRoomId, member, request.message());
 
         return new SuccessResponse<>();
     }
 
     // 메시지 조회
     @Override
-    @GetMapping("/api/messages/room/{roomId}")
+    @GetMapping("/api/messages/chatRooms/{chatRoomId}")
     public SuccessResponse<Slice<MessageResponse>> findMessages(
             @AuthenticationPrincipal Member member,
-            @PathVariable("roomId") Long roomId,
+            @PathVariable("chatRoomId") Long chatRoomId,
             @PageableDefault(size = 100, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Slice<MessageResponse> messages = chatService.findMessagesByRoomId(member.getId(), roomId,
+        Slice<MessageResponse> messages = chatService.findMessagesByRoomId(member.getId(), chatRoomId,
                 pageable);
 
         return new SuccessResponse<>(messages);
