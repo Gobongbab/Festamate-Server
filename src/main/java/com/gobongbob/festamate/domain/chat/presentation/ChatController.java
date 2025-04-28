@@ -42,12 +42,15 @@ public class ChatController implements ChatApi {
     @Override
     @GetMapping("/api/messages/chatRooms/{chatRoomId}")
     public SuccessResponse<Slice<MessageResponse>> findMessages(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable("chatRoomId") Long chatRoomId,
             @PageableDefault(size = 100, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Slice<MessageResponse> messages = chatService.findMessagesByRoomId(member.getId(), chatRoomId,
-                pageable);
+        Slice<MessageResponse> messages = chatService.findMessagesByRoomId(
+                memberDetails.getMember().getId(),
+                chatRoomId,
+                pageable
+        );
 
         return new SuccessResponse<>(messages);
     }
