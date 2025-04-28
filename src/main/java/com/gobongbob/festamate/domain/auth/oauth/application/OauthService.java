@@ -96,7 +96,7 @@ public class OauthService {
         // 프로필 완료 여부 확인
         if (member.isProfileCompleted()) {
             // 프로필 등록이 완료된 경우 JWT 반환
-            return tokenService.generateTokens(userId, TokenType.FINAL_ACCESS);
+            return tokenService.generateAndSaveTokens(userId, TokenType.FINAL_ACCESS);
         } else {
             // 프로필 등록이 안 된 경우 예외 처리
             throw new IllegalStateException("프로필 등록이 필요합니다.");

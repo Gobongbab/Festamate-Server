@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.testUser;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
 import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Gender;
@@ -23,15 +24,17 @@ public class TestService {
     private final ProfileImageRepository profileImageRepository;
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
 
     /**
      * 테스트용 회원 생성 및 토큰 반환 이미 존재하는 경우 해당 회원의 토큰 반환 (기본적으로는 매번 새로 생성 시도)
      */
-    @Transactional
-    public TestTokens createTestMember() {
-        // 고유 식별자를 사용하여 중복 방지 (예: 타임스탬프 또는 랜덤 문자열)
-        String uniqueSuffix = String.valueOf(System.currentTimeMillis());
+    @Transactional // DB 저장 및 토큰 생성/저장 로직 포함
+    public Map<String, String> createTestMemberAndGetTokens() {
+        // 고유 식별자를 사용하여 중복 방지 (예: 타임스탬프)
+        String uniqueSuffix = String.valueOf(System.currentTimeMillis() % 100000000); // 조금 더 짧게
         String nickname = "수영하는 봉밥이" + uniqueSuffix;
+        // 학번 형식 유지하며 고유하게 생성 (예시 단순화)
         String studentId = String.format("%d%05d", (2018 + (int) (Math.random() * 8)),
                 (int) (Math.random() * 100000));
         String loginId = "test_login_" + uniqueSuffix;
@@ -40,7 +43,7 @@ public class TestService {
                 uniqueSuffix.length() - 4) + "-" + uniqueSuffix.substring(
                 uniqueSuffix.length() - 4);
         // kakaoId도 고유해야 함
-        Long kakaoId = Long.parseLong(uniqueSuffix);
+        Long kakaoId = System.currentTimeMillis(); // 현재 시간 사용
 
         // Member 엔티티 생성
         Gender randomGender = Math.random() < 0.5 ? Gender.MALE : Gender.FEMALE;
@@ -59,10 +62,22 @@ public class TestService {
                 kakaoId,
                 randomGender,
                 "컴퓨터 공학과",
-                Role.USER// 테스트 유저는 USER 역할 부여
+                Role.USER // 테스트 유저는 USER 역할
         );
 
-        return createAndSaveMember(testMember, TokenType.TEST_ACCESS);
+        // 초기 프로필 이미지 설정 (DB에 해당 이름의 이미지가 있다고 가정)
+        String profileImageName = "swimBong.png";
+        profileImageRepository.findByStoreName(profileImageName)
+                .ifPresent(testMember::initializeProfileImage);
+
+        // DB에 회원 저장
+        Member savedMember = memberRepository.save(testMember);
+
+        // TokenService를 사용하여 토큰 생성 및 Redis 저장까지 한번에 처리
+        Map<String, String> tokens = tokenService.generateAndSaveTokens(savedMember.getId(),
+                TokenType.TEST_ACCESS);
+
+        return tokens; // accessToken과 refreshToken이 담긴 Map 반환
     }
 
     /**
