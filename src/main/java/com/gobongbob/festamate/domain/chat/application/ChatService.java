@@ -45,7 +45,7 @@ public class ChatService {
         );
         MessageResponse response = MessageResponse.fromEntity(savedMessage);
 
-        messagingTemplate.convertAndSend("/topic/room/" + chatRoomId, response);
+        messagingTemplate.convertAndSend("/topic/chatRooms/" + chatRoomId, response);
     }
 
     // 메시지 조회
