@@ -3,7 +3,7 @@ package com.gobongbob.festamate.domain.auth.jwt.domain;
 import java.time.Duration;
 
 public enum TokenType {
-    FINAL_ACCESS("final_access", Duration.ofHours(2), false, false),
+    FINAL_ACCESS("final_access", Duration.ofMinutes(2), false, false),
     FINAL_REFRESH("final_refresh", Duration.ofDays(7), false, false),
     ADMIN_ACCESS("admin_access", Duration.ofDays(100), true, false),
     ADMIN_REFRESH("admin_refresh", Duration.ofDays(100), true, false),
