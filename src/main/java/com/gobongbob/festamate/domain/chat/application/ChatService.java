@@ -52,7 +52,7 @@ public class ChatService {
     @CheckActiveUser
     public Slice<MessageResponse> findMessagesByRoomId(Long memberId, Long roomId,
             Pageable pageable) {
-        validateRoomParticipation(memberId, roomId);
+//        validateRoomParticipation(memberId, roomId);
 
         return messageRepository.findByRoomId(roomId, pageable)
                 .map(MessageResponse::fromEntity);
