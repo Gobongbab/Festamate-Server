@@ -95,11 +95,13 @@ public class OauthController {
     }
 
     private ResponseCookie createRefreshTokenCookie(String refreshToken) {
+        Duration refreshTokenValidity = TokenType.FINAL_REFRESH.getDuration(); // 6개월(180일)
+
         return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)          // JavaScript 접근 불가
                 .secure(true)           // HTTPS 환경에서만 전송 (로컬 HTTP 테스트 시 임시 주석 처리 고려)
                 .path("/")              // 전체 경로에서 쿠키 사용 가능
-                .maxAge(Duration.ofDays(14)) // 쿠키 만료 시간 (Redis TTL과 일치 권장)
+                .maxAge(refreshTokenValidity) // 쿠키 만료 시간 (Redis TTL과 일치 권장)
                 .sameSite("None")      // 동일 출처 요청에만 쿠키 전송 (CSRF 방지)
                 .build();
     }
