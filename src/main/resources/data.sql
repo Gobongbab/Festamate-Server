@@ -9,6 +9,7 @@ TRUNCATE TABLE report;
 TRUNCATE TABLE room_participant;
 TRUNCATE TABLE room_image;
 TRUNCATE TABLE room;
+TRUNCATE TABLE message;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
