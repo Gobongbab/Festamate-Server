@@ -9,18 +9,24 @@ import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberApi {
 
@@ -57,12 +63,33 @@ public interface MemberApi {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
             @ApiResponse(responseCode = "400", description = "중복된 닉네임이 존재합니다.")
     })
-    @PatchMapping("/members/profile")
+    @PatchMapping("/api/auth/members/profile")
     SuccessResponse<Void> updateProfile(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(description = "프로필 수정 요청 정보")
             @RequestBody @Valid ProfileUpdateRequest request
+    );
+
+    // 나의 프로필 사진 수정
+    @Operation(
+            summary = "나의 프로필 사진 수정",
+            description = "나의 프로필 사진을 수정합니다.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(type = "object")
+                    )
+            )
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
+    })
+    @PutMapping("/api/auth/members/profile/photo")
+    SuccessResponse<Void> updateProfilePhoto(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @Parameter(description = "프로필 이미지 (단일 파일)")
+            @RequestPart("profileImage") MultipartFile profileImage
     );
 
     @Operation(summary = "회원 삭제", description = "회원 ID로 회원을 삭제합니다.")
