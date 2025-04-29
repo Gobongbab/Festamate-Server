@@ -14,7 +14,7 @@ public record MemberResponse(
         String loginPassword,
         String phoneNumber,
         Gender gender,
-        String major,
+        String department,
         ImageResponse profileImage
 ) {
 
