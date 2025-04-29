@@ -139,6 +139,10 @@ public class Member {
         this.nickname = nickname;
     }
 
+    public void updateFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
+
     public void initializeRemainingTicket(int ticketCount) {
         this.remainingTicket = ticketCount;
     }
