@@ -6,6 +6,9 @@ import static com.gobongbob.festamate.global.response.ResponseCode.NO_ADMIN;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.image.domain.Image;
+import com.gobongbob.festamate.domain.image.domain.ProfileImage;
+import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
 import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.domain.Role;
@@ -16,13 +19,13 @@ import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
-import com.gobongbob.festamate.domain.sms.application.TokyoSnsService;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,7 +36,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final ProfileImageRepository profileImageRepository;
-    private final TokyoSnsService tokyoSnsService;
+    private final ImageService imageService;
 
     @Transactional
     public Member createMember(MemberCreateRequest request) {
@@ -83,12 +86,41 @@ public class MemberService {
         return MemberProfileResponse.fromEntity(member);
     }
 
-    // 나의 프로필 수정
+    // 나의 프로필 수정(닉네임)
     @Transactional
     @CheckActiveUser
     public void updateMemberProfileById(Member member, ProfileUpdateRequest request) {
         member.updateProfile(request.nickname());
         memberRepository.save(member);
+    }
+
+    // 나의 프로필 사진 수정
+    @Transactional
+    @CheckActiveUser
+    public void updateProfilePhoto(Member member, MultipartFile profileImageFile) {
+        // 1. 기존 프로필 이미지 엔티티 가져오기
+        ProfileImage currentProfileImageWrapper = member.getProfileImage();
+
+        Image currentProfileImage = null;
+        if (currentProfileImageWrapper != null) {
+            currentProfileImage = currentProfileImageWrapper.getImage();
+        }
+
+        // 2. 새로운 프로필 이미지 업로드
+        Image newImage = imageService.uploadImage(profileImageFile);
+
+        // 3. Member 엔티티의 프로필 이미지 참조 업데이트
+        ProfileImage newProfileImageWrapper = ProfileImage.builder()
+                .image(newImage)
+                .build();
+        profileImageRepository.save(newProfileImageWrapper);
+        member.initializeProfileImage(newProfileImageWrapper);
+        memberRepository.save(member);
+
+        // 4. 기존 프로필 이미지가 있었다면 삭제
+        if (currentProfileImage != null) {
+            imageService.delete(currentProfileImage);
+        }
     }
 
     // 회원 삭제
