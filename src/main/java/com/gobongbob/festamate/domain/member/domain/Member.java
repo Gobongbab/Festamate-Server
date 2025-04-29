@@ -74,7 +74,7 @@ public class Member {
     private String studentDepartment; // 임시 필드, 학생증 등록으로 학과 정보 기입을 할 예정이면 이 필드를 사용. 추후 의논해야 함.
 
     @Column(unique = true)
-    private String token; // FcmToken
+    private String fcmToken; // FcmToken
 
     @Builder.Default
     private int maximumTicket = 2;
@@ -92,7 +92,8 @@ public class Member {
             String studentId,
             String phoneNumber,
             Gender gender,
-            String studentDepartment
+            String studentDepartment,
+            String fcmToken
     ) {
         this.name = name;
         this.nickname = nickname;
@@ -100,6 +101,7 @@ public class Member {
         this.phoneNumber = phoneNumber;
         this.gender = gender;
         this.studentDepartment = studentDepartment;
+        this.fcmToken = fcmToken;
     }
 
     @Convert(converter = RoleConverter.class) // <--- @Enumerated 대신 @Convert 사용
