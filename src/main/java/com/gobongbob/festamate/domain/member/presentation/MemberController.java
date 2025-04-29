@@ -63,6 +63,7 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>(memberService.findMemberById(memberId));
     }
 
+    // 프로필 조회
     @Override
     @GetMapping("/api/auth/members/profile")
     public SuccessResponse<MemberProfileResponse> getProfile(
@@ -73,7 +74,7 @@ public class MemberController implements MemberApi {
 
     // 나의 프로필 수정
     @Override
-    @PatchMapping("/members/profile")
+    @PatchMapping("/api/auth/members/profile")
     public SuccessResponse<Void> updateProfile(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestBody @Valid ProfileUpdateRequest request

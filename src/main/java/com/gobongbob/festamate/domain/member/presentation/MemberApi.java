@@ -57,7 +57,7 @@ public interface MemberApi {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
             @ApiResponse(responseCode = "400", description = "중복된 닉네임이 존재합니다.")
     })
-    @PatchMapping("/members/profile")
+    @PatchMapping("/api/auth/members/profile")
     SuccessResponse<Void> updateProfile(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
