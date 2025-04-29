@@ -15,6 +15,7 @@ import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
+import com.gobongbob.festamate.global.NotificationService;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
@@ -33,6 +34,7 @@ public class RoomParticipationService {
     private final MessageRepository messageRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
 
     // 방 참여
     @Transactional
@@ -50,6 +52,18 @@ public class RoomParticipationService {
         participants.forEach(participant -> participateRoom(participant, room));
         if (roomParticipantRepository.countByRoom_Id(roomId) == room.getMaxParticipants()) { // 방에 참여자가 다 찼을 때
             room.updateStatus(Status.MATCHED);
+
+            // **방 매칭 시 FCM 알림 전송**
+            participants.forEach(participant -> {
+                String fcmToken = participant.getFcmToken();  // FCM 토큰 가져오기
+                if (fcmToken != null) {
+                    notificationService.sendNotification(
+                            fcmToken,
+                            "방 매칭 완료",
+                            "방 매칭이 완료되었습니다: " + room.getTitle()
+                    );
+                }
+            });
         }
 
         return chatRoomRepository.findByRoom(room)
