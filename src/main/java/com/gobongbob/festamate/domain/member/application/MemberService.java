@@ -88,6 +88,7 @@ public class MemberService {
     @CheckActiveUser
     public void updateMemberProfileById(Member member, ProfileUpdateRequest request) {
         member.updateProfile(request.nickname());
+        memberRepository.save(member);
     }
 
     // 회원 삭제
