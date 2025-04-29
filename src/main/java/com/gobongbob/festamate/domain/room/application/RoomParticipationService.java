@@ -52,19 +52,19 @@ public class RoomParticipationService {
         participants.forEach(participant -> participateRoom(participant, room));
         if (roomParticipantRepository.countByRoom_Id(roomId) == room.getMaxParticipants()) { // 방에 참여자가 다 찼을 때
             room.updateStatus(Status.MATCHED);
-
-            // **방 매칭 시 FCM 알림 전송**
-            participants.forEach(participant -> {
-                String fcmToken = participant.getFcmToken();  // FCM 토큰 가져오기
-                if (fcmToken != null) {
-                    notificationService.sendNotification(
-                            fcmToken,
-                            "방 매칭 완료",
-                            "방 매칭이 완료되었습니다: " + room.getTitle()
-                    );
-                }
-            });
         }
+
+        // **방 매칭 시 FCM 알림 전송**
+        participants.forEach(participant -> {
+            String fcmToken = participant.getFcmToken();  // FCM 토큰 가져오기
+            if (fcmToken != null) {
+                notificationService.sendNotification(
+                        fcmToken,
+                        "방 매칭 완료",
+                        "방 매칭이 완료되었습니다: " + room.getTitle()
+                );
+            }
+        });
 
         return chatRoomRepository.findByRoom(room)
                 .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
