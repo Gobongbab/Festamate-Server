@@ -5,6 +5,7 @@ import com.gobongbob.festamate.domain.coupon.dto.request.UseCouponRequest;
 import com.gobongbob.festamate.domain.coupon.persistence.CouponRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import com.gobongbob.festamate.global.NotificationService;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ public class CouponService {
     private static final int COUPON_COUNT = 1000;
     private static final int COUPON_LENGTH = 6;
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private final NotificationService notificationService;
 
     // 쿠폰 사용
     @Transactional
@@ -38,6 +40,17 @@ public class CouponService {
         coupon.assignToMember(findMember);
         findMember.increaseMaximumTicket();
         findMember.initializeRemainingTicket(findMember.getMaximumTicket());
+
+        // **FCM 알림 전송**, 추후 삭제해야 함.
+        String fcmToken = member.getFcmToken(); // FCM 토큰 가져오기
+        if (fcmToken != null) {
+            notificationService.sendNotification(
+                    fcmToken,
+                    "쿠폰 사용 완료",
+                    "쿠폰이 사용되었습니다: " + member.getName()
+            );
+        }
+
     }
 
     // 쿠폰 초기화

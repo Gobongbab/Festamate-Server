@@ -22,6 +22,7 @@ import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
+import com.gobongbob.festamate.global.NotificationService;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
@@ -45,6 +46,7 @@ public class RoomService {
     private final MessageRepository messageRepository;
     private final ImageService imageService;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
 
     // 방 생성
     @Transactional
@@ -77,6 +79,16 @@ public class RoomService {
         RoomParticipant roomParticipant = RoomParticipant.createHost(createdRoom, member);
         roomParticipantRepository.save(roomParticipant);
         member.useTicket();
+
+        // **FCM 알림 전송**, 추후 삭제해야 함.
+        String fcmToken = member.getFcmToken(); // FCM 토큰 가져오기
+        if (fcmToken != null) {
+            notificationService.sendNotification(
+                    fcmToken,
+                    "방 생성 완료",
+                    "방이 성공적으로 생성되었습니다: " + createdRoom.getTitle()
+            );
+        }
 
         return chatRoom;
     }
