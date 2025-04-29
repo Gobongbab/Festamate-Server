@@ -95,7 +95,7 @@ public class OauthController {
     }
 
     private ResponseCookie createRefreshTokenCookie(String refreshToken) {
-        Duration refreshTokenValidity = Duration.ofDays(180); // 6개월(180일)
+        Duration refreshTokenValidity = TokenType.FINAL_REFRESH.getDuration(); // 6개월(180일)
 
         return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)          // JavaScript 접근 불가
