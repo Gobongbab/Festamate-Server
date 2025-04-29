@@ -22,7 +22,7 @@ VALUES ('profile1.jpg', 'uuid_profile1.jpg', 'http://example.com/images/profile1
 
 -- Member 테이블 더미 데이터
 -- profile_image_id는 위에서 생성한 ProfileImage의 id를 참조합니다.
--- Gender, Major, MemberStatus Enum 값은 실제 Enum 정의에 맞게 문자열로 입력해야 합니다.
+-- Gender, Department, MemberStatus Enum 값은 실제 Enum 정의에 맞게 문자열로 입력해야 합니다.
 INSERT INTO member (kakao_id, is_profile_completed, name, nickname, student_id, phone_number,
                     gender, student_department, maximum_ticket, remaining_ticket, profile_image_id,
                     role, status, token)
