@@ -20,9 +20,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Validated
@@ -72,7 +75,7 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>(memberService.findProfile(memberDetails.getMember()));
     }
 
-    // 나의 프로필 수정
+    // 나의 프로필 수정(닉네임)
     @Override
     @PatchMapping("/api/auth/members/profile")
     public SuccessResponse<Void> updateProfile(
@@ -80,6 +83,17 @@ public class MemberController implements MemberApi {
             @RequestBody @Valid ProfileUpdateRequest request
     ) {
         memberService.updateMemberProfileById(memberDetails.getMember(), request);
+        return new SuccessResponse<>();
+    }
+
+    // 나의 프로필 사진 수정
+    @Override
+    @PutMapping("/api/auth/members/profile/photo")
+    public SuccessResponse<Void> updateProfilePhoto(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @RequestPart("profileImage") MultipartFile profileImage
+    ) {
+        memberService.updateProfilePhoto(memberDetails.getMember(), profileImage);
         return new SuccessResponse<>();
     }
 
