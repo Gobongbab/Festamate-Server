@@ -7,6 +7,7 @@ import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.dto.StoreImageDto;
 import com.gobongbob.festamate.domain.image.persistence.ImageStoreProcessor;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,5 +65,25 @@ public class ImageService {
     public void delete(Image image) {
         String storeName = image.getStoreName();
         amazonS3Client.deleteObject(bucket, storeName);
+    }
+
+    // 단일 사진 업로드
+    public Image uploadImage(MultipartFile imageFile) {
+        if (imageFile == null || imageFile.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 이미지 파일이 비어있습니다.");
+        }
+        StoreImageDto storeImageDto;
+        try {
+            List<StoreImageDto> dtos = imageStoreProcessor.storeImageFiles(
+                    Collections.singletonList(imageFile));
+            if (dtos == null || dtos.isEmpty()) {
+                throw new RuntimeException("이미지 파일 정보 생성에 실패했습니다.");
+            }
+            storeImageDto = dtos.get(0);
+        } catch (Exception e) {
+            throw new RuntimeException("이미지 파일 정보 처리 중 오류 발생", e);
+        }
+
+        return this.uploadImageFile(imageFile, storeImageDto);
     }
 }
