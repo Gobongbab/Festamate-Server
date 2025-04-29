@@ -53,12 +53,4 @@ public class TestController {
                 .sameSite("None")
                 .build();
     }
-
-//    테스트 관리자 비활성화 
-//    @PostMapping("/create-admin")
-//    public ResponseEntity<TestService.TestTokens> createAdminMember() {
-//        // 테스트 관리자용 유저 생성 및 JWT 토큰 반환
-//        TestService.TestTokens adminTokens = testService.createAdminMember();
-//        return ResponseEntity.ok(adminTokens);
-//    }
 }
