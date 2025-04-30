@@ -3,13 +3,14 @@ package com.gobongbob.festamate.domain.auth.jwt.domain;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.domain.Member.MemberStatus;
 import com.gobongbob.festamate.domain.member.domain.Role;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class CustomMemberDetails implements UserDetails {
+public class CustomMemberDetails implements UserDetails, Serializable {
 
     private final Member member;
 
