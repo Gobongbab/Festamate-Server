@@ -64,6 +64,14 @@ public class CustomMemberDetails implements UserDetails, Serializable, Principal
 
     @Override
     public String getName() {
+        if (member == null) {
+            System.out.println("Member is null");
+            return "member is null";
+        }
+        if (member.getName() == null) {
+            System.out.println("Member name is null");
+            return "member name is null";
+        }
         return member.getName();
     }
 }
