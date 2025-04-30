@@ -103,3 +103,6 @@ admin:
 logging:
   level:
     com.gobongbob.festamate: DEBUG
+cors:
+  allowed:
+    origins: ${CORS_ALLOWED_ORIGINS}
