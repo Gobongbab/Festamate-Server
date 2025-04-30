@@ -101,7 +101,5 @@ admin:
   loginId: ${ADMIN_LOGIN_ID}
   password: ${ADMIN_PASSWORD}
   kakaoId: ${ADMIN_KAKAO_ID}
-cors:
-  allowed:
-    origins: ${CORS_ALLOWED_ORIGINS}
+
 
