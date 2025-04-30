@@ -5,7 +5,9 @@ import com.gobongbob.festamate.domain.member.domain.Member.MemberStatus;
 import com.gobongbob.festamate.domain.member.domain.Role;
 import java.io.Serializable;
 import java.security.Principal;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -63,8 +65,7 @@ public class CustomMemberDetails implements UserDetails, Serializable, Principal
 
     @Override
     public String getName() {
-        return Optional.ofNullable(member.getNickname())
-                .orElse("anonymous-" + UUID.randomUUID());
+        return member.getId() != null ? String.valueOf(member.getId()) : "anonymous";
     }
 
     @Override
