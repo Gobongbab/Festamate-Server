@@ -81,7 +81,8 @@ public class CustomMemberDetails implements UserDetails, Serializable, Principal
 
     @Override
     public int hashCode() {
-        return Objects.hash(member.getId());
+        return member != null && member.getId() != null
+                ? Objects.hash(member.getId())
+                : 0; // 또는 throw new IllegalStateException("member or member.id is null");
     }
-
 }
