@@ -42,9 +42,12 @@ public class WebSocketInterceptor implements ChannelInterceptor {
             }
 
             String token = tokenHeader.replace("Bearer ", "");
+            log.info("Filtered Token: " + token);
             tokenProvider.validateToken(token);
 
             Authentication authentication = tokenProvider.getAuthentication(token);
+            log.info("Authentication Principal: " + authentication.getPrincipal());
+            log.info("Authentication Name: " + authentication.getName());
             setAuthentication(authentication, accessor);
         }
 
