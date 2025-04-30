@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -64,14 +66,7 @@ public class CustomMemberDetails implements UserDetails, Serializable, Principal
 
     @Override
     public String getName() {
-        if (member == null) {
-            System.out.println("Member is null");
-            return "member is null";
-        }
-        if (member.getName() == null) {
-            System.out.println("Member name is null");
-            return "member name is null";
-        }
-        return member.getName();
+        return Optional.ofNullable(member.getNickname())
+                .orElse("anonymous-" + UUID.randomUUID());
     }
 }
