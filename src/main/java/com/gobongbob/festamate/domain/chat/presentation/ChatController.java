@@ -6,6 +6,7 @@ import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.global.response.SuccessResponse;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +15,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,17 +33,23 @@ public class ChatController implements ChatApi {
     @MessageMapping("/messages/chatRooms/{chatRoomId}")
     public SuccessResponse<Void> sendMessage(
             @DestinationVariable("chatRoomId") Long chatRoomId,
-            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            Principal principal,
             MessageRequest request
     ) {
-        log.debug("CustomMemberDetails: " + memberDetails);
-        log.debug("memberDetails.getMember(): " + memberDetails.getMember());
-        Member member = memberDetails.getMember();
+        log.debug("Principal: " + principal);
+        log.debug("Principal.getName(): " + principal.getName());
+        String name = principal.getName();
         log.debug("[ChatController]");
-        log.debug("Member ID: " + member.getId());
         log.debug("Chat Room ID: " + chatRoomId);
         log.debug("Request: " + request);
         log.debug("Message: " + request.message());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.debug("Authentication: " + authentication);
+        CustomMemberDetails memberDetails = (CustomMemberDetails) authentication.getPrincipal();
+        log.debug("Member Details: " + memberDetails);
+        Member member = memberDetails.getMember();
+        log.debug("Member ID: " + member.getId());
+        log.debug("Member Nickname: " + member.getNickname());
 
         chatService.sendMessage(chatRoomId, member, request.message());
 
