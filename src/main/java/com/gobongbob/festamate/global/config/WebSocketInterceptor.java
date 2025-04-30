@@ -1,11 +1,6 @@
 package com.gobongbob.festamate.global.config;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.USER_NOT_FOUND;
-
-import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
-import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
-import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import com.gobongbob.festamate.global.util.TokenProvider;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +10,8 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -48,16 +43,8 @@ public class WebSocketInterceptor implements ChannelInterceptor {
             String token = tokenHeader.replace("Bearer ", "");
             tokenProvider.validateToken(token);
 
-            Long userId = tokenProvider.getUserId(token);
-            Member member = memberRepository.findById(userId)
-                    .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
-            UserDetails userDetails = new CustomMemberDetails(member);
-
-            accessor.setUser(new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            ));
+            Authentication authentication = tokenProvider.getAuthentication(token);
+            setAuthentication(authentication, accessor);
         }
 
         return message;
@@ -81,4 +68,12 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 //        }
 //
 //    }
+
+    private void setAuthentication(
+            Authentication authentication,
+            StompHeaderAccessor headerAccessor
+    ) {
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        headerAccessor.setUser(authentication);
+    }
 }
