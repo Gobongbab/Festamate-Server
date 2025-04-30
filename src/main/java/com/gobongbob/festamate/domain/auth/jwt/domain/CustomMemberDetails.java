@@ -5,10 +5,7 @@ import com.gobongbob.festamate.domain.member.domain.Member.MemberStatus;
 import com.gobongbob.festamate.domain.member.domain.Role;
 import java.io.Serializable;
 import java.security.Principal;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -69,4 +66,22 @@ public class CustomMemberDetails implements UserDetails, Serializable, Principal
         return Optional.ofNullable(member.getNickname())
                 .orElse("anonymous-" + UUID.randomUUID());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CustomMemberDetails that = (CustomMemberDetails) o;
+        return Objects.equals(member.getId(), that.member.getId()); // 고유한 사용자 식별자 기준
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(member.getId());
+    }
+
 }
