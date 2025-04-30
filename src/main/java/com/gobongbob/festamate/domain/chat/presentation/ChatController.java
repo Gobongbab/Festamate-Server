@@ -14,7 +14,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,10 +30,10 @@ public class ChatController implements ChatApi {
     @MessageMapping("/messages/chatRooms/{chatRoomId}")
     public SuccessResponse<Void> sendMessage(
             @DestinationVariable("chatRoomId") Long chatRoomId,
-            Authentication authentication,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
             MessageRequest request
     ) {
-        Member member = ((CustomMemberDetails) authentication.getPrincipal()).getMember();
+        Member member = memberDetails.getMember();
         log.info("[ChatController]");
         log.info("Member ID: " + member.getId());
         log.info("Chat Room ID: " + chatRoomId);
