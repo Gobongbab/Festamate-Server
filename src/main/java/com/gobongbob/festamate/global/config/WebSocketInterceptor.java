@@ -35,19 +35,19 @@ public class WebSocketInterceptor implements ChannelInterceptor {
         if (Objects.requireNonNull(accessor.getCommand()) == StompCommand.CONNECT ||
                 accessor.getCommand() == StompCommand.SEND) {
             String tokenHeader = accessor.getFirstNativeHeader("Authorization");
-            log.info("Authorization Header: " + tokenHeader);
+            log.debug("Authorization Header: " + tokenHeader);
             if (tokenHeader == null) {
                 log.error("No token found in message from session: " + sessionId);
                 throw new IllegalArgumentException("No token found");
             }
 
             String token = tokenHeader.replace("Bearer ", "");
-            log.info("Filtered Token: " + token);
+            log.debug("Filtered Token: " + token);
             tokenProvider.validateToken(token);
 
             Authentication authentication = tokenProvider.getAuthentication(token);
-            log.info("Authentication Principal: " + authentication.getPrincipal());
-            log.info("Authentication Name: " + authentication.getName());
+            log.debug("Authentication Principal: " + authentication.getPrincipal());
+            log.debug("Authentication Name: " + authentication.getName());
             setAuthentication(authentication, accessor);
         }
 

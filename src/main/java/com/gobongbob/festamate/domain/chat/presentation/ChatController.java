@@ -33,14 +33,14 @@ public class ChatController implements ChatApi {
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             MessageRequest request
     ) {
-        log.info("CustomMemberDetails: " + memberDetails);
-        log.info("memberDetails.getMember(): " + memberDetails.getMember());
+        log.debug("CustomMemberDetails: " + memberDetails);
+        log.debug("memberDetails.getMember(): " + memberDetails.getMember());
         Member member = memberDetails.getMember();
-        log.info("[ChatController]");
-        log.info("Member ID: " + member.getId());
-        log.info("Chat Room ID: " + chatRoomId);
-        log.info("Request: " + request);
-        log.info("Message: " + request.message());
+        log.debug("[ChatController]");
+        log.debug("Member ID: " + member.getId());
+        log.debug("Chat Room ID: " + chatRoomId);
+        log.debug("Request: " + request);
+        log.debug("Message: " + request.message());
 
         chatService.sendMessage(chatRoomId, member, request.message());
 
