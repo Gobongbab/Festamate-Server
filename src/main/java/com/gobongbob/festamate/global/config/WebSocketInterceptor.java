@@ -34,18 +34,17 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 
         if (Objects.requireNonNull(accessor.getCommand()) == StompCommand.CONNECT ||
                 accessor.getCommand() == StompCommand.SEND) {
-
-            String token = message.getHeaders().get("Authorization", String.class);
-            log.info("Authorization Header: " + token);
-            if (token == null || !token.startsWith("Bearer ")) {
+            String tokenHeader = accessor.getFirstNativeHeader("Authorization");
+            log.info("Authorization Header: " + tokenHeader);
+            if (tokenHeader == null) {
                 log.error("No token found in message from session: " + sessionId);
                 throw new IllegalArgumentException("No token found");
             }
 
-            String filteredToken = token.substring(7);  // "Bearer " 부분 제거
-            tokenProvider.validateToken(filteredToken);
+            String token = tokenHeader.replace("Bearer ", "");
+            tokenProvider.validateToken(token);
 
-            Authentication authentication = tokenProvider.getAuthentication(filteredToken);
+            Authentication authentication = tokenProvider.getAuthentication(token);
             setAuthentication(authentication, accessor);
         }
 
