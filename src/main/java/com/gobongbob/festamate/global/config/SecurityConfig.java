@@ -70,6 +70,8 @@ public class SecurityConfig {
 
                         // 비로그인 허용 경로
                         .requestMatchers(
+                                "/ws-sockjs",
+                                "/ws-sockjs/**",
                                 "/ws",
                                 "/ws/**",
                                 "/api/auth/kakao",         // JWT 필요 없음
