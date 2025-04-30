@@ -7,6 +7,7 @@ import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class ChatController implements ChatApi {
 
     private final ChatService chatService;
@@ -33,6 +35,12 @@ public class ChatController implements ChatApi {
             MessageRequest request
     ) {
         Member member = ((CustomMemberDetails) authentication.getPrincipal()).getMember();
+        log.info("[ChatController]");
+        log.info("Member ID: " + member.getId());
+        log.info("Chat Room ID: " + chatRoomId);
+        log.info("Request: " + request);
+        log.info("Message: " + request.message());
+
         chatService.sendMessage(chatRoomId, member, request.message());
 
         return new SuccessResponse<>();

@@ -14,6 +14,7 @@ import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ChatService {
@@ -44,6 +46,19 @@ public class ChatService {
                         .build()
         );
         MessageResponse response = MessageResponse.fromEntity(savedMessage);
+
+        log.info("[ChatService]");
+        log.info("Chat Room ID: " + chatRoomId);
+        log.info("Sender ID: " + member.getId());
+        log.info("Message: " + message);
+        log.info("Response: " + response);
+        log.info("Saved Message ID: " + savedMessage.getId());
+        log.info("Saved Message Sender ID: " + savedMessage.getSender().getId());
+        log.info("Saved Message Content: " + savedMessage.getMessage());
+        log.info("Saved Message Send Date: " + savedMessage.getSendDate());
+        log.info("Saved Message Chat Room ID: " + savedMessage.getChatRoom().getId());
+        log.info("Response Sender Nickname: " + response.nickname());
+        log.info("Response Sender Message: " + response.message());
 
         messagingTemplate.convertAndSend("/topic/chatRooms/" + chatRoomId, response);
     }
