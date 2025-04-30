@@ -29,7 +29,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws")
+        registry.addEndpoint("/ws-sockjs")
                 .setAllowedOriginPatterns(
                         "https://festamate-web.vercel.app",
                         "http://localhost:5173",
