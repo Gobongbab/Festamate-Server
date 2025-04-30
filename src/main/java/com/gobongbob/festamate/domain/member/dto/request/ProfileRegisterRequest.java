@@ -9,9 +9,9 @@ public record ProfileRegisterRequest(
         String studentId,
         String phoneNumber,
         Gender gender,
-        String college,
         String department,
         String kakaoAccessToken, // 카카오 access token
+        String fcmToken,        // FCM 토큰
         String nickname         // 회원이 등록할 닉네임
 ) {
 
@@ -23,7 +23,8 @@ public record ProfileRegisterRequest(
                 studentId,
                 phoneNumber,
                 gender,
-                department
+                department,
+                fcmToken
         );
 
         return existingMember;
@@ -48,12 +49,11 @@ public record ProfileRegisterRequest(
 
         // 귀엽고 친근한 명사 배열
         String[] nouns = {
-                "병아리", "토끼", "곰돌이", "강아지", "고양이", "판다", "쿠키", "마카롱", "푸딩", "솜사탕",
+                "쿠키", "마카롱", "푸딩", "솜사탕",
                 "구름", "별님", "꽃잎", "무지개", "도토리", "방울", "햇님", "달님", "사탕", "젤리",
                 "송이", "단추", "리본", "모찌", "만두", "딸기", "복숭아", "수박", "멜론", "사과",
                 "바나나", "포도", "오렌지", "레몬", "블루베리", "당근", "감자", "옥수수", "콩알", "팥알",
-                "밤톨", "호두", "꿀벌", "나비", "잠자리", "참새", "오리", "거북이", "다람쥐", "햄스터",
-                "펭귄", "코끼리", "기린", "원숭이", "하마", "물개", "바다표범", "돌고래", "고래",
+                "밤톨", "호두",
                 "불가사리", "조개", "소라", "멍게", "가리비", "새우", "게", "문어", "오징어", "해파리",
                 "물방울", "눈송이", "바람개비", "풍선", "요술봉", "종이접기", "인형", "장난감", "연필", "크레파스",
                 "지우개", "색연필", "물감", "크레용", "붓", "도화지", "색종이", "풀", "가위", "테이프",
