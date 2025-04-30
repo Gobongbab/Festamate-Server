@@ -4,13 +4,14 @@ import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.domain.Member.MemberStatus;
 import com.gobongbob.festamate.domain.member.domain.Role;
 import java.io.Serializable;
+import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class CustomMemberDetails implements UserDetails, Serializable {
+public class CustomMemberDetails implements UserDetails, Serializable, Principal {
 
     private final Member member;
 
@@ -59,5 +60,10 @@ public class CustomMemberDetails implements UserDetails, Serializable {
     @Override
     public boolean isEnabled() {
         return this.member.getStatus() == MemberStatus.ACTIVE;
+    }
+
+    @Override
+    public String getName() {
+        return member.getName();
     }
 }
