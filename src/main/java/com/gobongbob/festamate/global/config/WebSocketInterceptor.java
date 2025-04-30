@@ -37,7 +37,8 @@ public class WebSocketInterceptor implements ChannelInterceptor {
         log.info("Command: " + accessor.getCommand());
         log.info("Session Attributes: " + accessor.getSessionAttributes());
 
-        if (Objects.requireNonNull(accessor.getCommand()) == StompCommand.SEND) {
+        if (Objects.requireNonNull(accessor.getCommand()) == StompCommand.CONNECT ||
+                accessor.getCommand() == StompCommand.SEND) {
             String tokenHeader = accessor.getFirstNativeHeader("Authorization");
             if (tokenHeader == null) {
                 log.error("No token found in message from session: " + sessionId);
