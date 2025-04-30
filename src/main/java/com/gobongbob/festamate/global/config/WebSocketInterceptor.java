@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.global.config;
 
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.global.util.TokenProvider;
 import java.util.Objects;
@@ -47,7 +48,8 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 
             Authentication authentication = tokenProvider.getAuthentication(token);
             log.debug("Authentication Principal: " + authentication.getPrincipal());
-            log.debug("Authentication Name: " + authentication.getName());
+            CustomMemberDetails memberDetails = (CustomMemberDetails) authentication.getPrincipal();
+            log.debug("Authentication Name: " + memberDetails.getMember().getNickname());
             setAuthentication(authentication, accessor);
         }
 
