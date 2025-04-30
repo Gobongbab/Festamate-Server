@@ -47,10 +47,9 @@ public class WebSocketInterceptor implements ChannelInterceptor {
             tokenProvider.validateToken(token);
 
             Authentication authentication = tokenProvider.getAuthentication(token);
-            log.debug("Authentication Principal: " + authentication.getPrincipal());
             CustomMemberDetails memberDetails = (CustomMemberDetails) authentication.getPrincipal();
-            log.debug("Authentication Name: " + memberDetails.getMember().getNickname());
-            setAuthentication(authentication, accessor);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            accessor.setUser(memberDetails);
         }
 
         return message;
@@ -74,12 +73,4 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 //        }
 //
 //    }
-
-    private void setAuthentication(
-            Authentication authentication,
-            StompHeaderAccessor headerAccessor
-    ) {
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        headerAccessor.setUser(authentication);
-    }
 }
