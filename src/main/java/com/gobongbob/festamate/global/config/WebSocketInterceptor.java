@@ -27,23 +27,18 @@ public class WebSocketInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         String sessionId = accessor.getSessionId();
-        log.info("Session ID: " + sessionId);
         log.info("Message: " + message);
-        log.info("Accessor: " + accessor);
         log.info("Command: " + accessor.getCommand());
-        log.info("Session Attributes: " + accessor.getSessionAttributes());
 
         if (Objects.requireNonNull(accessor.getCommand()) == StompCommand.CONNECT ||
                 accessor.getCommand() == StompCommand.SEND) {
             String tokenHeader = accessor.getFirstNativeHeader("Authorization");
-            log.debug("Authorization Header: " + tokenHeader);
             if (tokenHeader == null) {
                 log.error("No token found in message from session: " + sessionId);
                 throw new IllegalArgumentException("No token found");
             }
 
             String token = tokenHeader.replace("Bearer ", "");
-            log.debug("Filtered Token: " + token);
             tokenProvider.validateToken(token);
 
             Authentication authentication = tokenProvider.getAuthentication(token);
