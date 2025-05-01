@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -39,6 +40,16 @@ public class AdminController implements AdminApi {
             @PathVariable("userId") Long userId
     ) {
         return new SuccessResponse<>(memberService.findMemberByIdForAdmin(memberDetails, userId));
+    }
+
+    // 관리자용 사용자 이름 검색
+    @GetMapping("/users/search")
+    public SuccessResponse<List<MemberResponse>> searchUsersByName(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @RequestParam("name") String name
+    ) {
+        List<MemberResponse> results = memberService.findMembersByNameForAdmin(memberDetails, name);
+        return new SuccessResponse<>(results);
     }
 
     // 관리자용 모임방 삭제
