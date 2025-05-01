@@ -3,15 +3,13 @@ package com.gobongbob.festamate.domain.auth.jwt.domain;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.domain.Member.MemberStatus;
 import com.gobongbob.festamate.domain.member.domain.Role;
-import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Objects;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class CustomMemberDetails implements UserDetails, Principal {
+public class CustomMemberDetails implements UserDetails {
 
     private final Member member;
 
@@ -60,28 +58,5 @@ public class CustomMemberDetails implements UserDetails, Principal {
     @Override
     public boolean isEnabled() {
         return this.member.getStatus() == MemberStatus.ACTIVE;
-    }
-
-    @Override
-    public String getName() {
-        return member.getId() != null ? String.valueOf(member.getId()) : "anonymous";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        CustomMemberDetails that = (CustomMemberDetails) o;
-        return Objects.equals(member.getId(), that.member.getId()); // 고유한 사용자 식별자 기준
-    }
-
-    @Override
-    public int hashCode() {
-        System.out.println("CustomMemberDetails.hashCode(): member ID = " + member.getId());
-        return Objects.hash(member.getId());
     }
 }
