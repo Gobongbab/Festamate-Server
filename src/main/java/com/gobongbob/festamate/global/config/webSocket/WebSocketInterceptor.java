@@ -1,9 +1,7 @@
 package com.gobongbob.festamate.global.config.webSocket;
 
-import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.global.util.TokenProvider;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -26,15 +24,13 @@ public class WebSocketInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        String sessionId = accessor.getSessionId();
-        log.info("Message: " + message);
-        log.info("Command: " + accessor.getCommand());
+        StompCommand command = accessor.getCommand();
+        log.debug("Command: " + command);
 
-        if (Objects.requireNonNull(accessor.getCommand()) == StompCommand.CONNECT ||
-                accessor.getCommand() == StompCommand.SEND) {
+        if (command == StompCommand.CONNECT || command == StompCommand.SEND) {
             String tokenHeader = accessor.getFirstNativeHeader("Authorization");
             if (tokenHeader == null) {
-                log.error("No token found in message from session: " + sessionId);
+                log.error("No token found in message from session: " + accessor.getSessionId());
                 throw new IllegalArgumentException("No token found");
             }
 
@@ -42,12 +38,15 @@ public class WebSocketInterceptor implements ChannelInterceptor {
             tokenProvider.validateToken(token);
 
             Authentication authentication = tokenProvider.getAuthentication(token);
-            CustomMemberDetails memberDetails = (CustomMemberDetails) authentication.getPrincipal();
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            accessor.setUser(memberDetails);
+            setAuthentication(authentication, accessor);
         }
 
         return message;
+    }
+
+    private static void setAuthentication(Authentication authentication, StompHeaderAccessor accessor) {
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        accessor.setUser(authentication);
     }
 //
 //    @Override
