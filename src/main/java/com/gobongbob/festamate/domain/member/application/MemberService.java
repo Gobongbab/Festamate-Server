@@ -23,6 +23,7 @@ import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,6 +77,22 @@ public class MemberService {
         return memberRepository.findByIdWithProfileImage(memberId)
                 .map(MemberResponse::fromEntity)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
+    }
+
+    // 관리자용 사용자 이름 검색 (목록 반환)
+    public List<MemberResponse> findMembersByNameForAdmin(CustomMemberDetails memberDetails,
+            String memberName) {
+        Role requesterRole = memberDetails.getMember().getRole();
+
+        if (requesterRole != Role.ADMIN) {
+            throw new BadRequestException(NO_ADMIN);
+        }
+
+        List<Member> foundMembers = memberRepository.findAllByNameWithProfileImage(memberName);
+
+        return foundMembers.stream()
+                .map(MemberResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
     public Member findMembersById(Long memberId) {
