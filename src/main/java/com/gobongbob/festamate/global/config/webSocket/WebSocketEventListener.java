@@ -1,4 +1,4 @@
-package com.gobongbob.festamate.global.config;
+package com.gobongbob.festamate.global.config.webSocket;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;

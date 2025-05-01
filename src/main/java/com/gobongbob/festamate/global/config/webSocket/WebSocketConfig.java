@@ -1,4 +1,4 @@
-package com.gobongbob.festamate.global.config;
+package com.gobongbob.festamate.global.config.webSocket;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
