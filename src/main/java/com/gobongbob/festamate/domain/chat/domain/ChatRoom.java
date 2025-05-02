@@ -16,7 +16,11 @@ public class ChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String title;
+
+    private String lastMessageContent;
+
+    private LocalDateTime lastMessageTime;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
