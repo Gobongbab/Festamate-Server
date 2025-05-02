@@ -1,7 +1,6 @@
 package com.gobongbob.festamate.domain.room.persistence;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,13 +19,4 @@ public interface RoomRepository extends Repository<Room, Long>, RoomQueryDslRepo
     Optional<Room> findByIdWithHost(Long id);
 
     void delete(Room room);
-
-    @Query("""
-                SELECT DISTINCT r
-                FROM RoomParticipant rp
-                JOIN rp.room r
-                JOIN FETCH r.chatRoom
-                WHERE rp.member.id = :memberId
-            """)
-    List<Room> findRoomsWithChatRoomByMember(Long memberId);
 }
