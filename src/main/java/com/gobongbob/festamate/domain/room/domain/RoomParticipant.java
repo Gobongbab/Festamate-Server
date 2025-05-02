@@ -29,21 +29,26 @@ public class RoomParticipant {
     private boolean isHost;
 
     public static RoomParticipant createHost(Room room, Member member) {
-        return RoomParticipant.builder()
-                .room(room)
+        RoomParticipant roomParticipant = RoomParticipant.builder()
                 .member(member)
                 .participantRole(ParticipantRole.HOST)
                 .isHost(true)
                 .build();
+        roomParticipant.setRoom(room);
+
+        return roomParticipant;
     }
 
     public static RoomParticipant createParticipant(Room room, Member member, ParticipantRole participantRole) {
-        return RoomParticipant.builder()
+        RoomParticipant roomParticipant = RoomParticipant.builder()
                 .room(room)
                 .member(member)
                 .participantRole(participantRole)
                 .isHost(false)
                 .build();
+        roomParticipant.setRoom(room);
+
+        return roomParticipant;
     }
 
     // 연관관계 편의 메서드
