@@ -65,16 +65,6 @@ public class RoomService {
         roomParticipantRepository.save(roomParticipant);
         member.useTicket();
 
-        // **FCM 알림 전송**, 추후 삭제해야 함.
-        String fcmToken = member.getFcmToken(); // FCM 토큰 가져오기
-        if (fcmToken != null) {
-            notificationService.sendNotification(
-                    fcmToken,
-                    "방 생성 완료",
-                    "방이 성공적으로 생성되었습니다: " + createdRoom.getTitle()
-            );
-        }
-
         return chatRoom;
     }
 
