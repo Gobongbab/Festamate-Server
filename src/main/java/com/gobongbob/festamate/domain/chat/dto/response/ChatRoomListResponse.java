@@ -2,13 +2,14 @@ package com.gobongbob.festamate.domain.chat.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
+import java.time.LocalDateTime;
 
 public record ChatRoomListResponse(
         Long id,
-        String name,
+        String title,
         String lastMessageContent,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        String lastMessageTime
+        LocalDateTime lastMessageTime
 ) {
 
     public static ChatRoomListResponse fromEntity(ChatRoom chatRoom) {
