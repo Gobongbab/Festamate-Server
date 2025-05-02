@@ -40,4 +40,13 @@ public class ChatRoom {
         this.room = room;
         room.setChatRoom(this);
     }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateLastMessage(String content) {
+        this.lastMessageContent = content;
+        this.lastMessageTime = LocalDateTime.now();
+    }
 }

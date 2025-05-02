@@ -58,7 +58,7 @@ public class RoomController implements RoomApi {
         chatService.sendMessage(
                 createdChatRoom.getId(),
                 memberDetails.getMember(),
-                "안녕하세요! " + createdChatRoom.getName() + "에 오신 것을 환영합니다!"
+                "안녕하세요! " + createdChatRoom.getTitle() + "에 오신 것을 환영합니다!"
         );
 
         return new SuccessResponse<>();
