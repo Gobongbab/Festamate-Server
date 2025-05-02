@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationService {
 
-    public void sendNotification(String token, String title, String body) {
+    public void sendNotification(String token, String title, String body, Long memberId) {
         Message message = Message.builder()
                 .setToken(token)
                 .setNotification(Notification.builder()
@@ -21,7 +21,7 @@ public class NotificationService {
         try {
             String response = FirebaseMessaging.getInstance().send(message);
         } catch (FirebaseMessagingException e) {
-            throw new RuntimeException("알림 전송 실패 : " + e.getMessage(), e);
+            throw new RuntimeException("알림 전송 실패 (memberId: " + memberId + ") : " + e.getMessage(), e);
         }
     }
 }
