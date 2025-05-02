@@ -54,24 +54,9 @@ public class RoomService {
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
         Room createdRoom = roomRepository.save(request.toEntity(member));
+        uploadImageIfExist(imageFiles, createdRoom);
 
-        if (imageFiles != null && !imageFiles.isEmpty()) {
-            List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
-                    .stream()
-                    .map(RoomImage::fromEntity)
-                    .toList();
-            createdRoom.assignImages(roomImages);
-        }
-        if (imageFiles == null || imageFiles.isEmpty()) {
-            Image image = pickRandomImage();
-            RoomImage roomImage = RoomImage.fromEntity(image);
-            createdRoom.assignImages(List.of(roomImage));
-        }
-
-        ChatRoom chatRoom = ChatRoom.builder()
-                .name(createdRoom.getTitle())
-                .room(createdRoom)
-                .build();
+        ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
         chatRoomRepository.save(chatRoom);
 
         RoomParticipant roomParticipant = RoomParticipant.createHost(createdRoom, member);
@@ -137,6 +122,7 @@ public class RoomService {
                 request.meetingDateTime(),
                 request.maxParticipants()
         );
+        room.getChatRoom().updateTitle(request.title());
     }
 
     // 방 삭제(일반, admin)
@@ -148,7 +134,6 @@ public class RoomService {
         validateIsHost(room, member);
 
         messageRepository.deleteByRoomId(roomId);
-        chatRoomRepository.deleteByRoomId(roomId);
         roomRepository.delete(room);
 
         /*
@@ -167,6 +152,21 @@ public class RoomService {
                 .findFirst()
                 .map(participant -> participant.isHost() ? RoomAuthority.HOST : RoomAuthority.PARTICIPANT)
                 .orElse(RoomAuthority.NON_PARTICIPANT);
+    }
+
+    private void uploadImageIfExist(List<MultipartFile> imageFiles, Room createdRoom) {
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
+                    .stream()
+                    .map(RoomImage::fromEntity)
+                    .toList();
+            createdRoom.assignImages(roomImages);
+        }
+        if (imageFiles == null || imageFiles.isEmpty()) {
+            Image image = pickRandomImage();
+            RoomImage roomImage = RoomImage.fromEntity(image);
+            createdRoom.assignImages(List.of(roomImage));
+        }
     }
 
     private Image pickRandomImage() {

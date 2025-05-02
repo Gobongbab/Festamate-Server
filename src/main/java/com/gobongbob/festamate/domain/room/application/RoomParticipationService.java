@@ -51,8 +51,7 @@ public class RoomParticipationService {
             room.updateStatus(Status.MATCHED);
         }
 
-        return chatRoomRepository.findByRoom(room)
-                .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
+        return room.getChatRoom();
     }
 
     // 모임방 나가기
@@ -69,12 +68,10 @@ public class RoomParticipationService {
         }
         if (member.isHost(room)) { // 방장이 방을 나가면 방을 삭제
             messageRepository.deleteByRoomId(roomId);
-            chatRoomRepository.deleteByRoomId(roomId);
             roomRepository.delete(room);
         }
 
-        return chatRoomRepository.findByRoom(room)
-                .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
+        return room.getChatRoom();
     }
 
     // 방장 여부 확인
