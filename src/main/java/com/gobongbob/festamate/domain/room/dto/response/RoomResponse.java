@@ -25,6 +25,7 @@ public record RoomResponse(
         int maxParticipants,
         int currentParticipants,
         RoomAuthority roomAuthority,
+        Long chatRoomId,
         List<ParticipantResponse> hostParticipants,
         List<ParticipantResponse> guestParticipants,
         List<ImageResponse> images
@@ -49,6 +50,7 @@ public record RoomResponse(
                 room.getMaxParticipants(),
                 room.getParticipants().size(),
                 roomAuthority,
+                room.getChatRoom().getId(),
                 toParticipantResponse(hostParticipants),
                 toParticipantResponse(guestParticipants),
                 toImageResponse(room)
