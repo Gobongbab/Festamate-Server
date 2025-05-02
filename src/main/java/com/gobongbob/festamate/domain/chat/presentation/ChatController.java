@@ -4,7 +4,6 @@ import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
-import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,15 +33,7 @@ public class ChatController implements ChatApi {
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Payload MessageRequest request
     ) {
-        log.debug("memberDetails: " + memberDetails);
-        log.debug("memberDetails.getMember(): " + memberDetails.getMember());
-        Member member = memberDetails.getMember();
-        log.debug("[ChatController]");
-        log.debug("Chat Room ID: " + chatRoomId);
-        log.debug("Request: " + request);
-        log.debug("Message: " + request.message());
-
-        chatService.sendMessage(chatRoomId, member, request.message());
+        chatService.sendMessage(chatRoomId, memberDetails.getMember(), request.message());
 
         return new SuccessResponse<>();
     }

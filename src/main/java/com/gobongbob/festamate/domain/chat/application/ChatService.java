@@ -47,19 +47,6 @@ public class ChatService {
         );
         MessageResponse response = MessageResponse.fromEntity(savedMessage);
 
-        log.info("[ChatService]");
-        log.info("Chat Room ID: " + chatRoomId);
-        log.info("Sender ID: " + member.getId());
-        log.info("Message: " + message);
-        log.info("Response: " + response);
-        log.info("Saved Message ID: " + savedMessage.getId());
-        log.info("Saved Message Sender ID: " + savedMessage.getSender().getId());
-        log.info("Saved Message Content: " + savedMessage.getMessage());
-        log.info("Saved Message Send Date: " + savedMessage.getSendDate());
-        log.info("Saved Message Chat Room ID: " + savedMessage.getChatRoom().getId());
-        log.info("Response Sender Nickname: " + response.nickname());
-        log.info("Response Sender Message: " + response.message());
-
         messagingTemplate.convertAndSend("/topic/chatRooms/" + chatRoomId, response);
     }
 
