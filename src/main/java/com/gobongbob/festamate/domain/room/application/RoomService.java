@@ -85,10 +85,7 @@ public class RoomService {
     public Slice<RoomListResponse> findBySearchCondition(Pageable pageable,
             FilteringCondition filteringCondition) {
         return roomRepository.findBySearchCondition(pageable, filteringCondition)
-                .map(room -> RoomListResponse.fromEntity(
-                        room,
-                        roomParticipantRepository.countByRoom_Id(room.getId())
-                ));
+                .map(RoomListResponse::fromEntity);
     }
 
     // 참여 중인 모임방 조회
@@ -96,10 +93,9 @@ public class RoomService {
     public List<RoomListResponse> findParticipatingRooms(Long memberId) {
         return roomParticipantRepository.findByMember_Id(memberId)
                 .stream()
-                .map(roomParticipant -> RoomListResponse.fromEntity(
-                        roomParticipant.getRoom(),
-                        roomParticipantRepository.countByRoom_Id(roomParticipant.getRoom().getId())
-                )).toList();
+                .map(RoomParticipant::getRoom)
+                .map(RoomListResponse::fromEntity)
+                .toList();
     }
 
     public RoomResponse findRoomById(CustomMemberDetails memberDetails, Long roomId) {

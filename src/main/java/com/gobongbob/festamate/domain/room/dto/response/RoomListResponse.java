@@ -24,7 +24,7 @@ public record RoomListResponse(
         ImageResponse thumbnail
 ) {
 
-    public static RoomListResponse fromEntity(Room room, int currentParticipants) {
+    public static RoomListResponse fromEntity(Room room) {
         Image thumbnail = room.getImages().get(0).getImage();
 
         return new RoomListResponse(
@@ -38,7 +38,7 @@ public record RoomListResponse(
                 room.getPreferredStudentIdMax(),
                 room.getMeetingDateTime(),
                 room.getMaxParticipants(),
-                currentParticipants,
+                room.getParticipants().size(),
                 ImageResponse.fromEntity(thumbnail)
         );
     }
