@@ -6,7 +6,6 @@ import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
 import com.gobongbob.festamate.domain.chat.dto.response.ChatRoomListResponse;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -42,10 +41,11 @@ public class ChatController implements ChatApi {
 
     @Override
     @GetMapping("/api/chatRooms/participations")
-    public SuccessResponse<List<ChatRoomListResponse>> findParticipatingChatRooms(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails
+    public SuccessResponse<Slice<ChatRoomListResponse>> findParticipatingChatRooms(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return new SuccessResponse<>(chatService.findParticipatingChatRooms(memberDetails.getMember()));
+        return new SuccessResponse<>(chatService.findParticipatingChatRooms(pageable, memberDetails.getMember()));
     }
 
     // 메시지 조회

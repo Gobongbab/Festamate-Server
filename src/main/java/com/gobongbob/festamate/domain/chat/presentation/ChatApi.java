@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -46,9 +45,11 @@ public interface ChatApi {
             @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
     })
     @GetMapping("/api/chatRooms/participations")
-    SuccessResponse<List<ChatRoomListResponse>> findParticipatingChatRooms(
+    SuccessResponse<Slice<ChatRoomListResponse>> findParticipatingChatRooms(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
-            @AuthenticationPrincipal CustomMemberDetails memberDetails
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @Parameter(description = "페이징 정보")
+            @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC) Pageable pageable
     );
 
     // 메시지 조회
