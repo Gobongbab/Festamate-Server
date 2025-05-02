@@ -10,12 +10,9 @@ import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
-import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
-import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -30,7 +27,6 @@ public class ChatService {
 
     private final MessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final RoomRepository roomRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final SimpMessageSendingOperations messagingTemplate;
 
@@ -66,11 +62,8 @@ public class ChatService {
         }
     }
 
-    public List<ChatRoomListResponse> findParticipatingChatRooms(Member member) {
-        return roomRepository.findRoomsWithChatRoomByMember(member.getId())
-                .stream()
-                .map(Room::getChatRoom)
-                .map(ChatRoomListResponse::fromEntity)
-                .toList();
+    public Slice<ChatRoomListResponse> findParticipatingChatRooms(Pageable pageable, Member member) {
+        return chatRoomRepository.findParticipatingChatRooms(pageable, member.getId())
+                .map(ChatRoomListResponse::fromEntity);
     }
 }
