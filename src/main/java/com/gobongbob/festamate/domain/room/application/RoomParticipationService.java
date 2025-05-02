@@ -38,8 +38,7 @@ public class RoomParticipationService {
     @Transactional
     @CheckActiveUser
     public ChatRoom participate(Long memberId, Long roomId, FriendPhoneNumbersRequest request) {
-        Member member = memberRepository.findById(
-                        memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
+        Member member = memberRepository.findById(memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
@@ -99,8 +98,7 @@ public class RoomParticipationService {
 
     private void participateRoom(Member member, Room room) {
         member.useTicket();
-        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member,
-                ParticipantRole.GUEST);
+        RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, ParticipantRole.GUEST);
         roomParticipantRepository.save(roomParticipant);
     }
 

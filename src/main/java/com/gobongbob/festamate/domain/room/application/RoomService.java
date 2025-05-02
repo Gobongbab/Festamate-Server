@@ -82,8 +82,7 @@ public class RoomService {
     }
 
     // 방 전체 조회
-    public Slice<RoomListResponse> findBySearchCondition(Pageable pageable,
-            FilteringCondition filteringCondition) {
+    public Slice<RoomListResponse> findBySearchCondition(Pageable pageable, FilteringCondition filteringCondition) {
         return roomRepository.findBySearchCondition(pageable, filteringCondition)
                 .map(RoomListResponse::fromEntity);
     }
@@ -103,18 +102,15 @@ public class RoomService {
                 .map(room -> RoomResponse.fromEntity(
                         room,
                         findRoomAuthorityByMember(room, memberDetails),
-                        roomParticipantRepository.findByRoomAndRole(room.getId(),
-                                ParticipantRole.HOST),
-                        roomParticipantRepository.findByRoomAndRole(room.getId(),
-                                ParticipantRole.GUEST)
+                        roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.HOST),
+                        roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.GUEST)
                 )).orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
     }
 
     // 모임방 정보 수정
     @Transactional
     @CheckActiveUser
-    public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request,
-            List<MultipartFile> imageFiles) {
+    public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request, List<MultipartFile> imageFiles) {
         Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
