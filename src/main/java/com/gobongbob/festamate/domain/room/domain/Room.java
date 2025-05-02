@@ -47,6 +47,10 @@ public class Room {
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    private List<RoomParticipant> participants = new ArrayList<>();
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<RoomImage> images = new ArrayList<>();
 
     // 연관관계 편의 메서드
