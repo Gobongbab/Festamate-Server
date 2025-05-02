@@ -5,14 +5,17 @@ import static com.gobongbob.festamate.global.response.ResponseCode.NO_AUTHORITY_
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.domain.Message;
+import com.gobongbob.festamate.domain.chat.dto.response.ChatRoomListResponse;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
+import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
-import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +32,7 @@ public class ChatService {
 
     private final MessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final RoomRepository roomRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final SimpMessageSendingOperations messagingTemplate;
 
@@ -42,7 +46,6 @@ public class ChatService {
                         .chatRoom(chatRoom)
                         .sender(member)
                         .message(message)
-                        .sendDate(LocalDateTime.now())
                         .build()
         );
         MessageResponse response = MessageResponse.fromEntity(savedMessage);
@@ -52,8 +55,7 @@ public class ChatService {
 
     // 메시지 조회
     @CheckActiveUser
-    public Slice<MessageResponse> findMessagesByRoomId(Long memberId, Long roomId,
-            Pageable pageable) {
+    public Slice<MessageResponse> findMessagesByRoomId(Long memberId, Long roomId, Pageable pageable) {
 //        validateRoomParticipation(memberId, roomId);
 
         return messageRepository.findByRoomId(roomId, pageable)
@@ -64,5 +66,13 @@ public class ChatService {
         if (roomParticipantRepository.findByRoom_IdAndMember_Id(memberId, roomId).isEmpty()) {
             throw new BadRequestException(NO_AUTHORITY_CHAT_ROOM);
         }
+    }
+
+    public List<ChatRoomListResponse> findParticipatingChatRooms(Member member) {
+        return roomRepository.findRoomsWithChatRoomByMember(member.getId())
+                .stream()
+                .map(Room::getChatRoom)
+                .map(ChatRoomListResponse::fromEntity)
+                .toList();
     }
 }
