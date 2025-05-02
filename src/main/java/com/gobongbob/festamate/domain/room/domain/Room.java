@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.room.domain;
 
+import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
@@ -52,6 +53,10 @@ public class Room {
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<RoomImage> images = new ArrayList<>();
+
+    @OneToOne(mappedBy = "room", cascade = CascadeType.ALL)
+    @Setter
+    private ChatRoom chatRoom;
 
     // 연관관계 편의 메서드
     public void assignImages(List<RoomImage> roomImages) {
