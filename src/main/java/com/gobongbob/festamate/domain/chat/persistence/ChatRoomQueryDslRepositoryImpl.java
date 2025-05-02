@@ -5,6 +5,7 @@ import static com.gobongbob.festamate.domain.room.domain.QRoom.room;
 import static com.gobongbob.festamate.domain.room.domain.QRoomParticipant.roomParticipant;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
+import com.gobongbob.festamate.domain.room.domain.Room;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -25,20 +26,21 @@ public class ChatRoomQueryDslRepositoryImpl implements ChatRoomQueryDslRepositor
      */
     @Override
     public Slice<ChatRoom> findParticipatingChatRooms(Pageable pageable, Long memberId) {
-        int pageSize = pageable.getPageSize();
-
-        JPAQuery<ChatRoom> basicQuery = queryFactory
-                .select(chatRoom)
+        JPAQuery<Room> basicQuery = queryFactory
+                .select(room)  // Room을 select
                 .from(roomParticipant)
                 .join(roomParticipant.room, room)
-                .join(room.chatRoom, chatRoom).fetchJoin()
+                .join(room.chatRoom, chatRoom).fetchJoin()  // fetch join
                 .where(roomParticipant.member.id.eq(memberId))
                 .offset(pageable.getOffset())
-                .limit(pageSize + 1);
+                .limit(pageable.getPageSize() + 1);
 
-        List<ChatRoom> content = addSortingQuery(basicQuery, pageable.getSort().toString());
+        List<Room> content = addSortingQuery(basicQuery, pageable.getSort().toString());
+        List<ChatRoom> chatRooms = content.stream()
+                .map(Room::getChatRoom)
+                .toList();
 
-        return new SliceImpl<>(content, pageable, hasNextPage(content, pageSize));
+        return new SliceImpl<>(chatRooms, pageable, hasNextPage(chatRooms, pageable.getPageSize()));
     }
 
     /**
@@ -58,8 +60,8 @@ public class ChatRoomQueryDslRepositoryImpl implements ChatRoomQueryDslRepositor
       정렬 관련 쿼리를 추가하기 위한 메소드
      */
     // 마지막 메시지 전송 시간이 얼마나 최신이냐에 따라서 정렬
-    private List<ChatRoom> addSortingQuery(JPAQuery<ChatRoom> basicQuery, String sortType) {
-        List<ChatRoom> content;
+    private List<Room> addSortingQuery(JPAQuery<Room> basicQuery, String sortType) {
+        List<Room> content;
 
         switch (sortType) {
             case "id":
