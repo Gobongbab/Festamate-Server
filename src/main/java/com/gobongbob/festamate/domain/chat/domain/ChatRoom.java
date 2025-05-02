@@ -1,18 +1,9 @@
 package com.gobongbob.festamate.domain.chat.domain;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Getter
@@ -25,9 +16,37 @@ public class ChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String title;
+
+    private String lastMessageContent;
+
+    private LocalDateTime lastMessageTime;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     private Room room;
+
+    public static ChatRoom createChatRoom(String title, Room room) {
+        ChatRoom chatRoom = ChatRoom.builder()
+                .title(title)
+                .build();
+        chatRoom.setRoom(room);
+
+        return chatRoom;
+    }
+
+    // 연관관계 편의 메서드
+    public void setRoom(Room room) {
+        this.room = room;
+        room.setChatRoom(this);
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateLastMessage(String content) {
+        this.lastMessageContent = content;
+        this.lastMessageTime = LocalDateTime.now();
+    }
 }

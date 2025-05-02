@@ -41,7 +41,8 @@ public class Message {
 
     @CreatedDate
     @Column(updatable = false)
-    private LocalDateTime sendDate;
+    @Builder.Default
+    private LocalDateTime sendDate = LocalDateTime.now();
 
     @Builder
     public Message(ChatRoom chatRoom, Member sender, String message) {

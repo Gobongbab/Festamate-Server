@@ -32,7 +32,6 @@ public record RoomResponse(
 
     public static RoomResponse fromEntity(
             Room room,
-            int currentParticipants,
             RoomAuthority roomAuthority,
             List<RoomParticipant> hostParticipants,
             List<RoomParticipant> guestParticipants
@@ -48,7 +47,7 @@ public record RoomResponse(
                 room.getPreferredStudentIdMax(),
                 room.getMeetingDateTime(),
                 room.getMaxParticipants(),
-                currentParticipants,
+                room.getParticipants().size(),
                 roomAuthority,
                 toParticipantResponse(hostParticipants),
                 toParticipantResponse(guestParticipants),
@@ -58,7 +57,7 @@ public record RoomResponse(
 
     private static List<ParticipantResponse> toParticipantResponse(List<RoomParticipant> participants) {
         return participants.stream()
-                .map(participant -> ParticipantResponse.fromEntity(participant, participant.isHost()))
+                .map(ParticipantResponse::fromEntity)
                 .toList();
     }
 
@@ -79,7 +78,7 @@ public record RoomResponse(
             String profileImageUrl
     ) {
 
-        private static ParticipantResponse fromEntity(RoomParticipant participant, boolean isHost) {
+        private static ParticipantResponse fromEntity(RoomParticipant participant) {
             Member member = participant.getMember();
 
             return new ParticipantResponse(
@@ -88,7 +87,7 @@ public record RoomResponse(
                     member.getStudentId().substring(2, 4),
                     member.getGender().name(),
                     member.getStudentDepartment(),
-                    isHost,
+                    participant.isHost(),
                     member.getProfileImage().getUrl()
             );
         }

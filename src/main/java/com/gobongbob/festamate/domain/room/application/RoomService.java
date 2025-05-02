@@ -56,24 +56,9 @@ public class RoomService {
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
         Room createdRoom = roomRepository.save(request.toEntity(member));
+        uploadImageIfExist(imageFiles, createdRoom);
 
-        if (imageFiles != null && !imageFiles.isEmpty()) {
-            List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
-                    .stream()
-                    .map(RoomImage::fromEntity)
-                    .toList();
-            createdRoom.assignImages(roomImages);
-        }
-        if (imageFiles == null || imageFiles.isEmpty()) {
-            Image image = pickRandomImage();
-            RoomImage roomImage = RoomImage.fromEntity(image);
-            createdRoom.assignImages(List.of(roomImage));
-        }
-
-        ChatRoom chatRoom = ChatRoom.builder()
-                .name(createdRoom.getTitle())
-                .room(createdRoom)
-                .build();
+        ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
         chatRoomRepository.save(chatRoom);
 
         RoomParticipant roomParticipant = RoomParticipant.createHost(createdRoom, member);
@@ -94,13 +79,9 @@ public class RoomService {
     }
 
     // 방 전체 조회
-    public Slice<RoomListResponse> findBySearchCondition(Pageable pageable,
-            FilteringCondition filteringCondition) {
+    public Slice<RoomListResponse> findBySearchCondition(Pageable pageable, FilteringCondition filteringCondition) {
         return roomRepository.findBySearchCondition(pageable, filteringCondition)
-                .map(room -> RoomListResponse.fromEntity(
-                        room,
-                        roomParticipantRepository.countByRoom_Id(room.getId())
-                ));
+                .map(RoomListResponse::fromEntity);
     }
 
     // 참여 중인 모임방 조회
@@ -108,30 +89,25 @@ public class RoomService {
     public List<RoomListResponse> findParticipatingRooms(Long memberId) {
         return roomParticipantRepository.findByMember_Id(memberId)
                 .stream()
-                .map(roomParticipant -> RoomListResponse.fromEntity(
-                        roomParticipant.getRoom(),
-                        roomParticipantRepository.countByRoom_Id(roomParticipant.getRoom().getId())
-                )).toList();
+                .map(RoomParticipant::getRoom)
+                .map(RoomListResponse::fromEntity)
+                .toList();
     }
 
     public RoomResponse findRoomById(CustomMemberDetails memberDetails, Long roomId) {
         return roomRepository.findById(roomId)
                 .map(room -> RoomResponse.fromEntity(
                         room,
-                        roomParticipantRepository.countByRoom_Id(room.getId()),
                         findRoomAuthorityByMember(room, memberDetails),
-                        roomParticipantRepository.findByRoomAndRole(room.getId(),
-                                ParticipantRole.HOST),
-                        roomParticipantRepository.findByRoomAndRole(room.getId(),
-                                ParticipantRole.GUEST)
+                        roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.HOST),
+                        roomParticipantRepository.findByRoomAndRole(room.getId(), ParticipantRole.GUEST)
                 )).orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
     }
 
     // 모임방 정보 수정
     @Transactional
     @CheckActiveUser
-    public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request,
-            List<MultipartFile> imageFiles) {
+    public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request, List<MultipartFile> imageFiles) {
         Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
@@ -158,6 +134,7 @@ public class RoomService {
                 request.meetingDateTime(),
                 request.maxParticipants()
         );
+        room.getChatRoom().updateTitle(request.title());
     }
 
     // 방 삭제(일반, admin)
@@ -168,9 +145,7 @@ public class RoomService {
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
 
-        roomParticipantRepository.deleteByRoomId(roomId);
         messageRepository.deleteByRoomId(roomId);
-        chatRoomRepository.deleteByRoomId(roomId);
         roomRepository.delete(room);
 
         /*
@@ -183,13 +158,27 @@ public class RoomService {
             return RoomAuthority.NON_MEMBER;
         }
 
-        return roomParticipantRepository.findByRoom_IdAndMember_Id(room.getId(),
-                        memberDetails.getMember().getId())
+        return room.getParticipants()
                 .stream()
+                .filter(participant -> participant.getMember().getId().equals(memberDetails.getMember().getId()))
                 .findFirst()
-                .map(participant -> participant.isHost() ? RoomAuthority.HOST
-                        : RoomAuthority.PARTICIPANT)
+                .map(participant -> participant.isHost() ? RoomAuthority.HOST : RoomAuthority.PARTICIPANT)
                 .orElse(RoomAuthority.NON_PARTICIPANT);
+    }
+
+    private void uploadImageIfExist(List<MultipartFile> imageFiles, Room createdRoom) {
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            List<RoomImage> roomImages = imageService.uploadImages(imageFiles)
+                    .stream()
+                    .map(RoomImage::fromEntity)
+                    .toList();
+            createdRoom.assignImages(roomImages);
+        }
+        if (imageFiles == null || imageFiles.isEmpty()) {
+            Image image = pickRandomImage();
+            RoomImage roomImage = RoomImage.fromEntity(image);
+            createdRoom.assignImages(List.of(roomImage));
+        }
     }
 
     private Image pickRandomImage() {
@@ -219,8 +208,7 @@ public class RoomService {
     }
 
     private void validateAlone(Room room) {
-        int participantsCount = roomParticipantRepository.countByRoom_Id(room.getId());
-        if (participantsCount > 1) {
+        if (!room.isJoinable()) { // 호스트 측 참가자만 있는 경우
             throw new BadRequestException(CAN_NOT_UPDATE);
         }
     }
