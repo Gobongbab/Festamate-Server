@@ -32,7 +32,8 @@ public class TestService {
     @Transactional // DB 저장 및 토큰 생성/저장 로직 포함
     public Map<String, String> createTestMemberAndGetTokens() {
         // 고유 식별자를 사용하여 중복 방지 (예: 타임스탬프)
-        String uniqueSuffix = String.valueOf(System.currentTimeMillis() % 100000000); // 조금 더 짧게
+        long suffixNumber = System.currentTimeMillis() % 100000000;
+        String uniqueSuffix = String.format("%08d", suffixNumber);
         String nickname = "수영하는 봉밥이" + uniqueSuffix;
         // 학번 형식 유지하며 고유하게 생성 (예시 단순화)
         String studentId = String.format("%d%05d", (2018 + (int) (Math.random() * 8)),

@@ -5,6 +5,7 @@ import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 
+// 관리자용 유저 조회
 public record MemberResponse(
         Long id,
         String name,
@@ -14,7 +15,8 @@ public record MemberResponse(
         String loginPassword,
         String phoneNumber,
         Gender gender,
-        String major,
+        String department,
+        String status,
         ImageResponse profileImage
 ) {
 
@@ -31,6 +33,7 @@ public record MemberResponse(
                 member.getPhoneNumber(),
                 member.getGender(),
                 member.getStudentDepartment(),
+                member.getStatus().name(),
                 ImageResponse.fromEntity(profileImage)
         );
     }

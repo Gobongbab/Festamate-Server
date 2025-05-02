@@ -8,6 +8,7 @@ import com.gobongbob.festamate.global.util.TokenProvider;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -69,6 +70,10 @@ public class SecurityConfig {
 
                         // 비로그인 허용 경로
                         .requestMatchers(
+                                "/ws-sockjs",
+                                "/ws-sockjs/**",
+                                "/ws",
+                                "/ws/**",
                                 "/api/auth/kakao",         // JWT 필요 없음
                                 "/api/auth/login",         // JWT 필요 없음
                                 "/api/auth/register/**",   // 회원가입 관련 전체 경로 (프로필 포함) JWT 필요 없음
@@ -115,16 +120,15 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @Value("${cors.allowed.origins}")
+    private String[] allowedOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 프론트 주소 명시 (credentials: true와 함께 쓰기 위해 * 안 됨)
-        configuration.setAllowedOrigins(List.of(
-                "https://festamate-web.vercel.app",
-                "http://localhost:5173",
-                "https://www.festamate.shop"
-        ));
+        // CORS 허용 주소 명시 (credentials: true와 함께 쓰기 위해 * 안 됨)
+        configuration.setAllowedOrigins(List.of(allowedOrigins));
 
         // 사용할 HTTP 메서드 명시
         configuration.setAllowedMethods(
@@ -136,7 +140,8 @@ public class SecurityConfig {
                 "Content-Type",
                 "Authorization",
                 "X-XSRF-token",
-                "Accept"
+                "Accept",
+                "Cookie"
         ));
 
         // 인증 정보 포함 여부

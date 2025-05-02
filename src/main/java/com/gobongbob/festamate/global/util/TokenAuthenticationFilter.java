@@ -37,6 +37,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        // 리프레시 요청은 필터 건너뛰기
+        if (request.getServletPath().equals("/api/auth/refresh")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 토큰 꺼내기
         String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);
         // 가져온 값에서 접두사 제거
@@ -94,6 +100,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 || uri.startsWith("/swagger-resources")
                 || uri.startsWith("/actuator/")
                 || uri.startsWith("/webjars/")
+                || uri.startsWith("/ws-sockjs")
+                || uri.startsWith("/ws")
                 || uri.equals("/swagger-ui.html")) {
             return true;
         }

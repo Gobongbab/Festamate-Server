@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.query.Param;
 
 public interface MemberRepository extends Repository<Member, Long> {
 
@@ -20,6 +21,9 @@ public interface MemberRepository extends Repository<Member, Long> {
 
     @Query("SELECT m FROM Member m JOIN FETCH m.profileImage WHERE m.id = :id")
     Optional<Member> findByIdWithProfileImage(Long id);
+
+    @Query("SELECT m FROM Member m LEFT JOIN FETCH m.profileImage pi WHERE m.name = :memberName")
+    List<Member> findAllByNameWithProfileImage(@Param("memberName") String name);
 
     void delete(Member room);
 

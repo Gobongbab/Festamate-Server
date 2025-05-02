@@ -4,16 +4,16 @@ import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
-import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.security.core.Authentication;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class ChatController implements ChatApi {
 
     private final ChatService chatService;
@@ -29,11 +30,10 @@ public class ChatController implements ChatApi {
     @MessageMapping("/messages/chatRooms/{chatRoomId}")
     public SuccessResponse<Void> sendMessage(
             @DestinationVariable("chatRoomId") Long chatRoomId,
-            Authentication authentication,
-            MessageRequest request
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @Payload MessageRequest request
     ) {
-        Member member = ((CustomMemberDetails) authentication.getPrincipal()).getMember();
-        chatService.sendMessage(chatRoomId, member, request.message());
+        chatService.sendMessage(chatRoomId, memberDetails.getMember(), request.message());
 
         return new SuccessResponse<>();
     }

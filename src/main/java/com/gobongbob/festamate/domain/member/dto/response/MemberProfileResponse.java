@@ -11,7 +11,7 @@ public record MemberProfileResponse(
         String studentId,
         String phoneNumber,
         Gender gender,
-        String major,
+        String department,
         int maximumTicket,
         int remainingTicket,
         ImageResponse profileImage

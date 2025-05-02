@@ -73,7 +73,7 @@ public record RoomResponse(
             String nickname,
             String studentId,
             String gender,
-            String major,
+            String department,
             boolean isHost,
             String profileImageUrl
     ) {

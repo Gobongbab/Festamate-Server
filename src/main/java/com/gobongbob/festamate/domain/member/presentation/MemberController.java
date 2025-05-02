@@ -4,6 +4,7 @@ import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.dto.request.MemberExistRequest;
+import com.gobongbob.festamate.domain.member.dto.request.MemberFcmTokenRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
@@ -20,9 +21,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Validated
@@ -63,6 +67,7 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>(memberService.findMemberById(memberId));
     }
 
+    // 프로필 조회
     @Override
     @GetMapping("/api/auth/members/profile")
     public SuccessResponse<MemberProfileResponse> getProfile(
@@ -71,14 +76,25 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>(memberService.findProfile(memberDetails.getMember()));
     }
 
-    // 나의 프로필 수정
+    // 나의 프로필 수정(닉네임)
     @Override
-    @PatchMapping("/members/profile")
+    @PatchMapping("/api/auth/members/profile")
     public SuccessResponse<Void> updateProfile(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestBody @Valid ProfileUpdateRequest request
     ) {
         memberService.updateMemberProfileById(memberDetails.getMember(), request);
+        return new SuccessResponse<>();
+    }
+
+    // 나의 프로필 사진 수정
+    @Override
+    @PutMapping("/api/auth/members/profile/photo")
+    public SuccessResponse<Void> updateProfilePhoto(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @RequestPart("profileImage") MultipartFile profileImage
+    ) {
+        memberService.updateProfilePhoto(memberDetails.getMember(), profileImage);
         return new SuccessResponse<>();
     }
 
@@ -109,6 +125,17 @@ public class MemberController implements MemberApi {
             @RequestParam(name = "nickname") String nickname
     ) {
         memberService.checkNicknameDuplication(nickname);
+        return new SuccessResponse<>();
+    }
+
+    // FCM 토큰 등록
+    @Override
+    @PostMapping("/members/fcm-token")
+    public SuccessResponse<Void> registerFcmToken(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @RequestBody MemberFcmTokenRequest request
+    ) {
+        memberService.registerFcmToken(memberDetails.getMember(), request);
         return new SuccessResponse<>();
     }
 }

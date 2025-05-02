@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.testUser;
 
+import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.auth.oauth.dto.response.AuthResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,7 +34,7 @@ public class TestController {
         String refreshToken = tokens.get("refreshToken");
 
         // 3. 리프레시 토큰 HttpOnly 쿠키 설정
-        ResponseCookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
+        ResponseCookie refreshTokenCookie = createTestRefreshTokenCookie(refreshToken);
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
         // 4. 본문에는 액세스 토큰만 포함하는 DTO 반환 (TestTokens 사용 안 함)
@@ -42,21 +43,14 @@ public class TestController {
     }
 
     // 쿠키 생성 유틸리티 메서드
-    private ResponseCookie createRefreshTokenCookie(String refreshToken) {
+    private ResponseCookie createTestRefreshTokenCookie(String refreshToken) {
+        Duration testRefreshTokenValidity = TokenType.TEST_REFRESH.getDuration(); // 100일
         return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(true) // 로컬 HTTP 테스트 시 임시 주석 처리 고려
                 .path("/")
-                .maxAge(Duration.ofDays(14))
-                .sameSite("Strict")
+                .maxAge(testRefreshTokenValidity)
+                .sameSite("None")
                 .build();
     }
-
-//    테스트 관리자 비활성화 
-//    @PostMapping("/create-admin")
-//    public ResponseEntity<TestService.TestTokens> createAdminMember() {
-//        // 테스트 관리자용 유저 생성 및 JWT 토큰 반환
-//        TestService.TestTokens adminTokens = testService.createAdminMember();
-//        return ResponseEntity.ok(adminTokens);
-//    }
 }

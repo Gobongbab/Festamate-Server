@@ -100,3 +100,6 @@ admin:
   loginId: ${ADMIN_LOGIN_ID}
   password: ${ADMIN_PASSWORD}
   kakaoId: ${ADMIN_KAKAO_ID}
+logging:
+  level:
+    com.gobongbob.festamate: DEBUG
