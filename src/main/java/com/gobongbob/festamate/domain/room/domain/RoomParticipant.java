@@ -45,4 +45,10 @@ public class RoomParticipant {
                 .isHost(false)
                 .build();
     }
+
+    // 연관관계 편의 메서드
+    public void setRoom(Room room) {
+        this.room = room;
+        room.getParticipants().add(this);
+    }
 }
