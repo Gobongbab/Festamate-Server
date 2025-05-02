@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -48,6 +49,7 @@ public class Report {
     @Column(nullable = false)
     private LocalDateTime reportDate;
 
+    @Setter
     @Column
     @Builder.Default
     private Boolean processed = false;
