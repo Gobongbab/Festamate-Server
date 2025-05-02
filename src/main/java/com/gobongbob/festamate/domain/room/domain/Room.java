@@ -82,4 +82,12 @@ public class Room {
     public void updateStatus(Status status) {
         this.status = status;
     }
+
+    public boolean isFull() {
+        return participants.size() == maxParticipants;
+    }
+
+    public boolean isJoinable() {
+        return participants.size() == (maxParticipants / 2);
+    }
 }

@@ -102,7 +102,6 @@ public class RoomService {
         return roomRepository.findById(roomId)
                 .map(room -> RoomResponse.fromEntity(
                         room,
-                        roomParticipantRepository.countByRoom_Id(room.getId()),
                         findRoomAuthorityByMember(room, memberDetails),
                         roomParticipantRepository.findByRoomAndRole(room.getId(),
                                 ParticipantRole.HOST),
@@ -152,7 +151,6 @@ public class RoomService {
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsHost(room, member);
 
-        roomParticipantRepository.deleteByRoomId(roomId);
         messageRepository.deleteByRoomId(roomId);
         chatRoomRepository.deleteByRoomId(roomId);
         roomRepository.delete(room);
@@ -167,12 +165,11 @@ public class RoomService {
             return RoomAuthority.NON_MEMBER;
         }
 
-        return roomParticipantRepository.findByRoom_IdAndMember_Id(room.getId(),
-                        memberDetails.getMember().getId())
+        return room.getParticipants()
                 .stream()
+                .filter(participant -> participant.getMember().getId().equals(memberDetails.getMember().getId()))
                 .findFirst()
-                .map(participant -> participant.isHost() ? RoomAuthority.HOST
-                        : RoomAuthority.PARTICIPANT)
+                .map(participant -> participant.isHost() ? RoomAuthority.HOST : RoomAuthority.PARTICIPANT)
                 .orElse(RoomAuthority.NON_PARTICIPANT);
     }
 
@@ -203,8 +200,7 @@ public class RoomService {
     }
 
     private void validateAlone(Room room) {
-        int participantsCount = roomParticipantRepository.countByRoom_Id(room.getId());
-        if (participantsCount > 1) {
+        if (!room.isJoinable()) { // 호스트 측 참가자만 있는 경우
             throw new BadRequestException(CAN_NOT_UPDATE);
         }
     }
