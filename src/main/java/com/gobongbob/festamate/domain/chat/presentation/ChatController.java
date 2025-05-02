@@ -3,8 +3,10 @@ package com.gobongbob.festamate.domain.chat.presentation;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
+import com.gobongbob.festamate.domain.chat.dto.response.ChatRoomListResponse;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +38,14 @@ public class ChatController implements ChatApi {
         chatService.sendMessage(chatRoomId, memberDetails.getMember(), request.message());
 
         return new SuccessResponse<>();
+    }
+
+    @Override
+    @GetMapping("/api/chatRooms/participations")
+    public SuccessResponse<List<ChatRoomListResponse>> findParticipatingChatRooms(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
+    ) {
+        return new SuccessResponse<>(chatService.findParticipatingChatRooms(memberDetails.getMember()));
     }
 
     // 메시지 조회
