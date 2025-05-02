@@ -1,4 +1,4 @@
-package com.gobongbob.festamate.global.config;
+package com.gobongbob.festamate.global.config.webSocket;
 
 import java.nio.charset.StandardCharsets;
 import org.springframework.lang.Nullable;

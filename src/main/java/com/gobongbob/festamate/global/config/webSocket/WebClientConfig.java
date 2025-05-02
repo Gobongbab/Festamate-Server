@@ -1,4 +1,4 @@
-package com.gobongbob.festamate.global.config;
+package com.gobongbob.festamate.global.config.webSocket;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

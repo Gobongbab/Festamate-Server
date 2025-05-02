@@ -100,6 +100,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 || uri.startsWith("/swagger-resources")
                 || uri.startsWith("/actuator/")
                 || uri.startsWith("/webjars/")
+                || uri.startsWith("/ws-sockjs")
+                || uri.startsWith("/ws")
                 || uri.equals("/swagger-ui.html")) {
             return true;
         }

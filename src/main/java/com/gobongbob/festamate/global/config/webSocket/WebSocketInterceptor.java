@@ -1,11 +1,8 @@
-package com.gobongbob.festamate.global.config;
+package com.gobongbob.festamate.global.config.webSocket;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
-import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
-import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import com.gobongbob.festamate.global.util.TokenProvider;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -13,11 +10,9 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
-import static com.gobongbob.festamate.global.response.ResponseCode.USER_NOT_FOUND;
 
 @Component
 @RequiredArgsConstructor
@@ -30,31 +25,30 @@ public class WebSocketInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        String sessionId = accessor.getSessionId();
+        StompCommand command = accessor.getCommand();
+        log.debug("Command: " + command);
 
-        if (Objects.requireNonNull(accessor.getCommand()) == StompCommand.SEND) {
+        if (command == StompCommand.CONNECT || command == StompCommand.SEND) {
             String tokenHeader = accessor.getFirstNativeHeader("Authorization");
             if (tokenHeader == null) {
-                log.error("No token found in message from session: " + sessionId);
+                log.error("No token found in message from session: " + accessor.getSessionId());
                 throw new IllegalArgumentException("No token found");
             }
 
             String token = tokenHeader.replace("Bearer ", "");
             tokenProvider.validateToken(token);
 
-            Long userId = tokenProvider.getUserId(token);
-            Member member = memberRepository.findById(userId)
-                    .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
-            UserDetails userDetails = new CustomMemberDetails(member);
-
-            accessor.setUser(new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            ));
+            Authentication authentication = tokenProvider.getAuthentication(token);
+            setAuthentication(authentication, accessor);
         }
 
         return message;
+    }
+
+    private static void setAuthentication(Authentication authentication, StompHeaderAccessor accessor) {
+        CustomMemberDetails memberDetails = (CustomMemberDetails) authentication.getPrincipal();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        accessor.setUser(memberDetails);
     }
 //
 //    @Override
