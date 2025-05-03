@@ -16,7 +16,8 @@ public record RoomCreateRequest(
         String preferredStudentIdMax,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime meetingDateTime,
-        int maxParticipants
+        int maxParticipants,
+        FriendPhoneNumbersRequest friendPhoneNumbers
 ) {
 
     public Room toEntity(Member member) {
