@@ -16,6 +16,7 @@ import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomAuthority;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
+import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
 import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
@@ -27,6 +28,7 @@ import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -61,9 +63,12 @@ public class RoomService {
         ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
         chatRoomRepository.save(chatRoom);
 
-        RoomParticipant roomParticipant = RoomParticipant.createHost(createdRoom, member);
-        roomParticipantRepository.save(roomParticipant);
-        member.useTicket();
+        List<RoomParticipant> participants = collectParticipants(request, createdRoom, member);
+
+        participants.forEach(participant -> {
+            roomParticipantRepository.save(participant);
+            participant.getMember().useTicket();
+        });
 
         // **FCM 알림 전송**, 추후 삭제해야 함.
         String fcmToken = member.getFcmToken(); // FCM 토큰 가져오기
@@ -151,6 +156,22 @@ public class RoomService {
         /*
         추후 방 삭제 시, 방에 참여중인 사용자들에게 알림을 보내는 로직 추가 필요
          */
+    }
+
+    private List<RoomParticipant> collectParticipants(RoomCreateRequest request, Room room, Member member) {
+        List<RoomParticipant> participants = createHostParticipants(room, request.friendPhoneNumbers());
+        participants.add(RoomParticipant.createHost(room, member));
+
+        return participants;
+    }
+
+    private List<RoomParticipant> createHostParticipants(Room room, FriendPhoneNumbersRequest request) {
+        return request.friendPhoneNumbers()
+                .stream()
+                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
+                        .orElseThrow(() -> new BadRequestException(NO_MEMBER))
+                ).map(member -> RoomParticipant.createParticipant(room, member, ParticipantRole.HOST))
+                .collect(Collectors.toList());
     }
 
     private RoomAuthority findRoomAuthorityByMember(Room room, CustomMemberDetails memberDetails) {
