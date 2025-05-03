@@ -62,8 +62,8 @@ public class ChatService {
             if (fcmToken != null) {
                 notificationService.sendNotification(
                         fcmToken,
-                        "채팅 메시지가 도착했습니다",
-                        member.getName() + ":" + message,
+                        "[Festamate!] 채팅 메시지가 도착했습니다!",
+                        member.getNickname() + ": " + message,
                         participantId
                 );
             }
