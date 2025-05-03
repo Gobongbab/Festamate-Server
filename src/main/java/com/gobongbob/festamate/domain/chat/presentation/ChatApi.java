@@ -2,6 +2,7 @@ package com.gobongbob.festamate.domain.chat.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
+import com.gobongbob.festamate.domain.chat.dto.response.ChatRoomListResponse;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +37,19 @@ public interface ChatApi {
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(description = "메시지 전송 요청 정보")
             MessageRequest request
+    );
+
+    @Operation(summary = "참여중인 채팅방 조회", description = "로그인 중인 회원이 참여중인 채팅방을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "모임방이 존재하지 않습니다.")
+    })
+    @GetMapping("/api/chatRooms/participations")
+    SuccessResponse<Slice<ChatRoomListResponse>> findParticipatingChatRooms(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @Parameter(description = "페이징 정보")
+            @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC) Pageable pageable
     );
 
     // 메시지 조회
