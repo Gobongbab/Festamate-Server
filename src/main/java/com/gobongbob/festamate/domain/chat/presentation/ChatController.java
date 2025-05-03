@@ -54,7 +54,7 @@ public class ChatController implements ChatApi {
     public SuccessResponse<Slice<MessageResponse>> findMessages(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable("chatRoomId") Long chatRoomId,
-            @PageableDefault(size = 100, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
+            @PageableDefault(size = 100, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Slice<MessageResponse> messages = chatService.findMessagesByRoomId(
                 memberDetails.getMember().getId(),
