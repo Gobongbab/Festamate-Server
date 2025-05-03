@@ -40,17 +40,6 @@ public class CouponService {
         coupon.assignToMember(findMember);
         findMember.increaseMaximumTicket();
         findMember.initializeRemainingTicket(findMember.getMaximumTicket());
-
-        // **FCM 알림 전송**, 추후 삭제해야 함.
-        String fcmToken = member.getFcmToken(); // FCM 토큰 가져오기
-        if (fcmToken != null) {
-            notificationService.sendNotification(
-                    fcmToken,
-                    "쿠폰 사용 완료",
-                    "쿠폰이 사용되었습니다: " + member.getName()
-            );
-        }
-
     }
 
     // 쿠폰 초기화

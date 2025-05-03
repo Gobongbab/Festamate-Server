@@ -27,5 +27,7 @@ public interface RoomParticipantRepository extends JpaRepository<RoomParticipant
 
     List<RoomParticipant> findByMember_Id(Long memberId);
 
+    List<RoomParticipant> findByRoom_Id(Long roomId);
+
     Optional<RoomParticipant> findByRoom_IdAndMember_Id(Long roomId, Long memberId);
 }
