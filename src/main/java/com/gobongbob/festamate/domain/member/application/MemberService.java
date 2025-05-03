@@ -19,6 +19,8 @@ import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
+import com.gobongbob.festamate.domain.report.domain.Report;
+import com.gobongbob.festamate.domain.report.persistence.ReportRepository;
 import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
@@ -39,6 +41,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final ProfileImageRepository profileImageRepository;
     private final ImageService imageService;
+    private final ReportRepository reportRepository;
 
     @Transactional
     public Member createMember(MemberCreateRequest request) {
@@ -166,6 +169,13 @@ public class MemberService {
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
         member.block();
         memberRepository.save(member);
+
+        // 해당 유저가 피신고자인 모든 신고의 processed = true 처리
+        List<Report> reports = reportRepository.findByReportedMember(member);
+        for (Report report : reports) {
+            report.setProcessed(true);
+        }
+        reportRepository.saveAll(reports);
     }
 
     // 유저 제재 해제(admin)
