@@ -71,8 +71,7 @@ public class RoomController implements RoomApi {
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @ModelAttribute FilteringCondition filteringCondition
     ) {
-        return new SuccessResponse<>(
-                roomService.findBySearchCondition(pageable, filteringCondition));
+        return new SuccessResponse<>(roomService.findBySearchCondition(pageable, filteringCondition));
     }
 
     // 참여 중인 모임방 조회
@@ -129,8 +128,7 @@ public class RoomController implements RoomApi {
             @PathVariable("roomId") Long roomId,
             @RequestBody FriendPhoneNumbersRequest request
     ) {
-        ChatRoom chatRoom = roomParticipationService.participate(memberDetails.getMember().getId(),
-                roomId, request);
+        ChatRoom chatRoom = roomParticipationService.participate(memberDetails.getMember().getId(), roomId, request);
         chatService.sendMessage(
                 chatRoom.getId(),
                 memberDetails.getMember(),
@@ -164,7 +162,6 @@ public class RoomController implements RoomApi {
             @PathVariable("roomId") Long roomId,
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
-        return new SuccessResponse<>(
-                roomParticipationService.isMemberHost(roomId, memberDetails.getMember()));
+        return new SuccessResponse<>(roomParticipationService.isMemberHost(roomId, memberDetails.getMember()));
     }
 }
