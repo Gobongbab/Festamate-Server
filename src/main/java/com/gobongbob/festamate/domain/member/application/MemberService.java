@@ -187,20 +187,6 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    // 프로필 등록 API
-    @Transactional
-    public void registerProfile(ProfileRegisterRequest request, Long userId) {
-
-        // 회원 조회
-        Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
-
-        // 프로필 정보 업데이트
-        Member updatedMember = request.toEntity(member);
-        memberRepository.save(updatedMember);
-
-    }
-
     // 닉네임 중복 체크
     public void checkNicknameDuplication(String nickname) {
         boolean isDuplicate = memberRepository.existsByNickname(nickname);

@@ -11,7 +11,6 @@ public record ProfileRegisterRequest(
         Gender gender,
         String department,
         String kakaoAccessToken, // 카카오 access token
-        String fcmToken,        // FCM 토큰
         String nickname         // 회원이 등록할 닉네임
 ) {
 
@@ -23,8 +22,7 @@ public record ProfileRegisterRequest(
                 studentId,
                 phoneNumber,
                 gender,
-                department,
-                fcmToken
+                department
         );
 
         return existingMember;
