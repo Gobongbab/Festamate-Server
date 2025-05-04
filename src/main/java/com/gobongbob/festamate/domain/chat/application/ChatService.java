@@ -16,7 +16,6 @@ import com.gobongbob.festamate.global.NotificationService;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -57,17 +56,24 @@ public class ChatService {
         messagingTemplate.convertAndSend("/topic/chatRooms/" + chatRoomId, response);
 
         participants.forEach(participant -> {
-            String fcmToken = participant.getMember().getFcmToken(); // FCM 토큰 가져오기
+            String fcmToken = participant.getMember().getFcmToken();
             Long participantId = participant.getMember().getId();
+
             if (fcmToken != null) {
-                notificationService.sendNotification(
-                        fcmToken,
-                        "[Festamate!] 채팅 메시지가 도착했습니다!",
-                        member.getNickname() + ": " + message,
-                        participantId
-                );
+                try {
+                    notificationService.sendNotification(
+                            fcmToken,
+                            "[Festamate!] 채팅 메시지가 도착했습니다!",
+                            member.getNickname() + ": " + message,
+                            participantId
+                    );
+                } catch (RuntimeException e) {
+                    log.warn("FCM 전송 실패 (memberId: {}) - {}", participantId, e.getMessage());
+                    // 필요시: 유효하지 않은 토큰이면 여기서 제거도 가능
+                }
             }
         });
+
     }
 
     // 메시지 조회

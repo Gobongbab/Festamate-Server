@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 public record MessageResponse(
         Long id,
+        Long memberId,
         String nickname,
         String message,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -15,6 +16,7 @@ public record MessageResponse(
     public static MessageResponse fromEntity(Message message) {
         return new MessageResponse(
                 message.getId(),
+                message.getSender().getId(),
                 message.getSender().getNickname(),
                 message.getMessage(),
                 message.getSendDate()
