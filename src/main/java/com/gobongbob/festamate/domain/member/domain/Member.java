@@ -92,8 +92,7 @@ public class Member {
             String studentId,
             String phoneNumber,
             Gender gender,
-            String studentDepartment,
-            String fcmToken
+            String studentDepartment
     ) {
         this.name = name;
         this.nickname = nickname;
@@ -101,7 +100,6 @@ public class Member {
         this.phoneNumber = phoneNumber;
         this.gender = gender;
         this.studentDepartment = studentDepartment;
-        this.fcmToken = fcmToken;
     }
 
     @Convert(converter = RoleConverter.class) // <--- @Enumerated 대신 @Convert 사용
