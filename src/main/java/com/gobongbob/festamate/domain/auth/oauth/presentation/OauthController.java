@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
-public class OauthController {
+public class OauthController implements OauthApi{
 
     private final OauthService oauthService;
     private final MemberService memberService;

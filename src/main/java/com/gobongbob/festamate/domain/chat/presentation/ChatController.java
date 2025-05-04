@@ -18,17 +18,19 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@RequestMapping("/api/messages")
 public class ChatController implements ChatApi {
 
     private final ChatService chatService;
 
     @Override
-    @MessageMapping("/messages/chatRooms/{chatRoomId}")
+    @MessageMapping("/chatRooms/{chatRoomId}")
     public SuccessResponse<Void> sendMessage(
             @DestinationVariable("chatRoomId") Long chatRoomId,
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
@@ -40,7 +42,7 @@ public class ChatController implements ChatApi {
     }
 
     @Override
-    @GetMapping("/api/chatRooms/participations")
+    @GetMapping("/chatRooms/participations")
     public SuccessResponse<Slice<ChatRoomListResponse>> findParticipatingChatRooms(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC) Pageable pageable
@@ -50,7 +52,7 @@ public class ChatController implements ChatApi {
 
     // 메시지 조회
     @Override
-    @GetMapping("/api/messages/chatRooms/{chatRoomId}")
+    @GetMapping("/chatRooms/{chatRoomId}")
     public SuccessResponse<Slice<MessageResponse>> findMessages(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable("chatRoomId") Long chatRoomId,
