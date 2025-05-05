@@ -9,13 +9,13 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ReportReason {
-    UNHEALTHY("음란물/불건전한 만남 및 대화"),
-    ABUSE("욕설/비하"),
-    ADVERTISING("상업적 광고 및 판매"),
-    SPLASH("낚시/놀람/도배"),
-    POLITICS("정당/정치인 비하 및 선거운동"),
-    IMPERSONATION("유출/사칭/사기"),
-    ILLEGAL("불법촬영물 등의 유통");
+    UNHEALTHY("부적절한 내용"),
+    ABUSE("욕설 및 비방"),
+    ADVERTISING("광고 및 홍보"),
+    SPLASH("도배"),
+    POLITICS("정치적 발언"),
+    IMPERSONATION("타인 사칭"),
+    ILLEGAL("불법 행위");
 
     private final String name;
 
