@@ -21,8 +21,7 @@ public class ChatRoom {
     @Builder.Default
     private String lastMessageContent = "";
 
-    @Builder.Default
-    private LocalDateTime lastMessageTime = LocalDateTime.now();
+    private LocalDateTime lastMessageTime;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
