@@ -74,6 +74,7 @@ public class ChatService {
             }
         });
 
+        chatRoom.updateLastMessage(savedMessage.getMessage());
     }
 
     // 메시지 조회
