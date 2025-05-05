@@ -21,10 +21,12 @@ import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class RoomParticipationService {
@@ -54,20 +56,24 @@ public class RoomParticipationService {
 
             // **방 매칭 시 FCM 알림 전송**
             room.getParticipants().forEach(participant -> {
-                String fcmToken = participant.getMember().getFcmToken(); // FCM 토큰 가져오기
+                String fcmToken = participant.getMember().getFcmToken();
                 Long participantId = participant.getMember().getId();
+
                 if (fcmToken != null) {
-                    notificationService.sendNotification(
-                            fcmToken,
-                            "방 매칭 완료",
-                            "방 매칭이 완료되었습니다: " + room.getTitle(),
-                            participantId
-                    );
+                    try {
+                        notificationService.sendNotification(
+                                fcmToken,
+                                "방 매칭 완료",
+                                "방 매칭이 완료되었습니다: " + room.getTitle(),
+                                participantId
+                        );
+                    } catch (RuntimeException e) {
+                        log.warn("FCM 전송 실패 (memberId: {}) - {}", participantId, e.getMessage());
+                        // 필요시: 유효하지 않은 토큰이면 여기서 제거도 가능
+                    }
                 }
             });
         }
-      
-
 
         return room.getChatRoom();
     }
