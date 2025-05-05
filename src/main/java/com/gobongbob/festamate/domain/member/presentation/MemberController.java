@@ -16,51 +16,28 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@RequiredArgsConstructor
 @RestController
 @Validated
-@RequiredArgsConstructor
+@RequestMapping("/api/members")
 @Tag(name = "Member", description = "회원 관련 API")
 public class MemberController implements MemberApi {
 
     private final MemberService memberService;
-    private final TokenService tokenService;
-
-//    @Operation(summary = "회원가입", description = "새로운 회원을 등록합니다.")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-//            @ApiResponse(responseCode = "400", description = "잘못된 요청")
-//    })
-//    @PostMapping("/auth/signup")
-//    public SuccessResponse<Void> signUp(
-//            @Parameter(description = "회원가입 요청 정보")
-//            @RequestBody @Valid MemberCreateRequest request
-//    ) {
-//        Member member = memberService.createMember(request);
-//        return new SuccessResponse<>();
-//    }
 
     // 모든 회원 조회
     @Override
-    @GetMapping("/members")
+    @GetMapping("")
     public SuccessResponse<List<MemberResponse>> findAllMembers() {
         return new SuccessResponse<>(memberService.findAllMembers());
     }
 
     // 회원 상세 조회
     @Override
-    @GetMapping("/members/{memberId}")
+    @GetMapping("/{memberId}")
     public SuccessResponse<MemberResponse> findMemberById(
             @PathVariable("memberId") Long memberId
     ) {
@@ -69,7 +46,7 @@ public class MemberController implements MemberApi {
 
     // 프로필 조회
     @Override
-    @GetMapping("/api/auth/members/profile")
+    @GetMapping("/profile")
     public SuccessResponse<MemberProfileResponse> getProfile(
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
@@ -78,7 +55,7 @@ public class MemberController implements MemberApi {
 
     // 나의 프로필 수정(닉네임)
     @Override
-    @PatchMapping("/api/auth/members/profile")
+    @PatchMapping("/profile")
     public SuccessResponse<Void> updateProfile(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestBody @Valid ProfileUpdateRequest request
@@ -89,7 +66,7 @@ public class MemberController implements MemberApi {
 
     // 나의 프로필 사진 수정
     @Override
-    @PutMapping("/api/auth/members/profile/photo")
+    @PutMapping("/profile/photo")
     public SuccessResponse<Void> updateProfilePhoto(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestPart("profileImage") MultipartFile profileImage
@@ -100,7 +77,7 @@ public class MemberController implements MemberApi {
 
     // 회원 삭제
     @Override
-    @DeleteMapping("/members/{memberId}")
+    @DeleteMapping("/{memberId}")
     public SuccessResponse<Void> deleteMemberById(
             @PathVariable("memberId") Long memberId
     ) {
@@ -110,7 +87,7 @@ public class MemberController implements MemberApi {
 
     // 회원 존재 여부 확인
     @Override
-    @PostMapping("/api/members/exist")
+    @PostMapping("/exist")
     public SuccessResponse<MemberExistResponse> checkMemberExist(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestBody MemberExistRequest request
@@ -120,7 +97,7 @@ public class MemberController implements MemberApi {
 
     // 닉네임 중복 확인
     @Override
-    @GetMapping("/api/auth/register/check/nickname")
+    @GetMapping("/check/nickname")
     public SuccessResponse<String> checkNickname(
             @RequestParam(name = "nickname") String nickname
     ) {
@@ -130,7 +107,7 @@ public class MemberController implements MemberApi {
 
     // FCM 토큰 등록
     @Override
-    @PostMapping("/members/fcm-token")
+    @PostMapping("/fcm-token")
     public SuccessResponse<Void> registerFcmToken(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @RequestBody MemberFcmTokenRequest request
