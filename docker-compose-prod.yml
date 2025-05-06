@@ -21,16 +21,17 @@ services:
       - redis
 
   # Redis 캐시 서버 설정
-  redis:
-    image: redis:6.2.4-alpine
-    container_name: redis-prod
+  ${REDIS_HOST}:
+    image: redis:latest
+    container_name: ${REDIS_CONTAINER_NAME}
     restart: always
     ports:
-      - "16379:6379"
+      - "${REDIS_PORT}:6379"
     environment:
-      - REDIS_HOST=localhost
-      - REDIS_PASSWORD=
-      - REDIS_PORT=16379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_CONTAINER_NAME=${REDIS_CONTAINER_NAME}
       - TZ=Asia/Seoul
     volumes:
       - redis-dev-data:/data # Redis 데이터 영속성을 위한 볼륨
