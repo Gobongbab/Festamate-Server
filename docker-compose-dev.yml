@@ -26,10 +26,10 @@ services:
 
 
       # --- Redis 관련 ---
-      # application.yml의 localhost 대신 Docker Compose 네트워크의 서비스 이름(redis) 사용
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_CONTAINER_NAME=${REDIS_CONTAINER_NAME}
 
       # --- Firebase 관련 ---
       # application.yml에서는 직접 사용되지 않았지만, SDK가 참조할 수 있는 표준 변수 또는 사용자 정의 변수
