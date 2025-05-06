@@ -1,7 +1,7 @@
 name: Java CD-Prod
 
 on:
-  push:
+  pull_request:
     branches: [ main ] # 운영 브랜치 (main)
     paths-ignore:
       - '**.md'
