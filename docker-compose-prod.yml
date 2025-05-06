@@ -21,7 +21,7 @@ services:
       - redis-service
 
   # Redis 캐시 서버 설정
-  redis_service:
+  redis-service:
     image: redis:latest
     container_name: ${REDIS_CONTAINER_NAME}
     restart: always
