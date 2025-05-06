@@ -86,7 +86,7 @@ services:
       - redis
 
   # Redis 캐시 서버 설정
-  ${REDIS_HOST}: # Redis 서비스의 이름
+  redis_service:
     image: redis:latest
     container_name: ${REDIS_CONTAINER_NAME}
     restart: always
