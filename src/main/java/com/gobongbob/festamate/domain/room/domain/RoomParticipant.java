@@ -9,6 +9,9 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"room_id", "member_id"})
+)
 public class RoomParticipant {
 
     @Id

@@ -66,8 +66,6 @@ public class RoomParticipationService {
                 }
             });
         }
-      
-
 
         return room.getChatRoom();
     }
