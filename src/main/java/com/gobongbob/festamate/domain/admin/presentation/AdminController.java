@@ -2,16 +2,23 @@ package com.gobongbob.festamate.domain.admin.presentation;
 
 import com.gobongbob.festamate.domain.admin.application.AdminService;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.auth.jwt.dto.request.LoginRequest;
+import com.gobongbob.festamate.domain.auth.oauth.dto.response.AuthResponse;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.report.application.ReportService;
 import com.gobongbob.festamate.domain.report.dto.response.ReportRoomResponse;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.global.response.SuccessResponse;
+import jakarta.servlet.http.HttpServletResponse;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -88,12 +95,37 @@ public class AdminController implements AdminApi {
     // 관리자용 일반 로그인
     @Override
     @PostMapping("/login")
-    public SuccessResponse<Map<String, String>> loginAdmin(
-            @RequestBody
-            LoginRequest loginRequest
+    public ResponseEntity<SuccessResponse<AuthResponse>> loginAdmin(
+            @RequestBody LoginRequest loginRequest,
+            HttpServletResponse response
     ) {
+        // 1. AdminService 호출하여 토큰 Map 받기
         Map<String, String> tokens = adminService.loginAdmin(loginRequest);
-        return new SuccessResponse<>(tokens);
+
+        // 2. Map에서 accessToken과 refreshToken 추출
+        String accessToken = tokens.get("accessToken");
+        String refreshToken = tokens.get("refreshToken");
+
+        // 3. 리프레시 토큰 HttpOnly 쿠키 설정 (아래 helper 메서드 사용)
+        ResponseCookie refreshTokenCookie = createAdminRefreshTokenCookie(refreshToken);
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+        // 4. 본문에는 액세스 토큰만 포함하는 DTO 반환
+        AuthResponse authResponse = new AuthResponse(accessToken); // accessToken만 담는 DTO
+        return ResponseEntity.ok(new SuccessResponse<>(authResponse));
+    }
+
+    // 관리자용 RefreshToken 쿠키 생성 유틸리티 메서드
+    private ResponseCookie createAdminRefreshTokenCookie(String refreshToken) {
+        Duration adminRefreshTokenValidity = TokenType.ADMIN_REFRESH.getDuration(); // TokenType 사용 시
+
+        return ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)   // JavaScript 접근 불가
+                .secure(true)     // HTTPS 환경에서만 전송
+                .path("/")        // 쿠키 적용 경로 (애플리케이션 전체)
+                .maxAge(adminRefreshTokenValidity) // 쿠키 만료 시간 (초 단위)
+                .sameSite("None")
+                .build();
     }
 
     // 관리자용 모든 신고 조회

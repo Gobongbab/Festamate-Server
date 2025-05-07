@@ -25,9 +25,9 @@ spring:
         default_batch_fetch_size: 1000
   data:
     redis:
-      host: redis #docker-compose.yml에서 Redis 서비스의 이름을 사용
-      port: 6379 # Docker에서 Redis 컨테이너가 6379 포트를 사용하므로, 호스트에서도 동일한 포트를 사용
-      password:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
   security:
     oauth2:
       client:

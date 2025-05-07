@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth/phone")
 @RequiredArgsConstructor
-public class TokyoSnsController {
+public class TokyoSnsController implements TokyoSnsApi {
 
     private final TokyoSnsService tokyoSnsService;
 

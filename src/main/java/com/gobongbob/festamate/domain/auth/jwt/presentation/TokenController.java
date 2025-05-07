@@ -47,7 +47,7 @@ public class TokenController {
                     refreshTokenCookie);
 
             // 3. 성공 시: 새 리프레시 토큰 HttpOnly 쿠키 설정
-            Duration refreshTokenValidity = TokenType.FINAL_REFRESH.getDuration(); // 6개월(180일)
+            Duration refreshTokenValidity = TokenType.FINAL_REFRESH.getDuration();
             ResponseCookie newRefreshTokenCookie = ResponseCookie.from("refreshToken",
                             result.getRefreshToken()) // 서비스로부터 받은 새 리프레시 토큰 값 사용
                     .httpOnly(true)          // JavaScript 접근 불가
