@@ -18,7 +18,8 @@ public class ChatRoom {
 
     private String title;
 
-    private String lastMessageContent;
+    @Builder.Default
+    private String lastMessageContent = "";
 
     private LocalDateTime lastMessageTime;
 

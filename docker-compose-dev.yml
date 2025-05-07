@@ -26,10 +26,10 @@ services:
 
 
       # --- Redis 관련 ---
-      # application.yml의 localhost 대신 Docker Compose 네트워크의 서비스 이름(redis) 사용
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_CONTAINER_NAME=${REDIS_CONTAINER_NAME}
 
       # --- Firebase 관련 ---
       # application.yml에서는 직접 사용되지 않았지만, SDK가 참조할 수 있는 표준 변수 또는 사용자 정의 변수
@@ -70,21 +70,29 @@ services:
 
       # --- CORS 설정 ---
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS} # CORS 허용 도메인 설정
+
+      # --- Redis 관련 ---
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_CONTAINER_NAME=${REDIS_CONTAINER_NAME}
+
     volumes: # EC2 호스트 경로와 Docker 컨테이너 내부의 특정 경로를 연결(마운트)하는 역할
       # EC2의 키 파일 경로: /home/ubuntu/festamate-firebase-key.json 컨테이너 내부 경로:/config/festamate-firebase-key.json
       - /home/ubuntu/festamate-firebase-key.json:/config/festamate-firebase-key.json:ro # 읽기 전용(ro)으로 마운트 권장
     networks:
       - festamate-network
     depends_on:
-      - redis
+      - redis-service
 
   # Redis 캐시 서버 설정
-  redis: # Redis 서비스의 이름
-    image: redis:6.2.4-alpine
-    container_name: redis-dev
+  redis-service:
+    image: redis:latest
+    container_name: ${REDIS_CONTAINER_NAME}
     restart: always
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD} # Redis 비밀번호 설정
     networks:
       - festamate-network
 

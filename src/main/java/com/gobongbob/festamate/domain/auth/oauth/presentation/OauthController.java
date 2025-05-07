@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
-public class OauthController {
+public class OauthController implements OauthApi {
 
     private final OauthService oauthService;
     private final MemberService memberService;
@@ -95,7 +95,7 @@ public class OauthController {
     }
 
     private ResponseCookie createRefreshTokenCookie(String refreshToken) {
-        Duration refreshTokenValidity = TokenType.FINAL_REFRESH.getDuration(); // 6개월(180일)
+        Duration refreshTokenValidity = TokenType.FINAL_REFRESH.getDuration();
 
         return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)          // JavaScript 접근 불가
