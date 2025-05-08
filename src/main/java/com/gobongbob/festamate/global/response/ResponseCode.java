@@ -19,6 +19,7 @@ public enum ResponseCode {
     ROOM_FULL(false, "모임이 가득 찼습니다."),
     PHONE_NUMBER_DUPLICATE(false, "같은 회원이 동시에 참여할 수 없습니다."),
     GENDER_NOT_MATCH(false, "성별이 일치하지 않습니다."),
+    STUDENT_ID_NOT_MATCH(false, "학번이 일치하지 않습니다."),
     MUST_HOST(false, "방장이어야 합니다."),
     MUST_NORMAL(false, "일반 회원이어야 합니다."),
     CAN_NOT_UPDATE(false, "방에 방장을 제외한 다른 사용자가 입장한 상태에서는 수정할 수 없습니다."),
