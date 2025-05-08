@@ -140,6 +140,7 @@ public class RoomParticipationService {
         validateRoomJoinable(room); // 방에 참여할 수 있는 인원인지 확인
         validatePhoneNumberUnique(participants); // 참여자 간의 전화번호가 중복되지 않는지 확인
         validateGender(room, participants); // 방의 성별과 참여자의 성별이 일치하는지 확인
+        validateStudentId(room, participants); // 방의 학번과 참여자의 학번이 일치하는지 확인
     }
 
     private void validateRoomMatching(Room room) {
@@ -178,6 +179,17 @@ public class RoomParticipationService {
 
         if (hasMismatchedGender) {
             throw new BadRequestException(GENDER_NOT_MATCH);
+        }
+    }
+
+    private void validateStudentId(Room room, List<Member> participants) {
+        boolean hasMismatchedStudentId = participants.stream()
+                .map(member -> member.getStudentId().substring(2, 4))
+                .anyMatch(studentId -> Integer.parseInt(studentId) < Integer.parseInt(room.getPreferredStudentIdMin())
+                        || Integer.parseInt(studentId) > Integer.parseInt(room.getPreferredStudentIdMax()));
+
+        if (hasMismatchedStudentId) {
+            throw new BadRequestException(STUDENT_ID_NOT_MATCH);
         }
     }
 
