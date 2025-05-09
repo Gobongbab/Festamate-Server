@@ -40,9 +40,9 @@ public class Room extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender preferredGender;
 
-    private String preferredStudentIdMin;
+    private int preferredStudentIdMin;
 
-    private String preferredStudentIdMax;
+    private int preferredStudentIdMax;
 
     private LocalDateTime meetingDateTime;
 
@@ -73,8 +73,8 @@ public class Room extends BaseEntity {
             String place,
             String content,
             Gender preferredGender,
-            String preferredStudentIdMin,
-            String preferredStudentIdMax,
+            int preferredStudentIdMin,
+            int preferredStudentIdMax,
             LocalDateTime meetingDateTime,
             int maxParticipants
     ) {
