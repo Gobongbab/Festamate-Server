@@ -18,10 +18,9 @@ public class AuditConfig {
         return () -> {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Object principal = authentication.getPrincipal();
-            if (!(principal instanceof CustomMemberDetails)) {
+            if (!(principal instanceof CustomMemberDetails memberDetails)) {
                 return Optional.empty();
             }
-            CustomMemberDetails memberDetails = (CustomMemberDetails) principal;
 
             return Optional.of(memberDetails.getMember().getName());
         };
