@@ -130,8 +130,8 @@ public class RoomService {
                 request.place(),
                 request.content(),
                 request.preferredGender(),
-                request.preferredStudentIdMin(),
-                request.preferredStudentIdMax(),
+                Integer.parseInt(request.preferredStudentIdMin()),
+                Integer.parseInt(request.preferredStudentIdMax()),
                 request.meetingDateTime(),
                 request.maxParticipants()
         );
