@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.chat.domain;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
@@ -10,7 +11,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ChatRoom {
+public class ChatRoom extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
