@@ -4,6 +4,7 @@ import static com.gobongbob.festamate.domain.room.domain.QRoom.room;
 import static org.springframework.util.StringUtils.hasText;
 
 import com.gobongbob.festamate.domain.member.domain.Gender;
+import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.Status;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
@@ -37,6 +38,24 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
                         genderEquals(filteringCondition.gender()),
                         participantsEquals(filteringCondition.participants()),
                         studentIdContains(filteringCondition.minStudentId(), filteringCondition.maxStudentId())
+                )
+                .offset(pageable.getOffset())
+                .limit(pageSize + 1);
+
+        List<Room> content = addSortingQuery(basicQuery, pageable.getSort().toString());
+
+        return new SliceImpl<>(content, pageable, hasNextPage(content, pageSize));
+    }
+
+    @Override
+    public Slice<Room> findRecommendedRooms(Pageable pageable, Member member) {
+        int pageSize = pageable.getPageSize();
+
+        JPAQuery<Room> basicQuery = queryFactory
+                .selectFrom(room)
+                .where(
+                        genderNotEquals(member.getGender()),
+                        studentIdContains(member.getStudentId())
                 )
                 .offset(pageable.getOffset())
                 .limit(pageSize + 1);
@@ -83,10 +102,29 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
         return null;
     }
 
+    private BooleanExpression genderNotEquals(Gender gender) {
+        if (gender != null && hasText(gender.getName())) {
+            Gender oppositeGender = gender == Gender.MALE ? Gender.FEMALE : Gender.MALE;
+
+            return room.preferredGender.eq(oppositeGender);
+        }
+
+        return null;
+    }
+
     private BooleanExpression studentIdContains(String minStudentId, String maxStudentId) {
         if (hasText(minStudentId) && hasText(maxStudentId)) {
             // 모임방의 최소 학번 조건이 25일 경우 24는 통과하고, 최대 학번 조건이 20일 경우 19는 통과하지 못함
             return room.preferredStudentIdMin.goe(minStudentId).and(room.preferredStudentIdMax.loe(maxStudentId));
+        }
+
+        return null;
+    }
+
+    private BooleanExpression studentIdContains(String studentId) {
+        if (hasText(studentId)) {
+            // 모임방의 최소 학번 조건이 25일 경우 24는 통과하고, 최대 학번 조건이 20일 경우 19는 통과하지 못함
+            return room.preferredStudentIdMin.goe(studentId).and(room.preferredStudentIdMax.loe(studentId));
         }
 
         return null;
