@@ -67,7 +67,7 @@ public class RoomController implements RoomApi {
 
     // 추천 모임방 조회
     @Override
-    @GetMapping("")
+    @GetMapping("/recommended")
     public SuccessResponse<Slice<RoomListResponse>> findRecommendedRooms(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
