@@ -9,6 +9,8 @@ import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.Status;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -114,17 +116,29 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
 
     private BooleanExpression studentIdContains(String minStudentId, String maxStudentId) {
         if (hasText(minStudentId) && hasText(maxStudentId)) {
-            // 모임방의 최소 학번 조건이 25일 경우 24는 통과하고, 최대 학번 조건이 20일 경우 19는 통과하지 못함
-            return room.preferredStudentIdMin.goe(minStudentId).and(room.preferredStudentIdMax.loe(maxStudentId));
+            NumberTemplate<Integer> preferredMin = Expressions.numberTemplate(Integer.class, "CAST({0} AS SIGNED)",
+                    room.preferredStudentIdMin);
+            NumberTemplate<Integer> preferredMax = Expressions.numberTemplate(Integer.class, "CAST({0} AS SIGNED)",
+                    room.preferredStudentIdMax);
+
+            return preferredMin.goe(Integer.parseInt(minStudentId))
+                    .and(preferredMax.loe(Integer.parseInt(maxStudentId)));
         }
 
         return null;
     }
 
-    private BooleanExpression studentIdContains(String studentId) {
-        if (hasText(studentId)) {
+
+    private BooleanExpression studentIdContains(String fullStudentId) {
+        if (hasText(fullStudentId)) {
+            int studentId = Integer.parseInt(fullStudentId.substring(2, 4));
+            NumberTemplate<Integer> preferredMin = Expressions.numberTemplate(Integer.class, "CAST({0} AS SIGNED)",
+                    room.preferredStudentIdMin);
+            NumberTemplate<Integer> preferredMax = Expressions.numberTemplate(Integer.class, "CAST({0} AS SIGNED)",
+                    room.preferredStudentIdMax);
+
             // 모임방의 최소 학번 조건이 25일 경우 24는 통과하고, 최대 학번 조건이 20일 경우 19는 통과하지 못함
-            return room.preferredStudentIdMin.goe(studentId).and(room.preferredStudentIdMax.loe(studentId));
+            return preferredMin.goe(studentId).and(preferredMax.loe(studentId));
         }
 
         return null;
