@@ -17,11 +17,11 @@ public class AuditConfig {
     public AuditorAware<String> auditorProvider() {
         return () -> {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (!(principal instanceof CustomMemberDetails)) {
                 return Optional.empty();
             }
-
-            CustomMemberDetails memberDetails = (CustomMemberDetails) authentication.getPrincipal();
+            CustomMemberDetails memberDetails = (CustomMemberDetails) principal;
 
             return Optional.of(memberDetails.getMember().getName());
         };
