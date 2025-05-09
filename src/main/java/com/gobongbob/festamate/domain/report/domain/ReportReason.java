@@ -1,8 +1,5 @@
 package com.gobongbob.festamate.domain.report.domain;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_REPORT_REASON;
-
-import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -18,13 +15,4 @@ public enum ReportReason {
     ILLEGAL("불법 행위");
 
     private final String name;
-
-    public static ReportReason findByName(String name) {
-        for (ReportReason reason : ReportReason.values()) {
-            if (reason.name.equals(name)) {
-                return reason;
-            }
-        }
-        throw new BadRequestException(NO_REPORT_REASON);
-    }
 }
