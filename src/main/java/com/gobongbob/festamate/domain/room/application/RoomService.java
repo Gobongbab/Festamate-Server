@@ -248,10 +248,11 @@ public class RoomService {
 
     private Image setBasicImage() {
         String basicImageUrl = "https://festamate-bucket.s3.ap-northeast-2.amazonaws.com/icon+(1).png";
+        UUID uuid = UUID.randomUUID();
 
         return Image.builder()
                 .url(basicImageUrl)
-                .uploadName("페메 로고")
+                .uploadName("페메 로고"+ uuid)
                 .storeName("페메 로고")
                 .build();
     }
