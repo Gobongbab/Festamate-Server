@@ -77,7 +77,7 @@ public class RoomService {
     private List<RoomParticipant> collectAndValidateInitialParticipants(FriendPhoneNumbersRequest request, Room room, Member hostMember) {
         List<Member> friendMembers = request.friendPhoneNumbers().stream()
                 .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
-                        .orElseThrow(() -> new BadRequestException("전화번호 [" + phoneNumber + "] 에 해당하는 친구를 찾을 수 없습니다.")))
+                        .orElseThrow(() -> new BadRequestException("전화번호 [" + phoneNumber + "] 에 해당하는 유저를 찾을 수 없습니다.")))
                 .collect(Collectors.toList());
 
         List<Member> allMembersForValidation = new ArrayList<>(friendMembers);
@@ -114,7 +114,7 @@ public class RoomService {
     private void validateSufficientTicketsForFriends(List<Member> members) {
         for (Member friend : members) {
             if (friend.getRemainingTicket() <= 0) {
-                throw new BadRequestException("친구 " + friend.getNickname() + "님의 티켓이 부족합니다.");
+                throw new BadRequestException(friend.getNickname() + "님의 티켓이 부족합니다.");
             }
         }
     }
@@ -252,8 +252,8 @@ public class RoomService {
 
         return Image.builder()
                 .url(basicImageUrl)
-                .uploadName("페메 로고"+ uuid)
-                .storeName("페메 로고")
+                .uploadName("페메 로고")
+                .storeName("페메 로고" + uuid)
                 .build();
     }
 
