@@ -2,7 +2,12 @@ package com.gobongbob.festamate.global.util;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.member.domain.Member;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -64,6 +69,7 @@ public class TokenProvider {
                 .claim("phoneNumber", member.getPhoneNumber())
                 .claim("type", tokenType)
                 .claim("memberType", type.name())
+                .claim("status", member.getStatus())
                 .claim("role",
                         member.getRole().getAuthority()); // "ROLE_USER", "ROLE_ADMIN" 등 권한 문자열 추가
 
