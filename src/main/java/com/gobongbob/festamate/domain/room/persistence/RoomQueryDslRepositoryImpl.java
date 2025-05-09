@@ -115,8 +115,8 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
     private BooleanExpression studentIdContains(String minStudentId, String maxStudentId) {
         if (hasText(minStudentId) && hasText(maxStudentId)) {
 
-            return room.preferredStudentIdMin.goe(Integer.parseInt(minStudentId))
-                    .and(room.preferredStudentIdMax.loe(Integer.parseInt(maxStudentId)));
+            return room.preferredStudentIdMin.loe(Integer.parseInt(minStudentId))
+                    .and(room.preferredStudentIdMax.goe(Integer.parseInt(maxStudentId)));
         }
 
         return null;
@@ -127,8 +127,8 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
         if (hasText(fullStudentId)) {
             int studentId = Integer.parseInt(fullStudentId.substring(2, 4));
 
-            // 모임방의 최소 학번 조건이 25일 경우 24는 통과하고, 최대 학번 조건이 20일 경우 19는 통과하지 못함
-            return room.preferredStudentIdMin.goe(studentId).and(room.preferredStudentIdMax.loe(studentId));
+            // 모임방의 최대 학번 조건이 25일 경우 24는 통과하고, 최소 학번 조건이 20일 경우 19는 통과하지 못함
+            return room.preferredStudentIdMin.loe(studentId).and(room.preferredStudentIdMax.goe(studentId));
         }
 
         return null;
