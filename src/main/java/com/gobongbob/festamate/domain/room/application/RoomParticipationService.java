@@ -188,8 +188,8 @@ public class RoomParticipationService {
     private void validateStudentId(Room room, List<Member> participants) {
         boolean hasMismatchedStudentId = participants.stream()
                 .map(member -> member.getStudentId().substring(2, 4))
-                .anyMatch(studentId -> Integer.parseInt(studentId) < Integer.parseInt(room.getPreferredStudentIdMin())
-                        || Integer.parseInt(studentId) > Integer.parseInt(room.getPreferredStudentIdMax()));
+                .anyMatch(studentId -> Integer.parseInt(studentId) < room.getPreferredStudentIdMin()
+                        || Integer.parseInt(studentId) > room.getPreferredStudentIdMax());
 
         if (hasMismatchedStudentId) {
             throw new BadRequestException(STUDENT_ID_NOT_MATCH);
