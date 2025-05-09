@@ -9,6 +9,7 @@ import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
+import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
@@ -23,9 +24,10 @@ import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
-import com.gobongbob.festamate.global.NotificationService;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,35 +44,97 @@ import org.springframework.web.multipart.MultipartFile;
 public class RoomService {
 
     private final RoomRepository roomRepository;
-    private final RoomImagePicker roomImagePicker;
     private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
     private final ImageService imageService;
     private final MemberRepository memberRepository;
-    private final NotificationService notificationService;
 
     // 방 생성
     @Transactional
-    @CheckActiveUser // 메서드 실행 전 현재 사용자가 ACTIVE 상태인지 AOP로 확인 (BLOCKED 시 AccessDeniedException 발생)
+    @CheckActiveUser// 메서드 실행 전 현재 사용자가 ACTIVE 상태인지 AOP로 확인 (BLOCKED 시 AccessDeniedException 발생)
     public ChatRoom createRoom(Long memberId, RoomCreateRequest request, List<MultipartFile> imageFiles) {
-        Member member = memberRepository.findById(memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
+        Member hostMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
-        Room createdRoom = roomRepository.save(request.toEntity(member));
+        Room createdRoom = roomRepository.save(request.toEntity(hostMember));
         uploadImageIfExist(imageFiles, createdRoom);
 
         ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
         chatRoomRepository.save(chatRoom);
 
-        List<RoomParticipant> participants = collectParticipants(request, createdRoom, member);
+        List<RoomParticipant> participants = collectAndValidateInitialParticipants(request.friendPhoneNumbers(), createdRoom, hostMember);
 
         participants.forEach(participant -> {
             roomParticipantRepository.save(participant);
-            participant.getMember().useTicket();
+            participant.getMember().useTicket(); // 각 참가자의 티켓 사용
         });
 
         return chatRoom;
+    }
+
+
+    private List<RoomParticipant> collectAndValidateInitialParticipants(FriendPhoneNumbersRequest request, Room room, Member hostMember) {
+        List<Member> friendMembers = request.friendPhoneNumbers().stream()
+                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
+                        .orElseThrow(() -> new BadRequestException("전화번호 [" + phoneNumber + "] 에 해당하는 유저를 찾을 수 없습니다.")))
+                .collect(Collectors.toList());
+
+        List<Member> allMembersForValidation = new ArrayList<>(friendMembers);
+        allMembersForValidation.add(hostMember); // 호스트도 전체 유효성 검사 목록에 포함
+
+        // 3. 유효성 검증
+        // 3.1. 모든 유저의 티켓 수를 확인
+        validateSufficientTicketsForFriends(allMembersForValidation);
+
+        // 3.2 해당 전화번호를 통해 조회한 유저가 DB에 존재하는지
+        for (Member member : allMembersForValidation) {
+            if (!memberRepository.existsByPhoneNumber(member.getPhoneNumber())) {
+                throw new BadRequestException("전화번호 [" + member.getPhoneNumber() + "] 에 해당하는 사용자를 찾을 수 없습니다.");
+            }
+        }
+
+        // 3.3. 호스트, 친구들 사이에 전화번호가 중복되지 않는지
+        validatePhoneNumberUniqueness(allMembersForValidation);
+
+        // 3.4. 성별이 호스트의 성별과 일치하는지
+        validateFriendGroupGender(friendMembers, hostMember.getGender());
+
+
+        // 4. 모든 유효성 검증이 끝났다면 방 생성 진행
+        List<RoomParticipant> participants = new ArrayList<>();
+        for (Member friend : friendMembers) {
+            participants.add(RoomParticipant.createParticipant(room, friend, ParticipantRole.HOST));
+        }
+        participants.add(RoomParticipant.createHost(room, hostMember));
+
+        return participants;
+    }
+
+    private void validateSufficientTicketsForFriends(List<Member> members) {
+        for (Member friend : members) {
+            if (friend.getRemainingTicket() <= 0) {
+                throw new BadRequestException(friend.getNickname() + "님의 티켓이 부족합니다.");
+            }
+        }
+    }
+
+    private void validatePhoneNumberUniqueness(List<Member> members) {
+        long distinctPhoneNumbers = members.stream()
+                .map(Member::getPhoneNumber)
+                .distinct()
+                .count();
+        if (distinctPhoneNumbers < members.size()) {
+            throw new BadRequestException(PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS);
+        }
+    }
+
+    private void validateFriendGroupGender(List<Member> friendMembers, Gender hostGender) {
+        for (Member friend : friendMembers) {
+            if (friend.getGender() != hostGender) {
+                throw new BadRequestException("친구 " + friend.getNickname() + "님의 성별(" + friend.getGender() + ")이 호스트님의 성별(" + hostGender + ")과 일치하지 않습니다.");
+            }
+        }
     }
 
     // 방 전체 조회
@@ -154,22 +218,6 @@ public class RoomService {
          */
     }
 
-    private List<RoomParticipant> collectParticipants(RoomCreateRequest request, Room room, Member member) {
-        List<RoomParticipant> participants = createHostParticipants(room, request.friendPhoneNumbers());
-        participants.add(RoomParticipant.createHost(room, member));
-
-        return participants;
-    }
-
-    private List<RoomParticipant> createHostParticipants(Room room, FriendPhoneNumbersRequest request) {
-        return request.friendPhoneNumbers()
-                .stream()
-                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
-                        .orElseThrow(() -> new BadRequestException(NO_MEMBER))
-                ).map(member -> RoomParticipant.createParticipant(room, member, ParticipantRole.HOST))
-                .collect(Collectors.toList());
-    }
-
     private RoomAuthority findRoomAuthorityByMember(Room room, CustomMemberDetails memberDetails) {
         if (memberDetails == null) {
             return RoomAuthority.NON_MEMBER;
@@ -192,31 +240,23 @@ public class RoomService {
             createdRoom.assignImages(roomImages);
         }
         if (imageFiles == null || imageFiles.isEmpty()) {
-            Image image = pickRandomImage();
+            Image image = setBasicImage();
             RoomImage roomImage = RoomImage.fromEntity(image);
             createdRoom.assignImages(List.of(roomImage));
         }
     }
 
-    private Image pickRandomImage() {
-        String randomImageUrl = roomImagePicker.getRandomImageUrl();
+    private Image setBasicImage() {
+        String basicImageUrl = "https://festamate-bucket.s3.ap-northeast-2.amazonaws.com/icon+(1).png";
+        UUID uuid = UUID.randomUUID();
 
         return Image.builder()
-                .url(randomImageUrl)
-                .uploadName(UUID.randomUUID().toString())
-                .storeName(UUID.randomUUID().toString())
+                .url(basicImageUrl)
+                .uploadName("페메 로고")
+                .storeName("페메 로고" + uuid)
                 .build();
     }
 
-    // chatService에 있는 validateRoomParticipation와 중복됩니다. 이 부분 확인 부탁드려요!
-    private void validateRoomParticipation(Long memberId) {
-        roomParticipantRepository.findByMember_Id(memberId)
-                .stream()
-                .findFirst()
-                .ifPresent(roomParticipant -> {
-                    throw new BadRequestException(ALREADY_PARTICIPATING);
-                });
-    }
 
     private void validateIsHost(Room room, Member member) {
         if (!member.isHost(room) && !member.isAdmin()) {
