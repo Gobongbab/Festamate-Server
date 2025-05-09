@@ -4,17 +4,16 @@ import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.report.domain.Report;
 import com.gobongbob.festamate.domain.report.domain.ReportReason;
 import com.gobongbob.festamate.domain.room.domain.Room;
-
 import java.time.LocalDateTime;
 
 public record ReportRoomRequest(
-        String reason
+        ReportReason reason
 ) {
 
     public Report toEntity(Member reporter, Room room, Member reportedMember) {
         return Report.builder()
                 .room(room)
-                .reason(ReportReason.findByName(reason))
+                .reason(reason)
                 .reporter(reporter)
                 .reportedMember(reportedMember)
                 .reportDate(LocalDateTime.now())

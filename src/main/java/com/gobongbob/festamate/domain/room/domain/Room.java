@@ -4,6 +4,7 @@ import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Room {
+public class Room extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,9 +40,9 @@ public class Room {
     @Enumerated(EnumType.STRING)
     private Gender preferredGender;
 
-    private String preferredStudentIdMin;
+    private int preferredStudentIdMin;
 
-    private String preferredStudentIdMax;
+    private int preferredStudentIdMax;
 
     private LocalDateTime meetingDateTime;
 
@@ -72,8 +73,8 @@ public class Room {
             String place,
             String content,
             Gender preferredGender,
-            String preferredStudentIdMin,
-            String preferredStudentIdMax,
+            int preferredStudentIdMin,
+            int preferredStudentIdMax,
             LocalDateTime meetingDateTime,
             int maxParticipants
     ) {

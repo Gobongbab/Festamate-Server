@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.room.domain;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import lombok.*;
 @Table(
         uniqueConstraints = @UniqueConstraint(columnNames = {"room_id", "member_id"})
 )
-public class RoomParticipant {
+public class RoomParticipant extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

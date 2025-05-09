@@ -24,8 +24,8 @@ public record RoomUpdateRequest(
                 .place(place)
                 .content(content)
                 .preferredGender(preferredGender)
-                .preferredStudentIdMin(preferredStudentIdMin)
-                .preferredStudentIdMax(preferredStudentIdMax)
+                .preferredStudentIdMin(Integer.parseInt(preferredStudentIdMin))
+                .preferredStudentIdMax(Integer.parseInt(preferredStudentIdMax))
                 .meetingDateTime(meetingDateTime)
                 .maxParticipants(maxParticipants)
                 .build();

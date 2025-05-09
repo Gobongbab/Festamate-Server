@@ -58,6 +58,18 @@ public interface RoomApi {
             @ModelAttribute FilteringCondition filteringCondition
     );
 
+    @Operation(summary = "추천 모임 조회", description = "사용자에게 추천하는 모임 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
+    })
+    @GetMapping("")
+    SuccessResponse<Slice<RoomListResponse>> findRecommendedRooms(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @Parameter(description = "페이징 정보")
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    );
+
     @Operation(summary = "참여 중인 모임방 조회", description = "사용자가 참여 중인 방 목록을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")

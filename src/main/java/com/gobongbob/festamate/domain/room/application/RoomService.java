@@ -143,6 +143,12 @@ public class RoomService {
                 .map(RoomListResponse::fromEntity);
     }
 
+    // 추천 모임방 조회
+    public Slice<RoomListResponse> findRecommendedRooms(Pageable pageable, Member member) {
+        return roomRepository.findRecommendedRooms(pageable, member)
+                .map(RoomListResponse::fromEntity);
+    }
+
     // 참여 중인 모임방 조회
     @CheckActiveUser
     public List<RoomListResponse> findParticipatingRooms(Long memberId) {
@@ -188,8 +194,8 @@ public class RoomService {
                 request.place(),
                 request.content(),
                 request.preferredGender(),
-                request.preferredStudentIdMin(),
-                request.preferredStudentIdMax(),
+                Integer.parseInt(request.preferredStudentIdMin()),
+                Integer.parseInt(request.preferredStudentIdMax()),
                 request.meetingDateTime(),
                 request.maxParticipants()
         );
