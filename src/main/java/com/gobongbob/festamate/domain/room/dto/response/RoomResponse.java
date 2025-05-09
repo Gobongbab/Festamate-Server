@@ -18,8 +18,8 @@ public record RoomResponse(
         String place,
         String content,
         Gender preferredGender,
-        String preferredStudentIdMin,
-        String preferredStudentIdMax,
+        int preferredStudentIdMin,
+        int preferredStudentIdMax,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime meetingDateTime,
         int maxParticipants,
