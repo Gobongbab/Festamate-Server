@@ -44,7 +44,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class RoomService {
 
     private final RoomRepository roomRepository;
-    private final RoomImagePicker roomImagePicker;
     private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
@@ -235,19 +234,19 @@ public class RoomService {
             createdRoom.assignImages(roomImages);
         }
         if (imageFiles == null || imageFiles.isEmpty()) {
-            Image image = pickRandomImage();
+            Image image = setBasicImage();
             RoomImage roomImage = RoomImage.fromEntity(image);
             createdRoom.assignImages(List.of(roomImage));
         }
     }
 
-    private Image pickRandomImage() {
-        String randomImageUrl = roomImagePicker.getRandomImageUrl();
+    private Image setBasicImage() {
+        String basicImageUrl = "https://festamate-bucket.s3.ap-northeast-2.amazonaws.com/icon+(1).png";
 
         return Image.builder()
-                .url(randomImageUrl)
-                .uploadName(UUID.randomUUID().toString())
-                .storeName(UUID.randomUUID().toString())
+                .url(basicImageUrl)
+                .uploadName("페메 로고")
+                .storeName("페메 로고")
                 .build();
     }
 
