@@ -14,7 +14,6 @@ import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.domain.Role;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
 import com.gobongbob.festamate.domain.member.dto.request.MemberFcmTokenRequest;
-import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
@@ -207,7 +206,10 @@ public class MemberService {
 
     // 회원 존재 여부 확인
     public MemberExistResponse checkMemberExist(String phoneNumber) {
-        return new MemberExistResponse(memberRepository.existsByPhoneNumber(phoneNumber));
+        Member member = memberRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
+
+        return new MemberExistResponse(memberRepository.existsByPhoneNumber(phoneNumber), member.getGender());
     }
 
     // 아래부터는 oauth2를 위한 메서드

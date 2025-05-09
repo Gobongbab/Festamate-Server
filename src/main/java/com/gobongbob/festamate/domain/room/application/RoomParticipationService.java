@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 @Slf4j
@@ -53,26 +55,7 @@ public class RoomParticipationService {
         participants.forEach(participant -> participateRoom(participant, room));
         if (room.isFull()) { // 방에 참여자가 다 찼을 때
             room.updateStatus(Status.MATCHED);
-
-            // **방 매칭 시 FCM 알림 전송**
-            room.getParticipants().forEach(participant -> {
-                String fcmToken = participant.getMember().getFcmToken();
-                Long participantId = participant.getMember().getId();
-
-                if (fcmToken != null) {
-                    try {
-                        notificationService.sendNotification(
-                                fcmToken,
-                                "방 매칭 완료",
-                                "방 매칭이 완료되었습니다: " + room.getTitle(),
-                                participantId
-                        );
-                    } catch (RuntimeException e) {
-                        log.warn("FCM 전송 실패 (memberId: {}) - {}", participantId, e.getMessage());
-                        // 필요시: 유효하지 않은 토큰이면 여기서 제거도 가능
-                    }
-                }
-            });
+            sendNotifications(room);
         }
 
         return room.getChatRoom();
@@ -132,6 +115,26 @@ public class RoomParticipationService {
         members.add(member);
 
         return members;
+    }
+
+    private void sendNotifications(Room room) {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                room.getParticipants().forEach(participant -> {
+                    String fcmToken = participant.getMember().getFcmToken();
+                    Long participantId = participant.getMember().getId();
+                    if (fcmToken != null) {
+                        notificationService.sendNotification(
+                                fcmToken,
+                                "방 매칭 완료",
+                                "방 매칭이 완료되었습니다: " + room.getTitle(),
+                                participantId
+                        );
+                    }
+                });
+            }
+        });
     }
 
     private void validateParticipation(Room room, List<Member> participants) {
