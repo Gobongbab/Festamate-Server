@@ -35,6 +35,7 @@ public enum ResponseCode {
     USER_NOT_FOUND(false, "해당 유저를 찾을 수 없습니다"),
     UNEXPECTED_TOKEN(false, "올바르지 않은 토큰입니다."),
     PHONE_NOT_VERIFIED(false, "전화번호 인증이 완료되지 않았습니다."),
+    PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS(false,  "초대된 사용자(호스트 및 친구) 간에 중복된 전화번호가 있습니다."),
 
     // 파일
     EMPTY_FILE(false, "파일이 비어있습니다."),

@@ -128,11 +128,7 @@ public class Member extends BaseEntity {
     }
 
     public void useTicket() {
-        if (this.remainingTicket > 0) {
-            this.remainingTicket--;
-        } else {
-            throw new BadRequestException(NOT_ENOUGH_TICKET);
-        }
+        this.remainingTicket--;
     }
 
     public void initTicket() {
