@@ -23,6 +23,7 @@ import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
+import com.gobongbob.festamate.domain.room.scheduler.RoomCloseScheduler;
 import com.gobongbob.festamate.global.NotificationService;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
@@ -43,6 +44,7 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final RoomImagePicker roomImagePicker;
+    private final RoomCloseScheduler roomCloseScheduler;
     private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
@@ -59,6 +61,7 @@ public class RoomService {
 
         Room createdRoom = roomRepository.save(request.toEntity(member));
         uploadImageIfExist(imageFiles, createdRoom);
+        roomCloseScheduler.scheduleRoomClose(createdRoom.getId(), createdRoom.getMeetingDateTime());
 
         ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
         chatRoomRepository.save(chatRoom);
