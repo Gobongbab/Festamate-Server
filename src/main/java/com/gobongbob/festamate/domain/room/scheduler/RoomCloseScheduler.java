@@ -12,10 +12,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class RoomCloseScheduler {
 
@@ -48,6 +46,7 @@ public class RoomCloseScheduler {
                 .ifPresent(room -> {
                     if (room.getStatus() != Status.CLOSED) {
                         room.updateStatus(Status.CLOSED);
+                        roomRepository.save(room);
                     }
                 });
     }
