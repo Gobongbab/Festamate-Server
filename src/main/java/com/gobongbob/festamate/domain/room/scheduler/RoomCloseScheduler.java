@@ -32,22 +32,34 @@ public class RoomCloseScheduler {
 
     public void scheduleRoomClose(Long meetingRoomId, LocalDateTime scheduledTime) {
         long delay = Duration.between(LocalDateTime.now(), scheduledTime).toMillis();
-        if (delay < 0) { // 이미 시간이 지났다면 바로 닫기
+        System.out.println("[scheduleRoomClose] roomId: " + meetingRoomId + ", delay(ms): " + delay);
+
+        if (delay < 0) {
+            System.out.println("[scheduleRoomClose] delay < 0 → 바로 closeRoom 실행");
             closeRoom(meetingRoomId);
 
             return;
         }
 
-        scheduler.schedule(() -> closeRoom(meetingRoomId), delay, TimeUnit.MILLISECONDS);
+        scheduler.schedule(() -> {
+            System.out.println("[ScheduledTask] 실행됨 → roomId: " + meetingRoomId);
+            closeRoom(meetingRoomId);
+        }, delay, TimeUnit.MILLISECONDS);
     }
 
     private void closeRoom(Long roomId) {
-        roomRepository.findById(roomId)
-                .ifPresent(room -> {
-                    if (room.getStatus() != Status.CLOSED) {
-                        room.updateStatus(Status.CLOSED);
-                        roomRepository.save(room);
-                    }
-                });
+        System.out.println("[closeRoom] 실행됨 → roomId: " + roomId);
+        roomRepository.findById(roomId).ifPresent(room -> {
+            System.out.println("[closeRoom] DB에서 조회됨 → roomId: " + roomId + ", status: " + room.getStatus());
+            if (room.getStatus() != Status.CLOSED) {
+                room.updateStatus(Status.CLOSED);
+                System.out.println("[closeRoom] 상태 CLOSED로 변경 → roomId: " + roomId + ", status: " + room.getStatus());
+                roomRepository.save(room);
+                System.out.println("[closeRoom] 상태 CLOSED로 변경 후 save 완료 → roomId: " + roomId);
+            } else {
+                System.out.println("[closeRoom] 이미 CLOSED 상태 → roomId: " + roomId);
+            }
+        });
     }
+
 }
