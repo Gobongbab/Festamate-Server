@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +48,8 @@ public class RoomCloseScheduler {
         }, delay, TimeUnit.MILLISECONDS);
     }
 
-    private void closeRoom(Long roomId) {
+    @Transactional
+    public void closeRoom(Long roomId) {
         System.out.println("[closeRoom] 실행됨 → roomId: " + roomId);
         roomRepository.findById(roomId).ifPresent(room -> {
             System.out.println("[closeRoom] DB에서 조회됨 → roomId: " + roomId + ", status: " + room.getStatus());
