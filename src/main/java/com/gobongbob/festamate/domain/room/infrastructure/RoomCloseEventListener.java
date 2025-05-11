@@ -1,6 +1,6 @@
 package com.gobongbob.festamate.domain.room.infrastructure;
 
-import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.domain.RoomCloseEvent;
 import com.gobongbob.festamate.domain.room.domain.Status;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +16,13 @@ public class RoomCloseEventListener {
 
     @EventListener
     @Transactional
-    public void handleRoomCloseEvent(Room event) {
-        roomRepository.findById(event.getId()).ifPresent(room -> {
+    public void handleRoomCloseEvent(RoomCloseEvent event) {
+        roomRepository.findById(event.getRoomId()).ifPresent(room -> {
             if (room.getStatus() != Status.CLOSED) {
                 room.updateStatus(Status.CLOSED);
                 roomRepository.save(room);
+                System.out.println("[RoomEventListener] 상태 변경 완료 → roomId: " + room.getId());
+                System.out.println("[RoomEventListener] 상태 변경 완료 → room.getStatus(): " + room.getStatus());
             }
         });
     }

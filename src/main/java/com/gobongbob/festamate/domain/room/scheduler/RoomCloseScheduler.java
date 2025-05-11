@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.room.scheduler;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.domain.RoomCloseEvent;
 import com.gobongbob.festamate.domain.room.domain.Status;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import jakarta.annotation.PostConstruct;
@@ -36,7 +37,7 @@ public class RoomCloseScheduler {
 
         scheduler.schedule(() -> {
             System.out.println("[Scheduler] 이벤트 발행 → roomId: " + room.getId());
-            eventPublisher.publishEvent(room);
+            eventPublisher.publishEvent(new RoomCloseEvent(room));
         }, delay, TimeUnit.MILLISECONDS);
     }
 }
