@@ -19,6 +19,9 @@ public interface RoomRepository extends Repository<Room, Long>, RoomQueryDslRepo
     @Query("SELECT r FROM Room r WHERE r.status = ?1 AND r.meetingDateTime > ?2")
     List<Room> findRoomsByScheduledTimeAfter(Status status, LocalDateTime meetingDateTime);
 
+    @Query("SELECT r FROM Room r WHERE r.status = ?1 AND r.meetingDateTime <= ?2")
+    List<Room> findRoomsByScheduledTimeBefore(Status status, LocalDateTime meetingDateTime);
+
     Optional<Room> findById(Long id);
 
     @Query("SELECT r FROM Room r JOIN FETCH r.host WHERE r.id = :id")
