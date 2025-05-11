@@ -16,13 +16,15 @@ public class RoomCloseEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleRoomCloseEvent(RoomCloseEvent event) {
-        roomRepository.findById(event.getRoomId()).ifPresent(room -> {
-            if (room.getStatus() != Status.CLOSED) {
-                room.updateStatus(Status.CLOSED);
-                roomRepository.save(room);
-                System.out.println("[RoomEventListener] 상태 변경 완료 → roomId: " + room.getId());
-                System.out.println("[RoomEventListener] 상태 변경 완료 → room.getStatus(): " + room.getStatus());
-            }
-        });
+        roomRepository.findById(event.getRoomId())
+                .ifPresent(room -> {
+                    if (room.getStatus() != Status.CLOSED) {
+                        room.updateStatus(Status.CLOSED);
+                        roomRepository.save(room);
+                        roomRepository.flush();
+                        System.out.println("[RoomEventListener] 상태 변경 완료 → roomId: " + room.getId());
+                        System.out.println("[RoomEventListener] 상태 변경 완료 → room.getStatus(): " + room.getStatus());
+                    }
+                });
     }
 }
