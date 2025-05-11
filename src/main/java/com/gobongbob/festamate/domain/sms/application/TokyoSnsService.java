@@ -1,6 +1,7 @@
 package com.gobongbob.festamate.domain.sms.application;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,12 @@ public class TokyoSnsService {
     private static final Duration CODE_VALID_DURATION = Duration.ofMinutes(5);
     private static final String VERIFICATION_PREFIX = "verification:"; // Redis 키 접두사
 
-    @Autowired // 명시적 생성자 주입
+    // 재전송 횟수 제한 관련 설정
+    private static final String RETRY_COUNT_PREFIX = "retry_count:"; // 재전송 횟수 키 접두사
+    private static final int MAX_RETRY_COUNT = 5; // 하루 최대 재전송 횟수
+    private static final Duration RETRY_COUNT_VALID_DURATION = Duration.ofDays(1); // 재전송 횟수 카운트 유효 기간 (24시간)
+
+    @Autowired
     public TokyoSnsService(SnsClient snsClient,
             StringRedisTemplate stringRedisTemplate) {
         this.snsClient = snsClient;
@@ -27,13 +33,43 @@ public class TokyoSnsService {
 
     public void sendVerificationCode(String phoneNumber) {
         String formattedPhone = formatToE164(phoneNumber);
-        String verificationCode = generateVerificationCode();
         String redisKey = VERIFICATION_PREFIX + phoneNumber;
+        String retryCountKey = RETRY_COUNT_PREFIX + phoneNumber;
 
-        // 인증 코드 문자열만 Redis에 저장
+        // 1. 재전송 횟수 확인
+        String currentRetryCountStr = stringRedisTemplate.opsForValue().get(retryCountKey);
+        int currentRetryCount = 0;
+        if (currentRetryCountStr != null) {
+            currentRetryCount = Integer.parseInt(currentRetryCountStr);
+        }
+
+        if (currentRetryCount >= MAX_RETRY_COUNT) {
+            Long ttl = stringRedisTemplate.getExpire(retryCountKey, TimeUnit.SECONDS);
+            String timeLeftMessage = "";
+            if (ttl != null && ttl > 0) {
+                long hours = ttl / 3600;
+                long minutes = (ttl % 3600) / 60;
+                long seconds = ttl % 60;
+                timeLeftMessage = String.format(" (다음 요청 가능 시간: 약 %d시간 %d분 %d초 후)", hours, minutes, seconds);
+            }
+            throw new IllegalStateException("하루 인증 요청 횟수를 초과했습니다." + timeLeftMessage);
+        }
+
+        // 2. 기존 인증 코드 삭제 (재전송 시 이전 코드 무효화)
+        stringRedisTemplate.delete(redisKey);
+
+        // 3. 새로운 인증 코드 생성 및 저장
+        String verificationCode = generateVerificationCode();
         stringRedisTemplate.opsForValue().set(redisKey, verificationCode, CODE_VALID_DURATION);
 
-        // 문자 발송 로직
+        // 4. 재전송 횟수 증가 및 유효기간 설정
+        Long newRetryCount = stringRedisTemplate.opsForValue().increment(retryCountKey);
+        // 처음 횟수가 기록될 때만 유효기간 설정 (이미 키가 존재하고 TTL이 설정되어 있으면 갱신하지 않음)
+        if (newRetryCount != null && newRetryCount == 1) {
+            stringRedisTemplate.expire(retryCountKey, RETRY_COUNT_VALID_DURATION);
+        }
+
+        // 5. 문자 발송 로직
         PublishRequest request = PublishRequest.builder()
                 .message("Festamate! 인증번호는 [" + verificationCode + "] 입니다.")
                 .phoneNumber(formattedPhone)
@@ -44,6 +80,7 @@ public class TokyoSnsService {
     // @Transactional 제거 (Redis 작업은 보통 단일 작업)
     public void verifyCode(String phoneNumber, String inputCode) {
         String redisKey = VERIFICATION_PREFIX + phoneNumber;
+        String retryCountKey = RETRY_COUNT_PREFIX + phoneNumber;
 
         // Redis에서 인증 코드 문자열 조회
         String storedCode = stringRedisTemplate.opsForValue().get(redisKey);
@@ -59,13 +96,15 @@ public class TokyoSnsService {
 
         // 인증 성공 시 로직: Redis에서 키 삭제
         stringRedisTemplate.delete(redisKey);
+        stringRedisTemplate.delete(retryCountKey); // 인증 성공 시 재시도 횟수 카운트도 초기화
 
     }
 
     public void removeVerificationInfo(String phoneNumber) {
         String redisKey = VERIFICATION_PREFIX + phoneNumber;
-        // HashMap 제거 로직 대신 Redis 삭제 사용
-        Boolean deleted = stringRedisTemplate.delete(redisKey);
+        String retryCountKey = RETRY_COUNT_PREFIX + phoneNumber;
+        stringRedisTemplate.delete(redisKey);
+        stringRedisTemplate.delete(retryCountKey); // 정보 삭제 시 재시도 횟수 카운트도 함께 삭제
     }
 
     private String generateVerificationCode() {

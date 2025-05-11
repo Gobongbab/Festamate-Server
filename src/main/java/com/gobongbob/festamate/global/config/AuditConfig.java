@@ -17,6 +17,9 @@ public class AuditConfig {
     public AuditorAware<String> auditorProvider() {
         return () -> {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return Optional.empty();
+            }
             Object principal = authentication.getPrincipal();
             if (!(principal instanceof CustomMemberDetails memberDetails)) {
                 return Optional.empty();
