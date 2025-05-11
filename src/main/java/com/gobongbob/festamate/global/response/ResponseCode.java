@@ -53,6 +53,12 @@ public enum ResponseCode {
     NO_REPORT(false, "해당 신고가 존재하지 않습니다."),
     NO_REPORT_REASON(false, "해당하는 신고 사유가 없습니다."),
 
+    // 티켓
+    NOT_EXIST_TICKET(false, "존재하지 않는 티켓입니다."),
+    ALREADY_USED_TICKET(false, "이미 사용된 쿠폰입니다."),
+    EXPIRED_TICKET(false, "만료된 쿠폰입니다."),
+
+
     // 관리자
     NO_ADMIN(false, "관리자 권한이 필요합니다.");
 
