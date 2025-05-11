@@ -1,43 +1,28 @@
 package com.gobongbob.festamate.domain.room.scheduler;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
-import com.gobongbob.festamate.domain.room.domain.RoomCloseEvent;
 import com.gobongbob.festamate.domain.room.domain.Status;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
-import jakarta.annotation.PostConstruct;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class RoomCloseScheduler {
 
     private final RoomRepository roomRepository;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private final ApplicationEventPublisher eventPublisher;
 
-    @PostConstruct
-    public void init() {
-        List<Room> expiredRooms = roomRepository.findRoomsByScheduledTimeBefore(Status.MATCHING, LocalDateTime.now());
-        expiredRooms.forEach(eventPublisher::publishEvent);
+    @Scheduled(fixedRate = 60000) // 1분마다 실행
+    public void closeExpiredRooms() {
+        List<Room> expiredRooms = roomRepository.findRoomsByScheduledTimeBefore(LocalDateTime.now());
+        expiredRooms.forEach(room -> {
+            room.updateStatus(Status.CLOSED);
+            System.out.println("[스케줄러] 상태 CLOSED로 변경 → roomId: " + room.getId());
+        });
 
-        List<Room> upcomingRooms = roomRepository.findRoomsByScheduledTimeAfter(Status.MATCHING, LocalDateTime.now());
-        upcomingRooms.forEach(room -> scheduleRoomClose(room, room.getMeetingDateTime()));
-    }
-
-    public void scheduleRoomClose(Room room, LocalDateTime scheduledTime) {
-        long delay = Duration.between(LocalDateTime.now(), scheduledTime).toMillis();
-
-        scheduler.schedule(() -> {
-            System.out.println("[Scheduler] 이벤트 발행 → roomId: " + room.getId());
-            eventPublisher.publishEvent(new RoomCloseEvent(room));
-        }, delay, TimeUnit.MILLISECONDS);
+        roomRepository.saveAll(expiredRooms); // 변경된 상태 저장
     }
 }
