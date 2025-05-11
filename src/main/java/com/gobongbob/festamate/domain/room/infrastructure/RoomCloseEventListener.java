@@ -4,9 +4,9 @@ import com.gobongbob.festamate.domain.room.domain.RoomCloseEvent;
 import com.gobongbob.festamate.domain.room.domain.Status;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
@@ -14,8 +14,7 @@ public class RoomCloseEventListener {
 
     private final RoomRepository roomRepository;
 
-    @EventListener
-    @Transactional
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleRoomCloseEvent(RoomCloseEvent event) {
         roomRepository.findById(event.getRoomId()).ifPresent(room -> {
             if (room.getStatus() != Status.CLOSED) {
