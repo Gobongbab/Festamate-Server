@@ -60,7 +60,6 @@ public class RoomService {
 
         Room createdRoom = roomRepository.save(request.toEntity(hostMember));
         uploadImageIfExist(imageFiles, createdRoom);
-        roomCloseScheduler.scheduleRoomClose(createdRoom, createdRoom.getMeetingDateTime());
 
         ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
         chatRoomRepository.save(chatRoom);
