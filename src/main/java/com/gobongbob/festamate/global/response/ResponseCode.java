@@ -48,7 +48,8 @@ public enum ResponseCode {
 
     // 신고
     CAN_NOT_REPORT_MYSELF(false, "자신의 방은 신고할 수 없습니다."),
-    ALREADY_REPORT(false, "이미 신고한 방입니다."),
+    ALREADY_REPORTED_ROOM(false, "이미 신고한 방입니다."),
+    ALREADY_REPORTED_MEMBER(false, "이미 신고한 유저입니다."),
     NO_REPORT(false, "해당 신고가 존재하지 않습니다."),
     NO_REPORT_REASON(false, "해당하는 신고 사유가 없습니다."),
 
