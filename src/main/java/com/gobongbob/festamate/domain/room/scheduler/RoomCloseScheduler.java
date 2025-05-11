@@ -11,8 +11,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,48 +20,23 @@ public class RoomCloseScheduler {
 
     private final RoomRepository roomRepository;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ApplicationEventPublisher eventPublisher;
 
     @PostConstruct
     public void init() {
-        List<Room> upcomingRooms = roomRepository.findRoomsByScheduledTimeAfter(
-                Status.MATCHING,
-                LocalDateTime.now()
-        );
+        List<Room> expiredRooms = roomRepository.findRoomsByScheduledTimeBefore(Status.MATCHING, LocalDateTime.now());
+        expiredRooms.forEach(eventPublisher::publishEvent);
 
-        upcomingRooms.forEach(room -> scheduleRoomClose(room.getId(), room.getMeetingDateTime()));
+        List<Room> upcomingRooms = roomRepository.findRoomsByScheduledTimeAfter(Status.MATCHING, LocalDateTime.now());
+        upcomingRooms.forEach(room -> scheduleRoomClose(room, room.getMeetingDateTime()));
     }
 
-    public void scheduleRoomClose(Long meetingRoomId, LocalDateTime scheduledTime) {
+    public void scheduleRoomClose(Room room, LocalDateTime scheduledTime) {
         long delay = Duration.between(LocalDateTime.now(), scheduledTime).toMillis();
-        System.out.println("[scheduleRoomClose] roomId: " + meetingRoomId + ", delay(ms): " + delay);
-
-        if (delay < 0) {
-            System.out.println("[scheduleRoomClose] delay < 0 → 바로 closeRoom 실행");
-            closeRoom(meetingRoomId);
-
-            return;
-        }
 
         scheduler.schedule(() -> {
-            System.out.println("[ScheduledTask] 실행됨 → roomId: " + meetingRoomId);
-            closeRoom(meetingRoomId);
+            System.out.println("[Scheduler] 이벤트 발행 → roomId: " + room.getId());
+            eventPublisher.publishEvent(room);
         }, delay, TimeUnit.MILLISECONDS);
     }
-
-    @Transactional
-    public void closeRoom(Long roomId) {
-        System.out.println("[closeRoom] 실행됨 → roomId: " + roomId);
-        roomRepository.findById(roomId).ifPresent(room -> {
-            System.out.println("[closeRoom] DB에서 조회됨 → roomId: " + roomId + ", status: " + room.getStatus());
-            if (room.getStatus() != Status.CLOSED) {
-                room.updateStatus(Status.CLOSED);
-                System.out.println("[closeRoom] 상태 CLOSED로 변경 → roomId: " + roomId + ", status: " + room.getStatus());
-                roomRepository.save(room);
-                System.out.println("[closeRoom] 상태 CLOSED로 변경 후 save 완료 → roomId: " + roomId);
-            } else {
-                System.out.println("[closeRoom] 이미 CLOSED 상태 → roomId: " + roomId);
-            }
-        });
-    }
-
 }

@@ -36,8 +36,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -62,12 +60,7 @@ public class RoomService {
 
         Room createdRoom = roomRepository.save(request.toEntity(hostMember));
         uploadImageIfExist(imageFiles, createdRoom);
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                roomCloseScheduler.scheduleRoomClose(createdRoom.getId(), createdRoom.getMeetingDateTime());
-            }
-        });
+        roomCloseScheduler.scheduleRoomClose(createdRoom, createdRoom.getMeetingDateTime());
 
         ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
         chatRoomRepository.save(chatRoom);
@@ -82,7 +75,6 @@ public class RoomService {
 
         return chatRoom;
     }
-
 
     private List<RoomParticipant> collectAndValidateInitialParticipants(FriendPhoneNumbersRequest request, Room room,
             Member hostMember) {
