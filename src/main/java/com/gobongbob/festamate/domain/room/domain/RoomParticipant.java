@@ -4,6 +4,8 @@ import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -13,6 +15,8 @@ import lombok.*;
 @Table(
         uniqueConstraints = @UniqueConstraint(columnNames = {"room_id", "member_id"})
 )
+@SQLRestriction("deleted = false")
+@SQLDelete(sql = "UPDATE room_participant SET deleted = true, deleted_at = now() WHERE id = ?")
 public class RoomParticipant extends BaseEntity {
 
     @Id
