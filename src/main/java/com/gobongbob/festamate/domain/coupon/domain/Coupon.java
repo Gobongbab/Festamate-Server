@@ -2,9 +2,13 @@ package com.gobongbob.festamate.domain.coupon.domain;
 
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.global.entity.BaseEntity;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_USED_TICKET;
+import static com.gobongbob.festamate.global.response.ResponseCode.EXPIRED_TICKET;
 
 @Entity
 @Getter
@@ -34,10 +38,10 @@ public class Coupon extends BaseEntity {
 
     public void useCoupon() {
         if (this.used) {
-            throw new IllegalStateException("이미 사용된 쿠폰입니다.");
+            throw new BadRequestException(ALREADY_USED_TICKET);
         }
         if (LocalDateTime.now().isAfter(this.expiresAt)) {
-            throw new IllegalStateException("만료된 쿠폰입니다.");
+            throw new BadRequestException(EXPIRED_TICKET);
         }
         this.used = true;
     }
