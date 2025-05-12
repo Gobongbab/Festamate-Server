@@ -250,7 +250,7 @@ public class RoomService {
     }
 
     private Image setBasicImage() {
-        String basicImageUrl = "https://festamate-bucket.s3.ap-northeast-2.amazonaws.com/icon+(1).png";
+        String basicImageUrl = "https://festamate-bucket.s3.ap-northeast-2.amazonaws.com/femalogo.png";
         UUID uuid = UUID.randomUUID();
 
         return Image.builder()

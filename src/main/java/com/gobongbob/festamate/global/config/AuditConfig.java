@@ -20,7 +20,6 @@ public class AuditConfig {
             if (authentication == null || !authentication.isAuthenticated()) {
                 return Optional.empty();
             }
-
             Object principal = authentication.getPrincipal();
             if (!(principal instanceof CustomMemberDetails memberDetails)) {
                 return Optional.empty();

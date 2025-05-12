@@ -1,10 +1,5 @@
 package com.gobongbob.festamate.domain.report.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_REPORT;
-import static com.gobongbob.festamate.global.response.ResponseCode.CAN_NOT_REPORT_MYSELF;
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.USER_NOT_FOUND;
-
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.report.domain.Report;
@@ -21,6 +16,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -51,7 +48,7 @@ public class ReportService {
                 .stream()
                 .findAny()
                 .ifPresent(report -> {
-                    throw new BadRequestException(ALREADY_REPORT);
+                    throw new BadRequestException(ALREADY_REPORTED_ROOM);
                 });
 
         Report report = request.toEntity(reporter, room, host);
@@ -71,7 +68,7 @@ public class ReportService {
                 .stream()
                 .findAny()
                 .ifPresent(report -> {
-                    throw new BadRequestException(ALREADY_REPORT);
+                    throw new BadRequestException(ALREADY_REPORTED_MEMBER);
                 });
 
         Report report = request.toEntity(reporter, reportedMember);

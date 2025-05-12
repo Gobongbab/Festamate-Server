@@ -11,9 +11,14 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_EXIST_TICKET;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 
 @Service
 @RequiredArgsConstructor
@@ -32,9 +37,9 @@ public class CouponService {
     @CheckActiveUser
     public void useCoupon(Member member, UseCouponRequest request) {
         Coupon coupon = couponRepository.findByCode(request.code())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 쿠폰입니다."));
+                .orElseThrow(() -> new BadRequestException(NOT_EXIST_TICKET));
         Member findMember = memberRepository.findById(member.getId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
         coupon.useCoupon();
         coupon.assignToMember(findMember);
