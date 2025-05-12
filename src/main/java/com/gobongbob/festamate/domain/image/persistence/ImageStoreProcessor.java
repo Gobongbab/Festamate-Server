@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class ImageStoreProcessor {
 
-    private static final List<String> WHITE_IMAGE_EXTENSION = List.of("jpg", "jpeg", "png", "Webp");
+    private static final List<String> WHITE_IMAGE_EXTENSION = List.of("jpg", "jpeg", "png", "gif");
     private static final int MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final String EXTENSION_FILE_CHARACTER = ".";
 
