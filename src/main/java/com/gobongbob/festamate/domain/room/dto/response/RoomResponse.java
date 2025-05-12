@@ -28,7 +28,7 @@ public record RoomResponse(
         Long chatRoomId,
         List<ParticipantResponse> hostParticipants,
         List<ParticipantResponse> guestParticipants,
-        List<ImageResponse> images
+        ImageResponse thumbnail
 ) {
 
     public static RoomResponse fromEntity(
@@ -53,7 +53,7 @@ public record RoomResponse(
                 room.getChatRoom().getId(),
                 toParticipantResponse(hostParticipants),
                 toParticipantResponse(guestParticipants),
-                toImageResponse(room)
+                ImageResponse.fromEntity(room.getImages().get(0).getImage())
         );
     }
 
@@ -63,12 +63,6 @@ public record RoomResponse(
                 .toList();
     }
 
-    private static List<ImageResponse> toImageResponse(Room room) {
-        return room.getImages()
-                .stream()
-                .map(roomImage -> ImageResponse.fromEntity(roomImage.getImage()))
-                .toList();
-    }
 
     private record ParticipantResponse(
             Long id,
