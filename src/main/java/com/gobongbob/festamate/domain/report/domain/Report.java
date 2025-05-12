@@ -7,12 +7,16 @@ import com.gobongbob.festamate.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLRestriction("deleted = false")
+@SQLDelete(sql = "UPDATE report SET deleted = true, deleted_at = now() WHERE id = ?")
 public class Report extends BaseEntity {
 
     @Id

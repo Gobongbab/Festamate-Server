@@ -1,20 +1,24 @@
 package com.gobongbob.festamate.domain.coupon.domain;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_USED_TICKET;
+import static com.gobongbob.festamate.global.response.ResponseCode.EXPIRED_TICKET;
+
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.global.entity.BaseEntity;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
-
-import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_USED_TICKET;
-import static com.gobongbob.festamate.global.response.ResponseCode.EXPIRED_TICKET;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLRestriction("deleted = false")
+@SQLDelete(sql = "UPDATE coupon SET deleted = true, deleted_at = now() WHERE id = ?")
 public class Coupon extends BaseEntity {
 
     @Id
