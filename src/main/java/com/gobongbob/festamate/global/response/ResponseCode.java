@@ -70,4 +70,8 @@ public enum ResponseCode {
         this.isSuccess = isSuccess;
         this.message = message;
     }
+
+    public String formatMessage(Object... arguments) {
+        return String.format(message, arguments);
+    }
 }
