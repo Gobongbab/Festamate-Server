@@ -8,8 +8,7 @@ public record FilteringCondition(
         Gender gender,
         String minStudentId,
         String maxStudentId,
-        Integer participants,
-        String studentId
+        Integer participants
 ) {
 
 }
