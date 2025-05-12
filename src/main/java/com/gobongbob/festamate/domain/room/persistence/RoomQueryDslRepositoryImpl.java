@@ -34,6 +34,7 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
         JPAQuery<Room> basicQuery = queryFactory
                 .selectFrom(room)
                 .where(
+                        keywordContains(filteringCondition.keyword()),
                         statusEquals(filteringCondition.status()),
                         genderEquals(filteringCondition.gender()),
                         participantsEquals(filteringCondition.participants()),
@@ -76,6 +77,14 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
 
         }
         return hasNext;
+    }
+
+    private BooleanExpression keywordContains(String keyword) {
+        if (hasText(keyword)) {
+            return room.title.contains(keyword);
+        }
+
+        return null;
     }
 
     private BooleanExpression statusEquals(Status status) {
