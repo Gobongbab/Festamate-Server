@@ -14,8 +14,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @SuperBuilder
 @MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public abstract class BaseTimeEntity extends DeletionCheckEntity {
 
     @CreatedDate
