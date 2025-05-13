@@ -20,14 +20,14 @@ public class TokyoSnsService {
     private final SnsClient snsClient; // AWS SNS 클라이언트
     private final StringRedisTemplate stringRedisTemplate;
 
-    // 인증 코드 유효 시간 (Duration 사용) - 예: 5분
+    // 인증 코드 유효 시간 (Duration 사용): 5분
     private static final Duration CODE_VALID_DURATION = Duration.ofMinutes(5);
     private static final String VERIFICATION_PREFIX = "verification:"; // Redis 키 접두사
 
     // 재전송 횟수 제한 관련 설정
     private static final String RETRY_COUNT_PREFIX = "retry_count:"; // 재전송 횟수 키 접두사
-    private static final int MAX_RETRY_COUNT = 2; // 하루 최대 재전송 횟수: 임시로 2개
-    private static final Duration RETRY_COUNT_VALID_DURATION = Duration.ofDays(1); // 재전송 횟수 카운트 유효 기간 (24시간)
+    private static final int MAX_RETRY_COUNT = 2; // 하루 최대 재전송 횟수: 2번
+    private static final Duration RETRY_COUNT_VALID_DURATION = Duration.ofDays(1); // 재전송 횟수 카운트 유효 기간: 24시간
 
     @Autowired
     public TokyoSnsService(SnsClient snsClient,
