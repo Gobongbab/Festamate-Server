@@ -24,9 +24,9 @@ import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
+import com.gobongbob.festamate.domain.room.scheduler.RoomCloseScheduler;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -44,6 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final RoomCloseScheduler roomCloseScheduler;
     private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
@@ -63,7 +64,8 @@ public class RoomService {
         ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
         chatRoomRepository.save(chatRoom);
 
-        List<RoomParticipant> participants = collectAndValidateInitialParticipants(request.friendPhoneNumbers(), createdRoom, hostMember);
+        List<RoomParticipant> participants = collectAndValidateInitialParticipants(request.friendPhoneNumbers(),
+                createdRoom, hostMember);
 
         participants.forEach(participant -> {
             roomParticipantRepository.save(participant);
@@ -73,8 +75,8 @@ public class RoomService {
         return chatRoom;
     }
 
-
-    private List<RoomParticipant> collectAndValidateInitialParticipants(FriendPhoneNumbersRequest request, Room room, Member hostMember) {
+    private List<RoomParticipant> collectAndValidateInitialParticipants(FriendPhoneNumbersRequest request, Room room,
+            Member hostMember) {
         List<Member> friendMembers = request.friendPhoneNumbers().stream()
                 .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
                         .orElseThrow(() -> new BadRequestException("전화번호 [" + phoneNumber + "] 에 해당하는 유저를 찾을 수 없습니다.")))
@@ -99,7 +101,6 @@ public class RoomService {
 
         // 3.4. 성별이 호스트의 성별과 일치하는지
         validateFriendGroupGender(friendMembers, hostMember.getGender());
-
 
         // 4. 모든 유효성 검증이 끝났다면 방 생성 진행
         List<RoomParticipant> participants = new ArrayList<>();
@@ -132,7 +133,9 @@ public class RoomService {
     private void validateFriendGroupGender(List<Member> friendMembers, Gender hostGender) {
         for (Member friend : friendMembers) {
             if (friend.getGender() != hostGender) {
-                throw new BadRequestException("친구 " + friend.getNickname() + "님의 성별(" + friend.getGender() + ")이 호스트님의 성별(" + hostGender + ")과 일치하지 않습니다.");
+                throw new BadRequestException(
+                        "친구 " + friend.getNickname() + "님의 성별(" + friend.getGender() + ")이 호스트님의 성별(" + hostGender
+                                + ")과 일치하지 않습니다.");
             }
         }
     }
@@ -151,12 +154,10 @@ public class RoomService {
 
     // 참여 중인 모임방 조회
     @CheckActiveUser
-    public List<RoomListResponse> findParticipatingRooms(Long memberId) {
-        return roomParticipantRepository.findByMember_Id(memberId)
-                .stream()
+    public Slice<RoomListResponse> findParticipatingRooms(Long memberId, Pageable pageable) {
+        return roomParticipantRepository.findByMember_Id(memberId, pageable)
                 .map(RoomParticipant::getRoom)
-                .map(RoomListResponse::fromEntity)
-                .toList();
+                .map(RoomListResponse::fromEntity);
     }
 
     public RoomResponse findRoomById(CustomMemberDetails memberDetails, Long roomId) {
@@ -247,7 +248,7 @@ public class RoomService {
     }
 
     private Image setBasicImage() {
-        String basicImageUrl = "https://festamate-bucket.s3.ap-northeast-2.amazonaws.com/icon+(1).png";
+        String basicImageUrl = "https://festamate-bucket.s3.ap-northeast-2.amazonaws.com/femalogo.png";
         UUID uuid = UUID.randomUUID();
 
         return Image.builder()

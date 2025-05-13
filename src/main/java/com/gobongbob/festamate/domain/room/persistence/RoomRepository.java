@@ -1,17 +1,16 @@
 package com.gobongbob.festamate.domain.room.persistence;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.Repository;
 
-public interface RoomRepository extends Repository<Room, Long>, RoomQueryDslRepository {
+public interface RoomRepository extends JpaRepository<Room, Long>, RoomQueryDslRepository {
 
-    Room save(Room room);
-
-    Page<Room> findAll(Pageable pageable);
+    @Query("SELECT r FROM Room r WHERE r.meetingDateTime <= ?1")
+    List<Room> findRoomsByScheduledTimeBefore(LocalDateTime meetingDateTime);
 
     Optional<Room> findById(Long id);
 

@@ -75,9 +75,11 @@ public interface RoomApi {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
     })
     @GetMapping("/participations")
-    SuccessResponse<List<RoomListResponse>> findParticipatingRooms(
+    SuccessResponse<Slice<RoomListResponse>> findParticipatingRooms(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
-            @AuthenticationPrincipal CustomMemberDetails memberDetails
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @Parameter(description = "페이징 정보")
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     );
 
     @Operation(summary = "모임방 상세 조회", description = """

@@ -12,7 +12,7 @@ import lombok.Getter;
 public enum Status {
     MATCHING("매칭중"),
     MATCHED("매칭 완료"),
-    CLOSED("모임 종료");
+    CLOSED("매칭 종료");
 
     private final String name;
 

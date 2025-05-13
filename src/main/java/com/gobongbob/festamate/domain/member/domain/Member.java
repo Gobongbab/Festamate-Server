@@ -1,15 +1,14 @@
 package com.gobongbob.festamate.domain.member.domain;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_ENOUGH_TICKET;
-
 import com.gobongbob.festamate.domain.auth.oauth.domain.OauthInfo;
 import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.global.entity.BaseEntity;
-import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import jakarta.persistence.*;
 import java.util.Set;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Entity
@@ -17,6 +16,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLRestriction("deleted = false")
+@SQLDelete(sql = "UPDATE member SET deleted = true, deleted_at = now() WHERE id = ?")
 public class Member extends BaseEntity {
 
     @Id
