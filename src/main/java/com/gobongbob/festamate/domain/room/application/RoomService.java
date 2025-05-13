@@ -1,6 +1,13 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.*;
+import static com.gobongbob.festamate.global.response.ResponseCode.FRIEND_GENDER_NOT_MATCH_WITH_HOST;
+import static com.gobongbob.festamate.global.response.ResponseCode.MEMBER_NOT_FOUND_BY_PHONE_NUMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_ENOUGH_TICKET;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS;
+import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_UPDATE_NOT_AVAILABLE;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
@@ -9,13 +16,13 @@ import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
-import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomAuthority;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
+import com.gobongbob.festamate.domain.room.domain.Status;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
 import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
@@ -180,8 +187,8 @@ public class RoomService {
     public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request, List<MultipartFile> imageFiles) {
         Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
-        validateIsHost(room, member);
-        validateAlone(room);
+        validateIsAccessible(room, member);
+        validateIsMatchingRoom(room);
 
         if (imageFiles != null && !imageFiles.isEmpty()) {
             room.getImages().forEach(roomImage -> imageService.delete(roomImage.getImage()));
@@ -213,7 +220,7 @@ public class RoomService {
     public void deleteRoomById(Member member, Long roomId) {
         Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
-        validateIsHost(room, member);
+        validateIsAccessible(room, member);
 
         messageRepository.deleteByRoomId(roomId);
         roomRepository.delete(room);
@@ -263,15 +270,15 @@ public class RoomService {
     }
 
 
-    private void validateIsHost(Room room, Member member) {
+    private void validateIsAccessible(Room room, Member member) {
         if (!member.isHost(room) && !member.isAdmin()) {
             throw new BadRequestException(MUST_HOST);
         }
     }
 
-    private void validateAlone(Room room) {
-        if (!room.isJoinable()) { // 호스트 측 참가자만 있는 경우
-            throw new BadRequestException(CAN_NOT_UPDATE);
+    private void validateIsMatchingRoom(Room room) {
+        if (room.getStatus() != Status.MATCHING) {
+            throw new BadRequestException(ROOM_UPDATE_NOT_AVAILABLE);
         }
     }
 }
