@@ -221,6 +221,7 @@ public class RoomService {
         Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateIsAccessible(room, member);
+        validateIsMatchingRoom(room);
 
         messageRepository.deleteByRoomId(roomId);
         roomRepository.delete(room);
