@@ -26,7 +26,7 @@ public class TokyoSnsService {
 
     // 재전송 횟수 제한 관련 설정
     private static final String RETRY_COUNT_PREFIX = "retry_count:"; // 재전송 횟수 키 접두사
-    private static final int MAX_RETRY_COUNT = 5; // 하루 최대 재전송 횟수
+    private static final int MAX_RETRY_COUNT = 2; // 하루 최대 재전송 횟수: 임시로 2개
     private static final Duration RETRY_COUNT_VALID_DURATION = Duration.ofDays(1); // 재전송 횟수 카운트 유효 기간 (24시간)
 
     @Autowired
@@ -37,9 +37,10 @@ public class TokyoSnsService {
     }
 
     public void sendVerificationCode(String phoneNumber) {
-        String formattedPhone = formatToE164(phoneNumber);
-        String redisKey = VERIFICATION_PREFIX + phoneNumber;
-        String retryCountKey = RETRY_COUNT_PREFIX + phoneNumber;
+        String formattedPhone = formatToE164(phoneNumber); // 문자 발송용
+        String normalizedPhone = normalizePhoneNumber(phoneNumber); // Redis Key용
+        String redisKey = VERIFICATION_PREFIX + normalizedPhone;
+        String retryCountKey = RETRY_COUNT_PREFIX + normalizedPhone;
 
         // 1. 재전송 횟수 확인
         String currentRetryCountStr = stringRedisTemplate.opsForValue().get(retryCountKey);
@@ -84,8 +85,9 @@ public class TokyoSnsService {
 
     // @Transactional 제거 (Redis 작업은 보통 단일 작업)
     public void verifyCode(String phoneNumber, String inputCode) {
-        String redisKey = VERIFICATION_PREFIX + phoneNumber;
-        String retryCountKey = RETRY_COUNT_PREFIX + phoneNumber;
+        String normalizedPhone = normalizePhoneNumber(phoneNumber); // 추가
+        String redisKey = VERIFICATION_PREFIX + normalizedPhone;
+        String retryCountKey = RETRY_COUNT_PREFIX + normalizedPhone;
 
         // Redis에서 인증 코드 문자열 조회
         String storedCode = stringRedisTemplate.opsForValue().get(redisKey);
@@ -106,10 +108,16 @@ public class TokyoSnsService {
     }
 
     public void removeVerificationInfo(String phoneNumber) {
-        String redisKey = VERIFICATION_PREFIX + phoneNumber;
-        String retryCountKey = RETRY_COUNT_PREFIX + phoneNumber;
+        String normalizedPhone = normalizePhoneNumber(phoneNumber); // 추가
+        String redisKey = VERIFICATION_PREFIX + normalizedPhone;
+        String retryCountKey = RETRY_COUNT_PREFIX + normalizedPhone;
         stringRedisTemplate.delete(redisKey);
         stringRedisTemplate.delete(retryCountKey); // 정보 삭제 시 재시도 횟수 카운트도 함께 삭제
+    }
+
+    // 하이픈 제거
+    private String normalizePhoneNumber(String phoneNumber) {
+        return phoneNumber.replaceAll("-", "");
     }
 
     private String generateVerificationCode() {
