@@ -1,10 +1,13 @@
 package com.gobongbob.festamate.global.aop;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.AUTHENTICATION_INVALID;
+import static com.gobongbob.festamate.global.response.ResponseCode.USER_ACCOUNT_DISABLED_OR_BLOCKED;
+
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -26,12 +29,12 @@ public class UserStatusCheckAspect {
 
         if (authentication == null || !authentication.isAuthenticated()
                 || !(authentication.getPrincipal() instanceof CustomMemberDetails memberDetails)) {
-            throw new AccessDeniedException("인증 정보가 유효하지 않습니다."); // 인증 안 된 접근은 여기서 차단
+            throw new BadRequestException(AUTHENTICATION_INVALID); // 인증 안 된 접근은 여기서 차단
         }
 
         // isEnabled()로 상태 확인 (false이면 차단)
         if (!memberDetails.isEnabled()) {
-            throw new AccessDeniedException("차단되었거나 비활성화된 사용자입니다. 이 기능을 사용할 수 없습니다.");
+            throw new BadRequestException(USER_ACCOUNT_DISABLED_OR_BLOCKED);
         }
     }
 }
