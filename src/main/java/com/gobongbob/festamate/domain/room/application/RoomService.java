@@ -17,6 +17,7 @@ import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.domain.Member.MemberStatus;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -105,7 +106,10 @@ public class RoomService {
         // 3.3. 호스트, 친구들 사이에 전화번호가 중복되지 않는지
         validatePhoneNumberUniqueness(allMembersForValidation);
 
-        // 3.4. 성별이 호스트의 성별과 일치하는지
+        // 3.4 참여자들 중 제재된 회원이 없는지
+        validateParticipantsActive(allMembersForValidation);
+
+        // 3.5. 성별이 호스트의 성별과 일치하는지
         validateFriendGroupGender(friendMembers, hostMember);
 
         // 4. 모든 유효성 검증이 끝났다면 방 생성 진행
@@ -133,6 +137,15 @@ public class RoomService {
                 .count();
         if (distinctPhoneNumbers < members.size()) {
             throw new BadRequestException(PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS);
+        }
+    }
+
+    private void validateParticipantsActive(List<Member> participants) {
+        boolean hasBlockedParticipant = participants.stream()
+                .anyMatch(member -> member.getStatus() == MemberStatus.BLOCKED);
+
+        if (hasBlockedParticipant) {
+            throw new BadRequestException(NO_MEMBER);
         }
     }
 

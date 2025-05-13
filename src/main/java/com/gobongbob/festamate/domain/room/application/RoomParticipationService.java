@@ -6,6 +6,7 @@ import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.domain.Member.MemberStatus;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -139,8 +140,7 @@ public class RoomParticipationService {
 
     private void validateParticipation(Room room, List<Member> participants) {
         validateRoomMatching(room); // 현재 매칭중인 방인지 확인
-        validateRoomFull(room); // 방에 참여자가 다 찼는지 확인
-        validateRoomJoinable(room); // 방에 참여할 수 있는 인원인지 확인
+        validateParticipantsActive(participants); // 참여자들이 활성화된 회원인지 확인
         validatePhoneNumberUnique(participants); // 참여자 간의 전화번호가 중복되지 않는지 확인
         validateGender(room, participants); // 방의 성별과 참여자의 성별이 일치하는지 확인
         validateStudentId(room, participants); // 방의 학번과 참여자의 학번이 일치하는지 확인
@@ -158,9 +158,12 @@ public class RoomParticipationService {
         }
     }
 
-    private void validateRoomJoinable(Room room) {
-        if (!room.isJoinable()) { // 모임의 남은 자리 수와 참여하려는 인원의 수가 맞는지
-            throw new BadRequestException(ROOM_NOT_JOINABLE);
+    private void validateParticipantsActive(List<Member> participants) {
+        boolean hasBlockedParticipant = participants.stream()
+                .anyMatch(member -> member.getStatus() == MemberStatus.BLOCKED);
+
+        if (hasBlockedParticipant) {
+            throw new BadRequestException(NO_MEMBER);
         }
     }
 

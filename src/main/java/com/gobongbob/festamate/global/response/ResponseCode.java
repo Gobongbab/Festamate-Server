@@ -18,7 +18,7 @@ public enum ResponseCode {
     // 모임 참여 및 생성
     ROOM_FULL(false, "모임이 가득 찼습니다."),
     PHONE_NUMBER_DUPLICATE(false, "같은 회원이 동시에 참여할 수 없습니다."),
-    ROOM_NOT_JOINABLE(false, "모임의 남은 자리가 입장 인원 수와 일치하지 않습니다."),
+    ENTRY_MISMATCH_WITH_ROOM_CAPACITY(false, "모임의 남은 자리가 참여자 수와 일치하지 않습니다."),
     GENDER_NOT_MATCH(false, "성별이 일치하지 않습니다."),
     STUDENT_ID_NOT_MATCH(false, "학번이 일치하지 않습니다."),
     NOT_ENOUGH_TICKET(false, "%s님의 티켓이 부족합니다."),
