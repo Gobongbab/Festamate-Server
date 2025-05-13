@@ -5,8 +5,11 @@ import com.gobongbob.festamate.global.util.JwtAccessDeniedHandler;
 import com.gobongbob.festamate.global.util.JwtAuthenticationEntryPoint;
 import com.gobongbob.festamate.global.util.TokenAuthenticationFilter;
 import com.gobongbob.festamate.global.util.TokenProvider;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -120,15 +123,30 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // 기본 프론트 도메인
+    private static final String DEFAULT_FRONTEND_ORIGIN = "https://festamate-web.vercel.app";
+
     @Value("${cors.allowed.origins}")
-    private String[] allowedOrigins;
+    private String corsAllowedOrigins;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // CORS 허용 주소 명시 (credentials: true와 함께 쓰기 위해 * 안 됨)
-        configuration.setAllowedOrigins(List.of(allowedOrigins));
+        // 1. 기본 도메인 추가
+        Set<String> allowedOriginsSet = new LinkedHashSet<>();
+        allowedOriginsSet.add(DEFAULT_FRONTEND_ORIGIN);
+
+        // 2. 환경변수에서 추가 도메인 병합
+        if (corsAllowedOrigins != null && !corsAllowedOrigins.isBlank()) {
+            String[] envOrigins = corsAllowedOrigins.split(",");
+            for (String origin : envOrigins) {
+                if (!origin.isBlank()) {
+                    allowedOriginsSet.add(origin.trim());
+                }
+            }
+        }
+        configuration.setAllowedOrigins(new ArrayList<>(allowedOriginsSet));
 
         // 사용할 HTTP 메서드 명시
         configuration.setAllowedMethods(
