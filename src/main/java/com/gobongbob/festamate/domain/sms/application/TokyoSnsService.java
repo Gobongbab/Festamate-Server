@@ -1,5 +1,10 @@
 package com.gobongbob.festamate.domain.sms.application;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.AUTH_CODE_MISMATCH;
+import static com.gobongbob.festamate.global.response.ResponseCode.AUTH_CODE_NOT_FOUND_OR_EXPIRED;
+import static com.gobongbob.festamate.global.response.ResponseCode.AUTH_REQUEST_DAILY_LIMIT_EXCEEDED;
+
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +57,7 @@ public class TokyoSnsService {
                 long seconds = ttl % 60;
                 timeLeftMessage = String.format(" (다음 요청 가능 시간: 약 %d시간 %d분 %d초 후)", hours, minutes, seconds);
             }
-            throw new IllegalStateException("하루 인증 요청 횟수를 초과했습니다." + timeLeftMessage);
+            throw new BadRequestException(AUTH_REQUEST_DAILY_LIMIT_EXCEEDED + timeLeftMessage);
         }
 
         // 2. 기존 인증 코드 삭제 (재전송 시 이전 코드 무효화)
@@ -87,11 +92,11 @@ public class TokyoSnsService {
 
         if (storedCode == null) {
             // HashMap null 체크 대신 Redis 조회 결과 사용
-            throw new IllegalArgumentException("인증 요청이 존재하지 않거나 만료되었습니다.");
+            throw new BadRequestException(AUTH_CODE_NOT_FOUND_OR_EXPIRED);
         }
 
         if (!storedCode.equals(inputCode)) {
-            throw new IllegalArgumentException("인증번호가 틀렸습니다.");
+            throw new BadRequestException(AUTH_CODE_MISMATCH);
         }
 
         // 인증 성공 시 로직: Redis에서 키 삭제
