@@ -77,8 +77,9 @@ public class RoomService {
             Member hostMember) {
         List<Member> friendMembers = request.friendPhoneNumbers().stream()
                 .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
-                        .orElseThrow(() -> new BadRequestException("전화번호 [" + phoneNumber + "] 에 해당하는 유저를 찾을 수 없습니다.")))
-                .collect(Collectors.toList());
+                        .orElseThrow(() -> new BadRequestException(
+                                MEMBER_NOT_FOUND_BY_PHONE_NUMBER.formatMessage(phoneNumber)))
+                ).collect(Collectors.toList());
 
         List<Member> allMembersForValidation = new ArrayList<>(friendMembers);
         allMembersForValidation.add(hostMember); // 호스트도 전체 유효성 검사 목록에 포함
@@ -90,7 +91,7 @@ public class RoomService {
         // 3.2 해당 전화번호를 통해 조회한 유저가 DB에 존재하는지
         for (Member member : allMembersForValidation) {
             if (!memberRepository.existsByPhoneNumber(member.getPhoneNumber())) {
-                throw new BadRequestException("전화번호 [" + member.getPhoneNumber() + "] 에 해당하는 사용자를 찾을 수 없습니다.");
+                throw new BadRequestException(MEMBER_NOT_FOUND_BY_PHONE_NUMBER.formatMessage(member.getPhoneNumber()));
             }
         }
 
@@ -98,7 +99,7 @@ public class RoomService {
         validatePhoneNumberUniqueness(allMembersForValidation);
 
         // 3.4. 성별이 호스트의 성별과 일치하는지
-        validateFriendGroupGender(friendMembers, hostMember.getGender());
+        validateFriendGroupGender(friendMembers, hostMember);
 
         // 4. 모든 유효성 검증이 끝났다면 방 생성 진행
         List<RoomParticipant> participants = new ArrayList<>();
@@ -113,7 +114,7 @@ public class RoomService {
     private void validateSufficientTicketsForFriends(List<Member> members) {
         for (Member friend : members) {
             if (friend.getRemainingTicket() <= 0) {
-                throw new BadRequestException(friend.getNickname() + "님의 티켓이 부족합니다.");
+                throw new BadRequestException(NOT_ENOUGH_TICKET.formatMessage(friend.getNickname()));
             }
         }
     }
@@ -128,12 +129,15 @@ public class RoomService {
         }
     }
 
-    private void validateFriendGroupGender(List<Member> friendMembers, Gender hostGender) {
+    private void validateFriendGroupGender(List<Member> friendMembers, Member host) {
         for (Member friend : friendMembers) {
-            if (friend.getGender() != hostGender) {
-                throw new BadRequestException(
-                        "친구 " + friend.getNickname() + "님의 성별(" + friend.getGender() + ")이 호스트님의 성별(" + hostGender
-                                + ")과 일치하지 않습니다.");
+            if (friend.getGender() != host.getGender()) {
+                throw new BadRequestException(FRIEND_GENDER_NOT_MATCH_WITH_HOST.formatMessage(
+                        friend.getNickname(),
+                        friend.getGender().getName(),
+                        host.getNickname(),
+                        host.getGender().getName()
+                ));
             }
         }
     }
