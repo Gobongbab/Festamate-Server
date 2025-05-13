@@ -21,7 +21,8 @@ public enum ResponseCode {
     ROOM_NOT_JOINABLE(false, "모임의 남은 자리가 입장 인원 수와 일치하지 않습니다."),
     GENDER_NOT_MATCH(false, "성별이 일치하지 않습니다."),
     STUDENT_ID_NOT_MATCH(false, "학번이 일치하지 않습니다."),
-    NOT_ENOUGH_TICKET(false, "티켓이 부족합니다."),
+    NOT_ENOUGH_TICKET(false, "%s님의 티켓이 부족합니다."),
+    FRIEND_GENDER_NOT_MATCH_WITH_HOST(false, "친구 %s님의 성별(%s)이 %s님의 성별(%s)과 일치하지 않습니다."),
 
     // 모임 수정
     MUST_HOST(false, "방장이어야 합니다."),
