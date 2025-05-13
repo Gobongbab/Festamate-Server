@@ -4,6 +4,8 @@ import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -26,6 +28,8 @@ public interface RoomParticipantRepository extends JpaRepository<RoomParticipant
     List<RoomParticipant> findByRoomAndRole(Long roomId, ParticipantRole participantRole);
 
     List<RoomParticipant> findByMember_Id(Long memberId);
+
+    Slice<RoomParticipant> findByMember_Id(Long memberId, Pageable pageable);
 
     List<RoomParticipant> findByRoom_Id(Long roomId);
 
