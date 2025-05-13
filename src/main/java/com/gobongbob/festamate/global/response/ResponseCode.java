@@ -35,7 +35,7 @@ public enum ResponseCode {
     USER_NOT_FOUND(false, "해당 유저를 찾을 수 없습니다"),
     UNEXPECTED_TOKEN(false, "올바르지 않은 토큰입니다."),
     PHONE_NOT_VERIFIED(false, "전화번호 인증이 완료되지 않았습니다."),
-    PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS(false,  "초대된 사용자(호스트 및 친구) 간에 중복된 전화번호가 있습니다."),
+    PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS(false, "초대된 사용자(호스트 및 친구) 간에 중복된 전화번호가 있습니다."),
 
     // 파일
     EMPTY_FILE(false, "파일이 비어있습니다."),
@@ -52,6 +52,8 @@ public enum ResponseCode {
     ALREADY_REPORTED_MEMBER(false, "이미 신고한 유저입니다."),
     NO_REPORT(false, "해당 신고가 존재하지 않습니다."),
     NO_REPORT_REASON(false, "해당하는 신고 사유가 없습니다."),
+    AUTHENTICATION_INVALID(false, "인증 정보가 유효하지 않습니다."),
+    USER_ACCOUNT_DISABLED_OR_BLOCKED(false, "차단되었거나 비활성화된 사용자입니다. 이 기능을 사용할 수 없습니다."),
 
     // 티켓
     NOT_EXIST_TICKET(false, "존재하지 않는 티켓입니다."),
