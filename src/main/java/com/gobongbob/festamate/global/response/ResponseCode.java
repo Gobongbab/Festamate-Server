@@ -36,6 +36,18 @@ public enum ResponseCode {
     UNEXPECTED_TOKEN(false, "올바르지 않은 토큰입니다."),
     PHONE_NOT_VERIFIED(false, "전화번호 인증이 완료되지 않았습니다."),
     PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS(false, "초대된 사용자(호스트 및 친구) 간에 중복된 전화번호가 있습니다."),
+    PROFILE_REGISTRATION_REQUIRED(false, "프로필 등록이 필요합니다."),
+    USER_ALREADY_EXISTS(false, "이미 존재하는 회원입니다."),
+
+    // 인증
+    KAKAO_USER_INFO_PARSING_ERROR(false, "카카오 사용자 정보 파싱에 실패했습니다."),
+    KAKAO_USER_ID_NOT_FOUND(false, "카카오 사용자 정보에서 ID를 찾을 수 없습니다."),
+    KAKAO_RESPONSE_EMPTY(false, "카카오 사용자 정보 응답이 비어있습니다."),
+    KAKAO_TOKEN_INVALID_OR_EXPIRED(false, "카카오 토큰이 만료되었거나 유효하지 않습니다."),
+    KAKAO_API_REQUEST_FAILED(false, "카카오 API 요청에 실패했습니다."),
+    AUTH_CODE_NOT_FOUND_OR_EXPIRED(false, "인증 요청이 존재하지 않거나 만료되었습니다."),
+    AUTH_CODE_MISMATCH(false, "인증번호가 틀렸습니다."),
+    AUTH_REQUEST_DAILY_LIMIT_EXCEEDED(false, "하루 인증 요청 횟수를 초과했습니다.%s"),
 
     // 파일
     EMPTY_FILE(false, "파일이 비어있습니다."),
@@ -59,7 +71,6 @@ public enum ResponseCode {
     NOT_EXIST_TICKET(false, "존재하지 않는 티켓입니다."),
     ALREADY_USED_TICKET(false, "이미 사용된 쿠폰입니다."),
     EXPIRED_TICKET(false, "만료된 쿠폰입니다."),
-
 
     // 관리자
     NO_ADMIN(false, "관리자 권한이 필요합니다.");
