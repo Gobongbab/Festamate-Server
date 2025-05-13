@@ -85,7 +85,7 @@ public class TokyoSnsService {
 
     // @Transactional 제거 (Redis 작업은 보통 단일 작업)
     public void verifyCode(String phoneNumber, String inputCode) {
-        String normalizedPhone = normalizePhoneNumber(phoneNumber); // 추가
+        String normalizedPhone = normalizePhoneNumber(phoneNumber);
         String redisKey = VERIFICATION_PREFIX + normalizedPhone;
         String retryCountKey = RETRY_COUNT_PREFIX + normalizedPhone;
 
@@ -108,7 +108,7 @@ public class TokyoSnsService {
     }
 
     public void removeVerificationInfo(String phoneNumber) {
-        String normalizedPhone = normalizePhoneNumber(phoneNumber); // 추가
+        String normalizedPhone = normalizePhoneNumber(phoneNumber);
         String redisKey = VERIFICATION_PREFIX + normalizedPhone;
         String retryCountKey = RETRY_COUNT_PREFIX + normalizedPhone;
         stringRedisTemplate.delete(redisKey);
