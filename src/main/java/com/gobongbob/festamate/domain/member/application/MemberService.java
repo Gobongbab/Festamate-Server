@@ -218,6 +218,9 @@ public class MemberService {
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
     }
 
+
+    // FCM 토큰 등록
+    @Transactional
     public void registerFcmToken(Member member, MemberFcmTokenRequest request) {
         member.updateFcmToken(request.fcmToken());
         memberRepository.save(member);
