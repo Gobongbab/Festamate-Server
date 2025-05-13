@@ -78,11 +78,11 @@ public class RoomController implements RoomApi {
     // 참여 중인 모임방 조회
     @Override
     @GetMapping("/participations")
-    public SuccessResponse<List<RoomListResponse>> findParticipatingRooms(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails
+    public SuccessResponse<Slice<RoomListResponse>> findParticipatingRooms(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return new SuccessResponse<>(
-                roomService.findParticipatingRooms(memberDetails.getMember().getId()));
+        return new SuccessResponse<>(roomService.findParticipatingRooms(memberDetails.getMember().getId(), pageable));
     }
 
     @Override

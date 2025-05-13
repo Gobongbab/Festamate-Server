@@ -154,12 +154,10 @@ public class RoomService {
 
     // 참여 중인 모임방 조회
     @CheckActiveUser
-    public List<RoomListResponse> findParticipatingRooms(Long memberId) {
-        return roomParticipantRepository.findByMember_Id(memberId)
-                .stream()
+    public Slice<RoomListResponse> findParticipatingRooms(Long memberId, Pageable pageable) {
+        return roomParticipantRepository.findByMember_Id(memberId, pageable)
                 .map(RoomParticipant::getRoom)
-                .map(RoomListResponse::fromEntity)
-                .toList();
+                .map(RoomListResponse::fromEntity);
     }
 
     public RoomResponse findRoomById(CustomMemberDetails memberDetails, Long roomId) {
