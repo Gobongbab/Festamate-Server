@@ -1,11 +1,16 @@
 package com.gobongbob.festamate.domain.image.infrastructure;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.EMPTY_FILE;
+import static com.gobongbob.festamate.global.response.ResponseCode.IMAGE_STORE_DTO_CREATE_FAILED;
+import static com.gobongbob.festamate.global.response.ResponseCode.S3_UPLOAD_FAILED;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.dto.StoreImageDto;
 import com.gobongbob.festamate.domain.image.persistence.ImageStoreProcessor;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +62,7 @@ public class ImageService {
                     .url(uploadUrl)
                     .build();
         } catch (IOException e) {
-            throw new RuntimeException("파일 업로드에 실패했습니다.", e);
+            throw new BadRequestException(S3_UPLOAD_FAILED);
         }
     }
 
@@ -70,20 +75,19 @@ public class ImageService {
     // 단일 사진 업로드
     public Image uploadImage(MultipartFile imageFile) {
         if (imageFile == null || imageFile.isEmpty()) {
-            throw new IllegalArgumentException("업로드할 이미지 파일이 비어있습니다.");
+            throw new BadRequestException(EMPTY_FILE);
         }
         StoreImageDto storeImageDto;
         try {
-            List<StoreImageDto> dtos = imageStoreProcessor.storeImageFiles(
-                    Collections.singletonList(imageFile));
+            List<StoreImageDto> dtos = imageStoreProcessor.storeImageFiles(Collections.singletonList(imageFile));
             if (dtos == null || dtos.isEmpty()) {
-                throw new RuntimeException("이미지 파일 정보 생성에 실패했습니다.");
+                throw new BadRequestException(IMAGE_STORE_DTO_CREATE_FAILED);
             }
             storeImageDto = dtos.get(0);
         } catch (Exception e) {
             throw new RuntimeException("이미지 파일 정보 처리 중 오류 발생", e);
         }
 
-        return this.uploadImageFile(imageFile, storeImageDto);
+        return uploadImageFile(imageFile, storeImageDto);
     }
 }
