@@ -1,6 +1,14 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.*;
+import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_MATCHED;
+import static com.gobongbob.festamate.global.response.ResponseCode.ENTRY_MISMATCH_WITH_ROOM_CAPACITY;
+import static com.gobongbob.festamate.global.response.ResponseCode.GENDER_NOT_MATCH;
+import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
+import static com.gobongbob.festamate.global.response.ResponseCode.STUDENT_ID_NOT_MATCH;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
@@ -140,6 +148,7 @@ public class RoomParticipationService {
 
     private void validateParticipation(Room room, List<Member> participants) {
         validateRoomMatching(room); // 현재 매칭중인 방인지 확인
+        validateCapacity(room, participants); // 방의 남은 자리와 참여자 수가 일치하는지 확인
         validateParticipantsActive(participants); // 참여자들이 활성화된 회원인지 확인
         validatePhoneNumberUnique(participants); // 참여자 간의 전화번호가 중복되지 않는지 확인
         validateGender(room, participants); // 방의 성별과 참여자의 성별이 일치하는지 확인
@@ -152,9 +161,9 @@ public class RoomParticipationService {
         }
     }
 
-    private void validateRoomFull(Room room) {
-        if (room.isFull()) {
-            throw new BadRequestException(ROOM_FULL);
+    private void validateCapacity(Room room, List<Member> participants) {
+        if (room.getMaxParticipants() - room.getParticipants().size() != participants.size()) {
+            throw new BadRequestException(ENTRY_MISMATCH_WITH_ROOM_CAPACITY);
         }
     }
 
