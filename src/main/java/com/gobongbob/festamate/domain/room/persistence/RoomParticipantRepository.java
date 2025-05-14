@@ -11,8 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface RoomParticipantRepository extends JpaRepository<RoomParticipant, Long> {
 
-    RoomParticipant save(RoomParticipant roomParticipant);
-
     // saveAll() 메서드의 경우, JpaRepository 에 기본적으로 정의되어있음.
 
     Optional<RoomParticipant> findById(Long id);
