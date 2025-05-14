@@ -47,7 +47,7 @@ public enum ResponseCode {
     KAKAO_API_REQUEST_FAILED(false, "카카오 API 요청에 실패했습니다."),
     AUTH_CODE_NOT_FOUND_OR_EXPIRED(false, "인증 요청이 존재하지 않거나 만료되었습니다."),
     AUTH_CODE_MISMATCH(false, "인증번호가 틀렸습니다."),
-    AUTH_REQUEST_DAILY_LIMIT_EXCEEDED(false, "하루 인증 요청 횟수를 초과했습니다.%s"),
+    AUTH_REQUEST_DAILY_LIMIT_EXCEEDED(false, "인증번호 전송 횟수를 초과했습니다. 하루 최대 2회까지만 전송할 수 있습니다.%s"),
 
     // 파일
     EMPTY_FILE(false, "파일이 비어있습니다."),
