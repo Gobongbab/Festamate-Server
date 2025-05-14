@@ -1,8 +1,6 @@
 package com.gobongbob.festamate.domain.chat.persistence;
 
 import static com.gobongbob.festamate.domain.chat.domain.QChatRoom.chatRoom;
-import static com.gobongbob.festamate.domain.room.domain.QRoom.room;
-import static com.gobongbob.festamate.domain.room.domain.QRoomParticipant.roomParticipant;
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -10,9 +8,6 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
@@ -24,24 +19,24 @@ public class ChatRoomQueryDslRepositoryImpl implements ChatRoomQueryDslRepositor
     /**
      * 모임 상태, 학과, 학번, 성별에 따른 조회
      */
-    @Override
-    public Slice<ChatRoom> findParticipatingChatRooms(Pageable pageable, Long memberId) {
-        JPAQuery<Room> basicQuery = queryFactory
-                .select(room)  // Room을 select
-                .from(roomParticipant)
-                .join(roomParticipant.room, room)
-                .join(room.chatRoom, chatRoom).fetchJoin()  // fetch join
-                .where(roomParticipant.member.id.eq(memberId))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize() + 1);
-
-        List<Room> content = addSortingQuery(basicQuery, pageable.getSort().toString());
-        List<ChatRoom> chatRooms = content.stream()
-                .map(Room::getChatRoom)
-                .toList();
-
-        return new SliceImpl<>(chatRooms, pageable, hasNextPage(chatRooms, pageable.getPageSize()));
-    }
+//    @Override
+//    public Slice<ChatRoom> findParticipatingChatRooms(Pageable pageable, Long memberId) {
+//        JPAQuery<Room> basicQuery = queryFactory
+//                .select(room)  // Room을 select
+//                .from(roomParticipant)
+//                .join(roomParticipant.room, room)
+//                .join(room.chatRoom, chatRoom).fetchJoin()  // fetch join
+//                .where(roomParticipant.member.id.eq(memberId))
+//                .offset(pageable.getOffset())
+//                .limit(pageable.getPageSize() + 1);
+//
+//        List<Room> content = addSortingQuery(basicQuery, pageable.getSort().toString());
+//        List<ChatRoom> chatRooms = content.stream()
+//                .map(Room::getChatRoom)
+//                .toList();
+//
+//        return new SliceImpl<>(chatRooms, pageable, hasNextPage(chatRooms, pageable.getPageSize()));
+//    }
 
     /**
      * 마지막 페이지 여부 확인 메소드
