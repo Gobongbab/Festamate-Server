@@ -3,7 +3,6 @@ package com.gobongbob.festamate.domain.chat.presentation;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
-import com.gobongbob.festamate.domain.chat.dto.response.ChatRoomListResponse;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
@@ -41,14 +40,14 @@ public class ChatController implements ChatApi {
         return new SuccessResponse<>();
     }
 
-    @Override
-    @GetMapping("/chatRooms/participations")
-    public SuccessResponse<Slice<ChatRoomListResponse>> findParticipatingChatRooms(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        return new SuccessResponse<>(chatService.findParticipatingChatRooms(pageable, memberDetails.getMember()));
-    }
+//    @Override
+//    @GetMapping("/chatRooms/participations")
+//    public SuccessResponse<Slice<ChatRoomListResponse>> findParticipatingChatRooms(
+//            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+//            @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC) Pageable pageable
+//    ) {
+//        return new SuccessResponse<>(chatService.findParticipatingChatRooms(pageable, memberDetails.getMember()));
+//    }
 
     // 메시지 조회
     @Override

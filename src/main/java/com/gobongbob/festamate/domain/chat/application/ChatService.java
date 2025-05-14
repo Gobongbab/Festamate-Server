@@ -5,7 +5,6 @@ import static com.gobongbob.festamate.global.response.ResponseCode.NO_AUTHORITY_
 
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.domain.Message;
-import com.gobongbob.festamate.domain.chat.dto.response.ChatRoomListResponse;
 import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
@@ -66,8 +65,8 @@ public class ChatService {
         }
     }
 
-    public Slice<ChatRoomListResponse> findParticipatingChatRooms(Pageable pageable, Member member) {
-        return chatRoomRepository.findParticipatingChatRooms(pageable, member.getId())
-                .map(ChatRoomListResponse::fromEntity);
-    }
+//    public Slice<ChatRoomListResponse> findParticipatingChatRooms(Pageable pageable, Member member) {
+//        return chatRoomRepository.findParticipatingChatRooms(pageable, member.getId())
+//                .map(ChatRoomListResponse::fromEntity);
+//    }
 }
