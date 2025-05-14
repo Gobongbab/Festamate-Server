@@ -1,8 +1,16 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.*;
+import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_MATCHED;
+import static com.gobongbob.festamate.global.response.ResponseCode.GENDER_NOT_MATCH;
+import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
+import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_FULL;
+import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_NOT_JOINABLE;
+import static com.gobongbob.festamate.global.response.ResponseCode.STUDENT_ID_NOT_MATCH;
 
-import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
@@ -24,8 +32,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 @Slf4j
@@ -64,7 +70,7 @@ public class RoomParticipationService {
     // 모임방 나가기
     @Transactional
     @CheckActiveUser
-    public ChatRoom leave(Member member, Long roomId) {
+    public Room leave(Member member, Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateNotHost(room, member);
@@ -78,7 +84,7 @@ public class RoomParticipationService {
             roomRepository.delete(room);
         }
 
-        return room.getChatRoom();
+        return room;
     }
 
     // 방장 여부 확인
