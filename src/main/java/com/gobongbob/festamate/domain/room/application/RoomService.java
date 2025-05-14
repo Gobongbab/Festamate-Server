@@ -206,7 +206,7 @@ public class RoomService {
                 request.meetingDateTime(),
                 request.maxParticipants()
         );
-        room.getChatRoom().updateTitle(request.title());
+//        room.getChatRoom().updateTitle(request.title());
     }
 
     // 방 삭제(일반, admin)
