@@ -68,9 +68,6 @@ dependencies {
     // V2로의 변경이 필요하나, 문법이 다소 다른 관계로 현재로선 보류중이다.
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.767'
 
-    // Firebase Admin SDK
-    implementation 'com.google.firebase:firebase-admin:9.2.0'
-
     // Sentry
     implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.5.0'
 

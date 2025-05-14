@@ -23,7 +23,6 @@ import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
-import com.gobongbob.festamate.global.NotificationService;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
@@ -44,7 +43,6 @@ public class RoomParticipationService {
     private final MessageRepository messageRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final MemberRepository memberRepository;
-    private final NotificationService notificationService;
 
     // 방 참여
     @Transactional
@@ -61,7 +59,6 @@ public class RoomParticipationService {
         participants.forEach(participant -> participateRoom(participant, room));
         if (room.isFull()) { // 방에 참여자가 다 찼을 때
             room.updateStatus(Status.MATCHED);
-//            sendNotifications(room);
         }
 
         return room;
@@ -122,26 +119,6 @@ public class RoomParticipationService {
 
         return members;
     }
-
-//    private void sendNotifications(Room room) {
-//        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-//            @Override
-//            public void afterCommit() {
-//                room.getParticipants().forEach(participant -> {
-//                    String fcmToken = participant.getMember().getFcmToken();
-//                    Long participantId = participant.getMember().getId();
-//                    if (fcmToken != null) {
-//                        notificationService.sendNotification(
-//                                fcmToken,
-//                                "방 매칭 완료",
-//                                "방 매칭이 완료되었습니다: " + room.getTitle(),
-//                                participantId
-//                        );
-//                    }
-//                });
-//            }
-//        });
-//    }
 
     private void validateParticipation(Room room, List<Member> participants) {
         validateRoomMatching(room); // 현재 매칭중인 방인지 확인
