@@ -43,7 +43,7 @@ public class RoomParticipationService {
     // 방 참여
     @Transactional
     @CheckActiveUser
-    public ChatRoom participate(Long memberId, Long roomId, FriendPhoneNumbersRequest request) {
+    public Room participate(Long memberId, Long roomId, FriendPhoneNumbersRequest request) {
         Member member = memberRepository.findById(memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
         Room room = roomRepository.findById(roomId)
@@ -55,10 +55,10 @@ public class RoomParticipationService {
         participants.forEach(participant -> participateRoom(participant, room));
         if (room.isFull()) { // 방에 참여자가 다 찼을 때
             room.updateStatus(Status.MATCHED);
-            sendNotifications(room);
+//            sendNotifications(room);
         }
 
-        return room.getChatRoom();
+        return room;
     }
 
     // 모임방 나가기
@@ -117,25 +117,25 @@ public class RoomParticipationService {
         return members;
     }
 
-    private void sendNotifications(Room room) {
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                room.getParticipants().forEach(participant -> {
-                    String fcmToken = participant.getMember().getFcmToken();
-                    Long participantId = participant.getMember().getId();
-                    if (fcmToken != null) {
-                        notificationService.sendNotification(
-                                fcmToken,
-                                "방 매칭 완료",
-                                "방 매칭이 완료되었습니다: " + room.getTitle(),
-                                participantId
-                        );
-                    }
-                });
-            }
-        });
-    }
+//    private void sendNotifications(Room room) {
+//        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+//            @Override
+//            public void afterCommit() {
+//                room.getParticipants().forEach(participant -> {
+//                    String fcmToken = participant.getMember().getFcmToken();
+//                    Long participantId = participant.getMember().getId();
+//                    if (fcmToken != null) {
+//                        notificationService.sendNotification(
+//                                fcmToken,
+//                                "방 매칭 완료",
+//                                "방 매칭이 완료되었습니다: " + room.getTitle(),
+//                                participantId
+//                        );
+//                    }
+//                });
+//            }
+//        });
+//    }
 
     private void validateParticipation(Room room, List<Member> participants) {
         validateRoomMatching(room); // 현재 매칭중인 방인지 확인
