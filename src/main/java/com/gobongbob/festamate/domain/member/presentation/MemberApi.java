@@ -2,7 +2,6 @@ package com.gobongbob.festamate.domain.member.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.dto.request.MemberExistRequest;
-import com.gobongbob.festamate.domain.member.dto.request.MemberFcmTokenRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
@@ -125,14 +124,5 @@ public interface MemberApi {
     SuccessResponse<String> checkNickname(
             @Parameter(name = "nickname", description = "확인할 닉네임", required = true)
             @RequestParam(name = "nickname") String nickname
-    );
-
-    @Operation(summary = "FCM 토큰 발급", description = "FCM 토큰을 발급합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
-    })
-    @PostMapping("/members/fcm-token")    SuccessResponse<Void> registerFcmToken(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @RequestBody MemberFcmTokenRequest request
     );
 }

@@ -38,6 +38,9 @@ public enum ResponseCode {
     PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS(false, "초대된 사용자(호스트 및 친구) 간에 중복된 전화번호가 있습니다."),
     PROFILE_REGISTRATION_REQUIRED(false, "프로필 등록이 필요합니다."),
     USER_ALREADY_EXISTS(false, "이미 존재하는 회원입니다."),
+    FAIL_SEND_SMS(false, "SMS 발송을 실패했습니다."),
+    ERROR_SEND_SMS(false, "SMS 발송 중 오류가 발생했습니다."),
+    CAN_NOT_RECOGNIZE_STUDENT_CARD(false, "학생증 정보를 인식할 수 없습니다. 옳바른 학생증을 업로드해주세요."),
 
     // 인증
     KAKAO_USER_INFO_PARSING_ERROR(false, "카카오 사용자 정보 파싱에 실패했습니다."),
