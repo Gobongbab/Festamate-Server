@@ -205,10 +205,10 @@ public class RoomParticipationService {
             try {
                 messageService.send(message);
             } catch (NurigoMessageNotReceivedException e) {
-                log.error("(NurigoMessageNotReceivedException) 휴대폰 문자 전송 에러 상세 내용: " + e.getMessage());
+                log.error("(NurigoMessageNotReceivedException) 휴대폰 문자 전송 에러 상세 내용: " + e);
                 throw new BadRequestException(FAIL_SEND_SMS);
             } catch (Exception e) {
-                log.error("(Exception) 휴대폰 문자 전송 에러 상세 내용: " + e.getMessage());
+                log.error("(Exception) 휴대폰 문자 전송 에러 상세 내용: " + e);
                 throw new BadRequestException(ERROR_SEND_SMS);
             }
         });
