@@ -1,24 +1,22 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.CAN_NOT_UPDATE;
-import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
-import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS;
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
-import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.domain.Member.MemberStatus;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.RoomAuthority;
 import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
+import com.gobongbob.festamate.domain.room.domain.Status;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
 import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
@@ -27,7 +25,6 @@ import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
-import com.gobongbob.festamate.domain.room.scheduler.RoomCloseScheduler;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.ArrayList;
@@ -47,7 +44,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class RoomService {
 
     private final RoomRepository roomRepository;
-    private final RoomCloseScheduler roomCloseScheduler;
     private final RoomParticipantRepository roomParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
@@ -85,8 +81,9 @@ public class RoomService {
             Member hostMember) {
         List<Member> friendMembers = request.friendPhoneNumbers().stream()
                 .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
-                        .orElseThrow(() -> new BadRequestException("전화번호 [" + phoneNumber + "] 에 해당하는 유저를 찾을 수 없습니다.")))
-                .collect(Collectors.toList());
+                        .orElseThrow(() -> new BadRequestException(
+                                MEMBER_NOT_FOUND_BY_PHONE_NUMBER.formatMessage(phoneNumber)))
+                ).collect(Collectors.toList());
 
         List<Member> allMembersForValidation = new ArrayList<>(friendMembers);
         allMembersForValidation.add(hostMember); // 호스트도 전체 유효성 검사 목록에 포함
@@ -98,15 +95,18 @@ public class RoomService {
         // 3.2 해당 전화번호를 통해 조회한 유저가 DB에 존재하는지
         for (Member member : allMembersForValidation) {
             if (!memberRepository.existsByPhoneNumber(member.getPhoneNumber())) {
-                throw new BadRequestException("전화번호 [" + member.getPhoneNumber() + "] 에 해당하는 사용자를 찾을 수 없습니다.");
+                throw new BadRequestException(MEMBER_NOT_FOUND_BY_PHONE_NUMBER.formatMessage(member.getPhoneNumber()));
             }
         }
 
         // 3.3. 호스트, 친구들 사이에 전화번호가 중복되지 않는지
         validatePhoneNumberUniqueness(allMembersForValidation);
 
-        // 3.4. 성별이 호스트의 성별과 일치하는지
-        validateFriendGroupGender(friendMembers, hostMember.getGender());
+        // 3.4 참여자들 중 제재된 회원이 없는지
+        validateParticipantsActive(allMembersForValidation);
+
+        // 3.5. 성별이 호스트의 성별과 일치하는지
+        validateFriendGroupGender(friendMembers, hostMember);
 
         // 4. 모든 유효성 검증이 끝났다면 방 생성 진행
         List<RoomParticipant> participants = new ArrayList<>();
@@ -121,7 +121,7 @@ public class RoomService {
     private void validateSufficientTicketsForFriends(List<Member> members) {
         for (Member friend : members) {
             if (friend.getRemainingTicket() <= 0) {
-                throw new BadRequestException(friend.getNickname() + "님의 티켓이 부족합니다.");
+                throw new BadRequestException(NOT_ENOUGH_TICKET.formatMessage(friend.getNickname()));
             }
         }
     }
@@ -136,12 +136,24 @@ public class RoomService {
         }
     }
 
-    private void validateFriendGroupGender(List<Member> friendMembers, Gender hostGender) {
+    private void validateParticipantsActive(List<Member> participants) {
+        boolean hasBlockedParticipant = participants.stream()
+                .anyMatch(member -> member.getStatus() == MemberStatus.BLOCKED);
+
+        if (hasBlockedParticipant) {
+            throw new BadRequestException(NO_MEMBER);
+        }
+    }
+
+    private void validateFriendGroupGender(List<Member> friendMembers, Member host) {
         for (Member friend : friendMembers) {
-            if (friend.getGender() != hostGender) {
-                throw new BadRequestException(
-                        "친구 " + friend.getNickname() + "님의 성별(" + friend.getGender() + ")이 호스트님의 성별(" + hostGender
-                                + ")과 일치하지 않습니다.");
+            if (friend.getGender() != host.getGender()) {
+                throw new BadRequestException(FRIEND_GENDER_NOT_MATCH_WITH_HOST.formatMessage(
+                        friend.getNickname(),
+                        friend.getGender().getName(),
+                        host.getNickname(),
+                        host.getGender().getName()
+                ));
             }
         }
     }
@@ -182,8 +194,8 @@ public class RoomService {
     public void updateRoomById(Member member, Long roomId, RoomUpdateRequest request, List<MultipartFile> imageFiles) {
         Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
-        validateIsHost(room, member);
-        validateAlone(room);
+        validateIsAccessible(room, member);
+        validateIsMatchingRoom(room);
 
         if (imageFiles != null && !imageFiles.isEmpty()) {
             room.getImages().forEach(roomImage -> imageService.delete(roomImage.getImage()));
@@ -215,7 +227,8 @@ public class RoomService {
     public void deleteRoomById(Member member, Long roomId) {
         Room room = roomRepository.findByIdWithHost(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
-        validateIsHost(room, member);
+        validateIsAccessible(room, member);
+        validateIsMatchingRoom(room);
 
         messageRepository.deleteByRoomId(roomId);
         roomRepository.delete(room);
@@ -265,15 +278,15 @@ public class RoomService {
     }
 
 
-    private void validateIsHost(Room room, Member member) {
+    private void validateIsAccessible(Room room, Member member) {
         if (!member.isHost(room) && !member.isAdmin()) {
             throw new BadRequestException(MUST_HOST);
         }
     }
 
-    private void validateAlone(Room room) {
-        if (!room.isJoinable()) { // 호스트 측 참가자만 있는 경우
-            throw new BadRequestException(CAN_NOT_UPDATE);
+    private void validateIsMatchingRoom(Room room) {
+        if (room.getStatus() != Status.MATCHING) {
+            throw new BadRequestException(ROOM_UPDATE_NOT_AVAILABLE);
         }
     }
 }

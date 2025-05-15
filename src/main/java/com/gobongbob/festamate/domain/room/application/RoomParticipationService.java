@@ -1,8 +1,21 @@
 package com.gobongbob.festamate.domain.room.application;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_MATCHED;
+import static com.gobongbob.festamate.global.response.ResponseCode.ENTRY_MISMATCH_WITH_ROOM_CAPACITY;
+import static com.gobongbob.festamate.global.response.ResponseCode.ERROR_SEND_SMS;
+import static com.gobongbob.festamate.global.response.ResponseCode.FAIL_SEND_SMS;
+import static com.gobongbob.festamate.global.response.ResponseCode.GENDER_NOT_MATCH;
+import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
+import static com.gobongbob.festamate.global.response.ResponseCode.STUDENT_ID_NOT_MATCH;
+
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.domain.Member.MemberStatus;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -15,7 +28,6 @@ import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +37,6 @@ import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 @Service
 @Slf4j
@@ -97,14 +107,6 @@ public class RoomParticipationService {
         return new IsMemberHostResponse(isHost);
     }
 
-    private void participateRoomForFriends(Room room, FriendPhoneNumbersRequest request) {
-        request.friendPhoneNumbers()
-                .stream()
-                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
-                        .orElseThrow(() -> new BadRequestException(NO_MEMBER)))
-                .forEach(participant -> participateRoom(participant, room));
-    }
-
     private void participateRoom(Member member, Room room) {
         member.useTicket();
         RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, ParticipantRole.GUEST);
@@ -124,8 +126,8 @@ public class RoomParticipationService {
 
     private void validateParticipation(Room room, List<Member> participants) {
         validateRoomMatching(room); // 현재 매칭중인 방인지 확인
-        validateRoomFull(room); // 방에 참여자가 다 찼는지 확인
-        validateRoomJoinable(room); // 방에 참여할 수 있는 인원인지 확인
+        validateCapacity(room, participants); // 방의 남은 자리와 참여자 수가 일치하는지 확인
+        validateParticipantsActive(participants); // 참여자들이 활성화된 회원인지 확인
         validatePhoneNumberUnique(participants); // 참여자 간의 전화번호가 중복되지 않는지 확인
         validateGender(room, participants); // 방의 성별과 참여자의 성별이 일치하는지 확인
         validateStudentId(room, participants); // 방의 학번과 참여자의 학번이 일치하는지 확인
@@ -137,15 +139,18 @@ public class RoomParticipationService {
         }
     }
 
-    private void validateRoomFull(Room room) {
-        if (room.isFull()) {
-            throw new BadRequestException(ROOM_FULL);
+    private void validateCapacity(Room room, List<Member> participants) {
+        if (room.getMaxParticipants() - room.getParticipants().size() != participants.size()) {
+            throw new BadRequestException(ENTRY_MISMATCH_WITH_ROOM_CAPACITY);
         }
     }
 
-    private void validateRoomJoinable(Room room) {
-        if (!room.isJoinable()) { // 모임의 남은 자리 수와 참여하려는 인원의 수가 맞는지
-            throw new BadRequestException(ROOM_NOT_JOINABLE);
+    private void validateParticipantsActive(List<Member> participants) {
+        boolean hasBlockedParticipant = participants.stream()
+                .anyMatch(member -> member.getStatus() == MemberStatus.BLOCKED);
+
+        if (hasBlockedParticipant) {
+            throw new BadRequestException(NO_MEMBER);
         }
     }
 

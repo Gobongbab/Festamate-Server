@@ -1,6 +1,11 @@
 package com.gobongbob.festamate.domain.image.persistence;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.EMPTY_FILE;
+import static com.gobongbob.festamate.global.response.ResponseCode.EXCEED_IMAGE_CAPACITY;
+import static com.gobongbob.festamate.global.response.ResponseCode.UNSUPPORTED_IMAGE_EXTENSION;
+
 import com.gobongbob.festamate.domain.image.dto.StoreImageDto;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -10,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class ImageStoreProcessor {
 
-    private static final List<String> WHITE_IMAGE_EXTENSION = List.of("jpg", "jpeg", "png", "Webp");
+    private static final List<String> WHITE_IMAGE_EXTENSION = List.of("jpg", "jpeg", "png", "gif");
     private static final int MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final String EXTENSION_FILE_CHARACTER = ".";
 
@@ -47,22 +52,20 @@ public class ImageStoreProcessor {
 
     private void validateImageFileSize(long imageSize) {
         if (imageSize > MAX_FILE_SIZE) {
-            throw new RuntimeException(
-                    String.format("이미지 파일 크기는 %dMB 이하여야 합니다.", MAX_FILE_SIZE / (1024 * 1024))
-            );
+            throw new BadRequestException(EXCEED_IMAGE_CAPACITY.formatMessage(MAX_FILE_SIZE / (1024 * 1024)));
         }
     }
 
     private void validateImageFileEmpty(MultipartFile imageFile) {
         if (imageFile.isEmpty()) {
-            throw new RuntimeException("파일이 비어있습니다.");
+            throw new BadRequestException(EMPTY_FILE);
         }
     }
 
     private void validateImageFileExtension(final String extension) {
         // 지원하지 않는 파일 확장자를 사용한 경우, 해당 확장자 정보와 함께 예외 반환
         if (!WHITE_IMAGE_EXTENSION.contains(extension)) {
-            throw new RuntimeException("지원하지 않는 이미지 파일 확장자입니다." + " | " + extension);
+            throw new BadRequestException(UNSUPPORTED_IMAGE_EXTENSION.formatMessage(extension));
         }
     }
 }
