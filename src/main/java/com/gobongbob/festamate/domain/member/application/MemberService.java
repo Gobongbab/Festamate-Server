@@ -109,6 +109,9 @@ public class MemberService {
     @Transactional
     @CheckActiveUser
     public void updateMemberProfileById(Member member, ProfileUpdateRequest request) {
+        if(memberRepository.existsByNickname(request.nickname())){
+            throw new BadRequestException(DUPLICATE_NICKNAME);
+        }
         member.updateProfile(request.nickname());
         memberRepository.save(member);
     }
