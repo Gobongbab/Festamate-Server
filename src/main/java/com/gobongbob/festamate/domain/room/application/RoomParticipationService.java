@@ -1,8 +1,5 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.*;
-
-import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
@@ -15,17 +12,21 @@ import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
-import com.gobongbob.festamate.global.NotificationService;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.nurigo.sdk.message.exception.NurigoMessageNotReceivedException;
+import net.nurigo.sdk.message.model.Message;
+import net.nurigo.sdk.message.service.DefaultMessageService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 @Service
 @Slf4j
@@ -38,12 +39,16 @@ public class RoomParticipationService {
     private final MessageRepository messageRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final MemberRepository memberRepository;
-    private final NotificationService notificationService;
+    private final DefaultMessageService messageService;
+
+
+    @Value("${coolsms.from.number}")
+    private String fromNumber;
 
     // 방 참여
     @Transactional
     @CheckActiveUser
-    public ChatRoom participate(Long memberId, Long roomId, FriendPhoneNumbersRequest request) {
+    public Room participate(Long memberId, Long roomId, FriendPhoneNumbersRequest request) {
         Member member = memberRepository.findById(memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
         Room room = roomRepository.findById(roomId)
@@ -55,16 +60,16 @@ public class RoomParticipationService {
         participants.forEach(participant -> participateRoom(participant, room));
         if (room.isFull()) { // 방에 참여자가 다 찼을 때
             room.updateStatus(Status.MATCHED);
-            sendNotifications(room);
+            sendMatchingCompleteMessages(roomId, room);
         }
 
-        return room.getChatRoom();
+        return room;
     }
 
     // 모임방 나가기
     @Transactional
     @CheckActiveUser
-    public ChatRoom leave(Member member, Long roomId) {
+    public Room leave(Member member, Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_ROOM));
         validateNotHost(room, member);
@@ -78,7 +83,7 @@ public class RoomParticipationService {
             roomRepository.delete(room);
         }
 
-        return room.getChatRoom();
+        return room;
     }
 
     // 방장 여부 확인
@@ -115,26 +120,6 @@ public class RoomParticipationService {
         members.add(member);
 
         return members;
-    }
-
-    private void sendNotifications(Room room) {
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                room.getParticipants().forEach(participant -> {
-                    String fcmToken = participant.getMember().getFcmToken();
-                    Long participantId = participant.getMember().getId();
-                    if (fcmToken != null) {
-                        notificationService.sendNotification(
-                                fcmToken,
-                                "방 매칭 완료",
-                                "방 매칭이 완료되었습니다: " + room.getTitle(),
-                                participantId
-                        );
-                    }
-                });
-            }
-        });
     }
 
     private void validateParticipation(Room room, List<Member> participants) {
@@ -200,5 +185,43 @@ public class RoomParticipationService {
         if (member.isHost(room)) {
             throw new BadRequestException(MUST_NORMAL);
         }
+    }
+
+    private void sendMatchingCompleteMessages(Long roomId, Room room) {
+        List<String> participantPhoneNumbers = getParticipantPhoneNumbers(roomId);
+        sendMessagesToParticipants(participantPhoneNumbers, room);
+    }
+
+    private List<String> getParticipantPhoneNumbers(Long roomId) {
+        return roomParticipantRepository.findByRoom_Id(roomId)
+                .stream()
+                .map(roomParticipant -> roomParticipant.getMember().getPhoneNumber())
+                .collect(Collectors.toList());
+    }
+
+    private void sendMessagesToParticipants(List<String> participantPhoneNumbers, Room room) {
+        participantPhoneNumbers.forEach(phone -> {
+            Message message = setMessage(phone, room.getOpenChatUrl(), room.getTitle());
+            try {
+                messageService.send(message);
+            } catch (NurigoMessageNotReceivedException e) {
+                log.error("(NurigoMessageNotReceivedException) 휴대폰 문자 전송 에러 상세 내용: " + e);
+                throw new BadRequestException(FAIL_SEND_SMS);
+            } catch (Exception e) {
+                log.error("(Exception) 휴대폰 문자 전송 에러 상세 내용: " + e);
+                throw new BadRequestException(ERROR_SEND_SMS);
+            }
+        });
+    }
+
+    private Message setMessage(String phone, String openChatUrl, String title) {
+        Message message = new Message();
+        message.setFrom(fromNumber);
+        message.setTo(phone);
+        message.setText("[FestaMate!] 모임방 " + title + "에 매칭이 완료되었어요!  오픈채팅에 입장하여 시간과 장소를 정해보세요! \n " +
+                "오픈채팅 링크: \n" +
+                openChatUrl);
+
+        return message;
     }
 }

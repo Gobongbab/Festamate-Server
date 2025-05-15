@@ -2,7 +2,6 @@ package com.gobongbob.festamate.domain.room.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
-import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
@@ -23,7 +22,16 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -44,13 +52,12 @@ public class RoomController implements RoomApi {
             @RequestPart("request") @Valid RoomCreateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        ChatRoom createdChatRoom = roomService.createRoom(memberDetails.getMember().getId(),
-                request, multipartFiles);
-        chatService.sendMessage(
-                createdChatRoom.getId(),
-                memberDetails.getMember(),
-                "안녕하세요! " + createdChatRoom.getTitle() + "에 오신 것을 환영합니다!"
-        );
+        roomService.createRoom(memberDetails.getMember().getId(), request, multipartFiles);
+//        chatService.sendMessage(
+//                createdChatRoom.getId(),
+//                memberDetails.getMember(),
+//                "안녕하세요! " + createdChatRoom.getTitle() + "에 오신 것을 환영합니다!"
+//        );
 
         return new SuccessResponse<>();
     }
@@ -129,12 +136,12 @@ public class RoomController implements RoomApi {
             @PathVariable("roomId") Long roomId,
             @RequestBody FriendPhoneNumbersRequest request
     ) {
-        ChatRoom chatRoom = roomParticipationService.participate(memberDetails.getMember().getId(), roomId, request);
-        chatService.sendMessage(
-                chatRoom.getId(),
-                memberDetails.getMember(),
-                memberDetails.getMember().getNickname() + "님이 들어왔습니다."
-        );
+        roomParticipationService.participate(memberDetails.getMember().getId(), roomId, request);
+//        chatService.sendMessage(
+//                chatRoom.getId(),
+//                memberDetails.getMember(),
+//                memberDetails.getMember().getNickname() + "님이 들어왔습니다."
+//        );
 
         return new SuccessResponse<>();
     }
@@ -146,12 +153,12 @@ public class RoomController implements RoomApi {
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable("roomId") Long roomId
     ) {
-        ChatRoom chatRoom = roomParticipationService.leave(memberDetails.getMember(), roomId);
-        chatService.sendMessage(
-                chatRoom.getId(),
-                memberDetails.getMember(),
-                memberDetails.getMember().getNickname() + "님이 나갔습니다."
-        );
+        roomParticipationService.leave(memberDetails.getMember(), roomId);
+//        chatService.sendMessage(
+//                chatRoom.getId(),
+//                memberDetails.getMember(),
+//                memberDetails.getMember().getNickname() + "님이 나갔습니다."
+//        );
 
         return new SuccessResponse<>();
     }

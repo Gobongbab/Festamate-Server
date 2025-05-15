@@ -1,9 +1,12 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.*;
+import static com.gobongbob.festamate.global.response.ResponseCode.CAN_NOT_UPDATE;
+import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
-import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.image.domain.Image;
@@ -54,25 +57,28 @@ public class RoomService {
     // 방 생성
     @Transactional
     @CheckActiveUser// 메서드 실행 전 현재 사용자가 ACTIVE 상태인지 AOP로 확인 (BLOCKED 시 AccessDeniedException 발생)
-    public ChatRoom createRoom(Long memberId, RoomCreateRequest request, List<MultipartFile> imageFiles) {
+    public Room createRoom(Long memberId, RoomCreateRequest request, List<MultipartFile> imageFiles) {
         Member hostMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
         Room createdRoom = roomRepository.save(request.toEntity(hostMember));
         uploadImageIfExist(imageFiles, createdRoom);
 
-        ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
-        chatRoomRepository.save(chatRoom);
+//        ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
+//        chatRoomRepository.save(chatRoom);
 
-        List<RoomParticipant> participants = collectAndValidateInitialParticipants(request.friendPhoneNumbers(),
-                createdRoom, hostMember);
+        List<RoomParticipant> participants = collectAndValidateInitialParticipants(
+                request.friendPhoneNumbers(),
+                createdRoom,
+                hostMember
+        );
 
         participants.forEach(participant -> {
             roomParticipantRepository.save(participant);
             participant.getMember().useTicket(); // 각 참가자의 티켓 사용
         });
 
-        return chatRoom;
+        return createdRoom;
     }
 
     private List<RoomParticipant> collectAndValidateInitialParticipants(FriendPhoneNumbersRequest request, Room room,
@@ -200,7 +206,7 @@ public class RoomService {
                 request.meetingDateTime(),
                 request.maxParticipants()
         );
-        room.getChatRoom().updateTitle(request.title());
+//        room.getChatRoom().updateTitle(request.title());
     }
 
     // 방 삭제(일반, admin)
