@@ -1,6 +1,5 @@
 package com.gobongbob.festamate.domain.member.presentation;
 
-import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.dto.request.MemberExistRequest;
@@ -16,7 +15,16 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
@@ -53,7 +61,7 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>(memberService.findProfile(memberDetails.getMember()));
     }
 
-    // 나의 프로필 수정(닉네임)
+    // 나의 닉네임 수정
     @Override
     @PatchMapping("/profile")
     public SuccessResponse<Void> updateProfile(
@@ -72,16 +80,6 @@ public class MemberController implements MemberApi {
             @RequestPart("profileImage") MultipartFile profileImage
     ) {
         memberService.updateProfilePhoto(memberDetails.getMember(), profileImage);
-        return new SuccessResponse<>();
-    }
-
-    // 회원 삭제
-    @Override
-    @DeleteMapping("/{memberId}")
-    public SuccessResponse<Void> deleteMemberById(
-            @PathVariable("memberId") Long memberId
-    ) {
-        memberService.deleteMemberById(memberId);
         return new SuccessResponse<>();
     }
 
