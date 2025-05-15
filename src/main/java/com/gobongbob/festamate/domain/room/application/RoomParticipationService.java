@@ -101,14 +101,6 @@ public class RoomParticipationService {
         return new IsMemberHostResponse(isHost);
     }
 
-    private void participateRoomForFriends(Room room, FriendPhoneNumbersRequest request) {
-        request.friendPhoneNumbers()
-                .stream()
-                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
-                        .orElseThrow(() -> new BadRequestException(NO_MEMBER)))
-                .forEach(participant -> participateRoom(participant, room));
-    }
-
     private void participateRoom(Member member, Room room) {
         member.useTicket();
         RoomParticipant roomParticipant = RoomParticipant.createParticipant(room, member, ParticipantRole.GUEST);
