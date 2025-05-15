@@ -17,7 +17,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -90,17 +89,6 @@ public interface MemberApi {
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @Parameter(description = "프로필 이미지 (단일 파일)")
             @RequestPart("profileImage") MultipartFile profileImage
-    );
-
-    @Operation(summary = "회원 삭제", description = "회원 ID로 회원을 삭제합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
-            @ApiResponse(responseCode = "400", description = "회원이 존재하지 않습니다.")
-    })
-    @DeleteMapping("/members/{memberId}")
-    SuccessResponse<Void> deleteMemberById(
-            @Parameter(name = "memberId", description = "삭제할 회원 ID")
-            @PathVariable("memberId") Long memberId
     );
 
     @Operation(summary = "회원 존재 여부 확인", description = "전화번호로 회원 존재 여부를 확인합니다.")

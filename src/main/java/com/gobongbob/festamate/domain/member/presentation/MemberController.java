@@ -51,7 +51,7 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>(memberService.findProfile(memberDetails.getMember()));
     }
 
-    // 나의 프로필 수정(닉네임)
+    // 나의 닉네임 수정
     @Override
     @PatchMapping("/profile")
     public SuccessResponse<Void> updateProfile(
@@ -70,16 +70,6 @@ public class MemberController implements MemberApi {
             @RequestPart("profileImage") MultipartFile profileImage
     ) {
         memberService.updateProfilePhoto(memberDetails.getMember(), profileImage);
-        return new SuccessResponse<>();
-    }
-
-    // 회원 삭제
-    @Override
-    @DeleteMapping("/{memberId}")
-    public SuccessResponse<Void> deleteMemberById(
-            @PathVariable("memberId") Long memberId
-    ) {
-        memberService.deleteMemberById(memberId);
         return new SuccessResponse<>();
     }
 
