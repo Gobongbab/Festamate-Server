@@ -44,7 +44,6 @@ public enum ResponseCode {
     PHONE_NOT_VERIFIED(false, "전화번호 인증이 완료되지 않았습니다."),
     MEMBER_NOT_FOUND_BY_PHONE_NUMBER(false, "전화번호 [ %s ] 에 해당하는 회원을 찾을 수 없습니다."),
     PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS(false, "초대된 사용자(호스트 및 친구) 간에 중복된 전화번호가 있습니다."),
-    PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS(false, "초대된 사용자(호스트 및 친구) 간에 중복된 전화번호가 있습니다."),
     PROFILE_REGISTRATION_REQUIRED(false, "프로필 등록이 필요합니다."),
     USER_ALREADY_EXISTS(false, "이미 존재하는 회원입니다."),
     FAIL_SEND_SMS(false, "SMS 발송을 실패했습니다."),

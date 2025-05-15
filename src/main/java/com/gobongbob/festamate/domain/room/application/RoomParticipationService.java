@@ -1,8 +1,21 @@
 package com.gobongbob.festamate.domain.room.application;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_MATCHED;
+import static com.gobongbob.festamate.global.response.ResponseCode.ENTRY_MISMATCH_WITH_ROOM_CAPACITY;
+import static com.gobongbob.festamate.global.response.ResponseCode.ERROR_SEND_SMS;
+import static com.gobongbob.festamate.global.response.ResponseCode.FAIL_SEND_SMS;
+import static com.gobongbob.festamate.global.response.ResponseCode.GENDER_NOT_MATCH;
+import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_PARTICIPATING_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE;
+import static com.gobongbob.festamate.global.response.ResponseCode.STUDENT_ID_NOT_MATCH;
+
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
+import com.gobongbob.festamate.domain.member.domain.Member.MemberStatus;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.ParticipantRole;
 import com.gobongbob.festamate.domain.room.domain.Room;
@@ -15,7 +28,6 @@ import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +37,6 @@ import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 @Service
 @Slf4j
