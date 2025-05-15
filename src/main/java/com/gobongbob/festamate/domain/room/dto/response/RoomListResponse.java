@@ -1,11 +1,14 @@
 package com.gobongbob.festamate.domain.room.dto.response;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_ROOM_IMAGE;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gobongbob.festamate.domain.image.domain.Image;
 import com.gobongbob.festamate.domain.image.dto.response.ImageResponse;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.domain.Status;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.time.LocalDateTime;
 
 public record RoomListResponse(
@@ -26,8 +29,10 @@ public record RoomListResponse(
 ) {
 
     public static RoomListResponse fromEntity(Room room) {
+        if (room.getImages().isEmpty()) {
+            throw new BadRequestException(NO_ROOM_IMAGE);
+        }
         Image thumbnail = room.getImages().get(0).getImage();
-
         return new RoomListResponse(
                 room.getId(),
                 room.getTitle(),

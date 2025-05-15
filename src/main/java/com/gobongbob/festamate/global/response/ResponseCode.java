@@ -30,6 +30,7 @@ public enum ResponseCode {
     ROOM_UPDATE_NOT_AVAILABLE(false, "방에 방장을 제외한 다른 사용자가 입장한 상태에서는 수정할 수 없습니다."),
     ROLE_NOT_FOUND(false, "해당하는 권한이 없습니다."),
     STATUS_NOT_FOUND(false, "해당하는 모임방 상태가 없습니다. (매칭중, 매칭완료, 종료)"),
+    NO_ROOM_IMAGE(false, "방에 이미지가 없습니다."),
 
     // 인증
     UNEXPECTED_TOKEN(false, "올바르지 않은 토큰입니다."),
