@@ -60,7 +60,7 @@ public class OcrService {
         String studentId = getValueAfterKeyword(result, "학번");
 
         if (StringUtils.isEmpty(studentName) || StringUtils.isEmpty(studentDepartment) || StringUtils.isEmpty(studentId)) {
-            // 하나라도 null이면 예외 처리
+            // 하나라도 null이거나 공백이면 예외 처리
             throw new BadRequestException(CAN_NOT_RECOGNIZE_STUDENT_CARD);
         }
 
