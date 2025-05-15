@@ -44,6 +44,22 @@ public enum ResponseCode {
     PHONE_NOT_VERIFIED(false, "전화번호 인증이 완료되지 않았습니다."),
     MEMBER_NOT_FOUND_BY_PHONE_NUMBER(false, "전화번호 [ %s ] 에 해당하는 회원을 찾을 수 없습니다."),
     PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS(false, "초대된 사용자(호스트 및 친구) 간에 중복된 전화번호가 있습니다."),
+    PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS(false, "초대된 사용자(호스트 및 친구) 간에 중복된 전화번호가 있습니다."),
+    PROFILE_REGISTRATION_REQUIRED(false, "프로필 등록이 필요합니다."),
+    USER_ALREADY_EXISTS(false, "이미 존재하는 회원입니다."),
+    FAIL_SEND_SMS(false, "SMS 발송을 실패했습니다."),
+    ERROR_SEND_SMS(false, "SMS 발송 중 오류가 발생했습니다."),
+    CAN_NOT_RECOGNIZE_STUDENT_CARD(false, "학생증 정보를 인식할 수 없습니다. 옳바른 학생증을 업로드해주세요."),
+
+    // 인증
+    KAKAO_USER_INFO_PARSING_ERROR(false, "카카오 사용자 정보 파싱에 실패했습니다."),
+    KAKAO_USER_ID_NOT_FOUND(false, "카카오 사용자 정보에서 ID를 찾을 수 없습니다."),
+    KAKAO_RESPONSE_EMPTY(false, "카카오 사용자 정보 응답이 비어있습니다."),
+    KAKAO_TOKEN_INVALID_OR_EXPIRED(false, "카카오 토큰이 만료되었거나 유효하지 않습니다."),
+    KAKAO_API_REQUEST_FAILED(false, "카카오 API 요청에 실패했습니다."),
+    AUTH_CODE_NOT_FOUND_OR_EXPIRED(false, "인증 요청이 존재하지 않거나 만료되었습니다."),
+    AUTH_CODE_MISMATCH(false, "인증번호가 틀렸습니다."),
+    AUTH_REQUEST_DAILY_LIMIT_EXCEEDED(false, "인증번호 전송 횟수를 초과했습니다. 하루 최대 2회까지만 전송할 수 있습니다.%s"),
 
     // 이미지 가공
     EMPTY_FILE(false, "파일이 비어있습니다."),
@@ -64,6 +80,8 @@ public enum ResponseCode {
     ALREADY_REPORTED_MEMBER(false, "이미 신고한 유저입니다."),
     NO_REPORT(false, "해당 신고가 존재하지 않습니다."),
     NO_REPORT_REASON(false, "해당하는 신고 사유가 없습니다."),
+    AUTHENTICATION_INVALID(false, "인증 정보가 유효하지 않습니다."),
+    USER_ACCOUNT_DISABLED_OR_BLOCKED(false, "차단되었거나 비활성화된 사용자입니다. 이 기능을 사용할 수 없습니다."),
 
     // 티켓
     NOT_EXIST_TICKET(false, "존재하지 않는 티켓입니다."),

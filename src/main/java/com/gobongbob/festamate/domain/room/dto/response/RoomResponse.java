@@ -17,6 +17,7 @@ public record RoomResponse(
         Status status,
         String place,
         String content,
+        String openChatUrl,
         Gender preferredGender,
         int preferredStudentIdMin,
         int preferredStudentIdMax,
@@ -25,7 +26,6 @@ public record RoomResponse(
         int maxParticipants,
         int currentParticipants,
         RoomAuthority roomAuthority,
-        Long chatRoomId,
         List<ParticipantResponse> hostParticipants,
         List<ParticipantResponse> guestParticipants,
         ImageResponse thumbnail
@@ -43,6 +43,7 @@ public record RoomResponse(
                 room.getStatus(),
                 room.getPlace(),
                 room.getContent(),
+                room.getOpenChatUrl(),
                 room.getPreferredGender(),
                 room.getPreferredStudentIdMin(),
                 room.getPreferredStudentIdMax(),
@@ -50,7 +51,6 @@ public record RoomResponse(
                 room.getMaxParticipants(),
                 room.getParticipants().size(),
                 roomAuthority,
-                room.getChatRoom().getId(),
                 toParticipantResponse(hostParticipants),
                 toParticipantResponse(guestParticipants),
                 ImageResponse.fromEntity(room.getImages().get(0).getImage())

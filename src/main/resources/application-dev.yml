@@ -9,9 +9,6 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASS}
     driver-class-name: com.mysql.cj.jdbc.Driver
-  sql:
-    init:
-      mode: never
   jpa:
     properties:
       hibernate:
@@ -103,3 +100,11 @@ admin:
 logging:
   level:
     com.gobongbob.festamate: DEBUG
+
+# 문자 메시징
+coolsms:
+  api:
+    key: ${COOLSMS_KEY}
+    secret: ${COOLSMS_SECRET}
+  from:
+    number: ${FROM_NUMBER}

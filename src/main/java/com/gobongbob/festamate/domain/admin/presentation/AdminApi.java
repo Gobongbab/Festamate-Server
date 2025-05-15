@@ -111,4 +111,25 @@ public interface AdminApi {
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     );
+
+    @Operation(summary = "쿠폰 초기화", description = "사용자의 쿠폰을 초기화합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
+    })
+    @PostMapping("/coupons/init")
+    SuccessResponse<Void> initializeCoupons(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
+    );
+
+    @Operation(summary = "회원 삭제", description = "회원 ID로 회원을 삭제합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "회원이 존재하지 않습니다.")
+    })
+    @DeleteMapping("/members/{memberId}")
+    SuccessResponse<Void> deleteMemberById(
+            @Parameter(name = "memberId", description = "삭제할 회원 ID")
+            @PathVariable("memberId") Long memberId
+    );
 }

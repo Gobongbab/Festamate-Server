@@ -1,10 +1,8 @@
 package com.gobongbob.festamate.domain.member.presentation;
 
-import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.dto.request.MemberExistRequest;
-import com.gobongbob.festamate.domain.member.dto.request.MemberFcmTokenRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
@@ -53,7 +51,7 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>(memberService.findProfile(memberDetails.getMember()));
     }
 
-    // 나의 프로필 수정(닉네임)
+    // 나의 닉네임 수정
     @Override
     @PatchMapping("/profile")
     public SuccessResponse<Void> updateProfile(
@@ -75,16 +73,6 @@ public class MemberController implements MemberApi {
         return new SuccessResponse<>();
     }
 
-    // 회원 삭제
-    @Override
-    @DeleteMapping("/{memberId}")
-    public SuccessResponse<Void> deleteMemberById(
-            @PathVariable("memberId") Long memberId
-    ) {
-        memberService.deleteMemberById(memberId);
-        return new SuccessResponse<>();
-    }
-
     // 회원 존재 여부 확인
     @Override
     @PostMapping("/exist")
@@ -102,17 +90,6 @@ public class MemberController implements MemberApi {
             @RequestParam(name = "nickname") String nickname
     ) {
         memberService.checkNicknameDuplication(nickname);
-        return new SuccessResponse<>();
-    }
-
-    // FCM 토큰 등록
-    @Override
-    @PostMapping("/fcm-token")
-    public SuccessResponse<Void> registerFcmToken(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @RequestBody MemberFcmTokenRequest request
-    ) {
-        memberService.registerFcmToken(memberDetails.getMember(), request);
         return new SuccessResponse<>();
     }
 }

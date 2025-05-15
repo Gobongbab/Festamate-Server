@@ -27,14 +27,4 @@ public interface CouponApi {
             @Parameter(description = "쿠폰 사용 요청 정보")
             @RequestBody UseCouponRequest request
     );
-
-    @Operation(summary = "쿠폰 초기화", description = "사용자의 쿠폰을 초기화합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.")
-    })
-    @PostMapping("/init")
-    SuccessResponse<Void> initializeCoupons(
-            @Parameter(description = "인증된 사용자 정보", hidden = true)
-            @AuthenticationPrincipal CustomMemberDetails memberDetails
-    );
 }

@@ -68,9 +68,6 @@ dependencies {
     // V2로의 변경이 필요하나, 문법이 다소 다른 관계로 현재로선 보류중이다.
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.767'
 
-    // Firebase Admin SDK
-    implementation 'com.google.firebase:firebase-admin:9.2.0'
-
     // Sentry
     implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.5.0'
 
@@ -93,6 +90,9 @@ dependencies {
 
     // AOP
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // CoolSMS
+    implementation 'net.nurigo:sdk:4.2.7'
 }
 
 tasks.named('test') {
@@ -103,7 +103,6 @@ test {
     useJUnitPlatform()
     systemProperty 'spring.profiles.active', 'test'
 }
-
 
 // QueryDSL Build 옵션
 def querydslDir = "src/main/generated"

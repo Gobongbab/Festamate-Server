@@ -77,6 +77,12 @@ services:
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_CONTAINER_NAME=${REDIS_CONTAINER_NAME}
 
+      # --- CoolSms 관련 ---
+      - COOLSMS_KEY=${COOLSMS_KEY}
+      - COOLSMS_SECRET=${COOLSMS_SECRET}
+      - FROM_NUMBER=${FROM_NUMBER}
+
+
     volumes: # EC2 호스트 경로와 Docker 컨테이너 내부의 특정 경로를 연결(마운트)하는 역할
       # EC2의 키 파일 경로: /home/ubuntu/festamate-firebase-key.json 컨테이너 내부 경로:/config/festamate-firebase-key.json
       - /home/ubuntu/festamate-firebase-key.json:/config/festamate-firebase-key.json:ro # 읽기 전용(ro)으로 마운트 권장

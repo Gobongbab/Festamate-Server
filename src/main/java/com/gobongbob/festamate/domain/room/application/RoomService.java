@@ -1,13 +1,6 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.FRIEND_GENDER_NOT_MATCH_WITH_HOST;
-import static com.gobongbob.festamate.global.response.ResponseCode.MEMBER_NOT_FOUND_BY_PHONE_NUMBER;
-import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_ENOUGH_TICKET;
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
-import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS;
-import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_UPDATE_NOT_AVAILABLE;
+import static com.gobongbob.festamate.global.response.ResponseCode.*;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
@@ -60,25 +53,28 @@ public class RoomService {
     // 방 생성
     @Transactional
     @CheckActiveUser// 메서드 실행 전 현재 사용자가 ACTIVE 상태인지 AOP로 확인 (BLOCKED 시 AccessDeniedException 발생)
-    public ChatRoom createRoom(Long memberId, RoomCreateRequest request, List<MultipartFile> imageFiles) {
+    public Room createRoom(Long memberId, RoomCreateRequest request, List<MultipartFile> imageFiles) {
         Member hostMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
         Room createdRoom = roomRepository.save(request.toEntity(hostMember));
         uploadImageIfExist(imageFiles, createdRoom);
 
-        ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
-        chatRoomRepository.save(chatRoom);
+//        ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
+//        chatRoomRepository.save(chatRoom);
 
-        List<RoomParticipant> participants = collectAndValidateInitialParticipants(request.friendPhoneNumbers(),
-                createdRoom, hostMember);
+        List<RoomParticipant> participants = collectAndValidateInitialParticipants(
+                request.friendPhoneNumbers(),
+                createdRoom,
+                hostMember
+        );
 
         participants.forEach(participant -> {
             roomParticipantRepository.save(participant);
             participant.getMember().useTicket(); // 각 참가자의 티켓 사용
         });
 
-        return chatRoom;
+        return createdRoom;
     }
 
     private List<RoomParticipant> collectAndValidateInitialParticipants(FriendPhoneNumbersRequest request, Room room,
@@ -176,12 +172,10 @@ public class RoomService {
 
     // 참여 중인 모임방 조회
     @CheckActiveUser
-    public List<RoomListResponse> findParticipatingRooms(Long memberId) {
-        return roomParticipantRepository.findByMember_Id(memberId)
-                .stream()
+    public Slice<RoomListResponse> findParticipatingRooms(Long memberId, Pageable pageable) {
+        return roomParticipantRepository.findByMember_Id(memberId, pageable)
                 .map(RoomParticipant::getRoom)
-                .map(RoomListResponse::fromEntity)
-                .toList();
+                .map(RoomListResponse::fromEntity);
     }
 
     public RoomResponse findRoomById(CustomMemberDetails memberDetails, Long roomId) {
@@ -224,7 +218,7 @@ public class RoomService {
                 request.meetingDateTime(),
                 request.maxParticipants()
         );
-        room.getChatRoom().updateTitle(request.title());
+//        room.getChatRoom().updateTitle(request.title());
     }
 
     // 방 삭제(일반, admin)

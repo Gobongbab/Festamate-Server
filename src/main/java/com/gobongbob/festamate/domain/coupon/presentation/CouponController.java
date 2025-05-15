@@ -29,15 +29,4 @@ public class CouponController implements CouponApi {
 
         return new SuccessResponse<>();
     }
-
-    // 쿠폰 초기화
-    @Override
-    @PostMapping("/init")
-    public SuccessResponse<Void> initializeCoupons(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails
-    ) {
-        couponService.initializeCoupons(memberDetails.getMember());
-
-        return new SuccessResponse<>();
-    }
 }
