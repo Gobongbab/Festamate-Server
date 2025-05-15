@@ -26,6 +26,7 @@ public enum ResponseCode {
     NOT_ENOUGH_TICKET(false, "티켓이 부족합니다."),
     ROLE_NOT_FOUND(false, "해당하는 권한이 없습니다."),
     STATUS_NOT_FOUND(false, "해당하는 모임방 상태가 없습니다. (매칭중, 매칭완료, 종료)"),
+    NO_ROOM_IMAGE(false, "방에 이미지가 없습니다."),
 
     // 회원
     NO_MEMBER(false, "사용자가 존재하지 않습니다."),
