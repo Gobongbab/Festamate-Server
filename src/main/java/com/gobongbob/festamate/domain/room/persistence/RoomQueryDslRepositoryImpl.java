@@ -55,7 +55,7 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
         JPAQuery<Room> basicQuery = queryFactory
                 .selectFrom(room)
                 .where(
-                        genderNotEquals(member.getGender()),
+                        genderEquals(member.getGender()),
                         studentIdContains(member.getStudentId())
                 )
                 .offset(pageable.getOffset())
@@ -106,16 +106,6 @@ public class RoomQueryDslRepositoryImpl implements RoomQueryDslRepository {
     private BooleanExpression genderEquals(Gender gender) {
         if (gender != null && hasText(gender.getName())) {
             return room.preferredGender.eq(gender);
-        }
-
-        return null;
-    }
-
-    private BooleanExpression genderNotEquals(Gender gender) {
-        if (gender != null && hasText(gender.getName())) {
-            Gender oppositeGender = gender == Gender.MALE ? Gender.FEMALE : Gender.MALE;
-
-            return room.preferredGender.eq(oppositeGender);
         }
 
         return null;

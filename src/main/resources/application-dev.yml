@@ -20,6 +20,10 @@ spring:
           auto: update
           defer-datasource-initialization: true
         default_batch_fetch_size: 1000
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   data:
     redis:
       host: ${REDIS_HOST}
