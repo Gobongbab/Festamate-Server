@@ -5,6 +5,7 @@ import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.auth.jwt.dto.request.LoginRequest;
 import com.gobongbob.festamate.domain.auth.oauth.dto.response.AuthResponse;
+import com.gobongbob.festamate.domain.coupon.application.CouponService;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
 import com.gobongbob.festamate.domain.report.application.ReportService;
@@ -38,6 +39,7 @@ public class AdminController implements AdminApi {
     private final RoomService roomService;
     private final AdminService adminService;
     private final ReportService reportService;
+    private final CouponService couponService;
 
     // 관리자용 유저 목록 조회
     @Override
@@ -144,5 +146,26 @@ public class AdminController implements AdminApi {
             @AuthenticationPrincipal CustomMemberDetails memberDetails
     ) {
         return new SuccessResponse<>(reportService.getUnprocessedReports());
+    }
+
+    // 관리자용 쿠폰 초기화
+    @Override
+    @PostMapping("/coupons/init")
+    public SuccessResponse<Void> initializeCoupons(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
+    ) {
+        couponService.initializeCoupons(memberDetails.getMember());
+
+        return new SuccessResponse<>();
+    }
+
+    // 관리자용 회원 삭제
+    @Override
+    @DeleteMapping("/members/{memberId}")
+    public SuccessResponse<Void> deleteMemberById(
+            @PathVariable("memberId") Long memberId
+    ) {
+        memberService.deleteMemberById(memberId);
+        return new SuccessResponse<>();
     }
 }
