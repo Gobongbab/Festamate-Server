@@ -100,3 +100,11 @@ admin:
 logging:
   level:
     com.gobongbob.festamate: DEBUG
+
+# 문자 메시징
+coolsms:
+  api:
+    key: ${COOLSMS_KEY}
+    secret: ${COOLSMS_SECRET}
+  from:
+    number: ${FROM_NUMBER}
