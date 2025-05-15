@@ -57,10 +57,18 @@ public class RoomParticipationService {
 
         validateParticipation(room, participants);
 
+        List<String> participantPhoneNumbers = participants.stream()
+                .map(Member::getPhoneNumber)
+                .collect(Collectors.toList());
+
+        for(int i=0; i< room.getParticipants().size(); i++) {
+            participantPhoneNumbers.add(room.getParticipants().get(i).getMember().getPhoneNumber());
+        }
+
         participants.forEach(participant -> participateRoom(participant, room));
         if (room.isFull()) { // 방에 참여자가 다 찼을 때
             room.updateStatus(Status.MATCHED);
-            sendMatchingCompleteMessages(roomId, room);
+            sendMatchingCompleteMessages(participantPhoneNumbers, room);
         }
 
         return room;
@@ -113,10 +121,10 @@ public class RoomParticipationService {
 
     private List<Member> collectParticipants(Member member, FriendPhoneNumbersRequest request) {
         List<Member> members = request.friendPhoneNumbers()
-                .stream()
-                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
-                        .orElseThrow(() -> new BadRequestException(NO_MEMBER))
-                ).collect(Collectors.toList());
+            .stream()
+            .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new BadRequestException(NO_MEMBER)))
+            .collect(Collectors.toList());
         members.add(member);
 
         return members;
@@ -187,19 +195,7 @@ public class RoomParticipationService {
         }
     }
 
-    private void sendMatchingCompleteMessages(Long roomId, Room room) {
-        List<String> participantPhoneNumbers = getParticipantPhoneNumbers(roomId);
-        sendMessagesToParticipants(participantPhoneNumbers, room);
-    }
-
-    private List<String> getParticipantPhoneNumbers(Long roomId) {
-        return roomParticipantRepository.findByRoom_Id(roomId)
-                .stream()
-                .map(roomParticipant -> roomParticipant.getMember().getPhoneNumber())
-                .collect(Collectors.toList());
-    }
-
-    private void sendMessagesToParticipants(List<String> participantPhoneNumbers, Room room) {
+    private void sendMatchingCompleteMessages(List<String> participantPhoneNumbers, Room room) {
         participantPhoneNumbers.forEach(phone -> {
             Message message = setMessage(phone, room.getOpenChatUrl(), room.getTitle());
             try {
