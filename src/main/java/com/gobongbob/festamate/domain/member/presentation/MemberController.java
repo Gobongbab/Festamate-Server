@@ -3,7 +3,6 @@ package com.gobongbob.festamate.domain.member.presentation;
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
 import com.gobongbob.festamate.domain.member.dto.request.MemberExistRequest;
-import com.gobongbob.festamate.domain.member.dto.request.MemberFcmTokenRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
@@ -15,16 +14,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
@@ -100,17 +90,6 @@ public class MemberController implements MemberApi {
             @RequestParam(name = "nickname") String nickname
     ) {
         memberService.checkNicknameDuplication(nickname);
-        return new SuccessResponse<>();
-    }
-
-    // FCM 토큰 등록
-    @Override
-    @PostMapping("/fcm-token")
-    public SuccessResponse<Void> registerFcmToken(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @RequestBody MemberFcmTokenRequest request
-    ) {
-        memberService.registerFcmToken(memberDetails.getMember(), request);
         return new SuccessResponse<>();
     }
 }

@@ -71,10 +71,12 @@ public class Room extends BaseEntity {
     private Member host;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @SQLRestriction("deleted = false")
     @Builder.Default
     private List<RoomParticipant> participants = new ArrayList<>();
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @SQLRestriction("deleted = false")
     @Builder.Default
     private List<RoomImage> images = new ArrayList<>();
 

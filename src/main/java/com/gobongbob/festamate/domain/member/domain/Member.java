@@ -56,9 +56,6 @@ public class Member extends BaseEntity {
 
     private String studentDepartment; // 임시 필드, 학생증 등록으로 학과 정보 기입을 할 예정이면 이 필드를 사용. 추후 의논해야 함.
 
-    @Column(unique = true)
-    private String fcmToken; // FcmToken
-
     @Builder.Default
     private int maximumTicket = 2;
 
@@ -118,10 +115,6 @@ public class Member extends BaseEntity {
 
     public void updateProfile(String nickname) {
         this.nickname = nickname;
-    }
-
-    public void updateFcmToken(String fcmToken) {
-        this.fcmToken = fcmToken;
     }
 
     public void initializeRemainingTicket(int ticketCount) {

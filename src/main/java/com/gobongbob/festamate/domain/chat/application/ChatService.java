@@ -9,12 +9,9 @@ import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
-import com.gobongbob.festamate.domain.room.domain.RoomParticipant;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
-import com.gobongbob.festamate.global.NotificationService;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +30,6 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final RoomParticipantRepository roomParticipantRepository;
     private final SimpMessageSendingOperations messagingTemplate;
-    private final NotificationService notificationService;
 
     @Transactional
     public void sendMessage(Long chatRoomId, Member member, String message) {
@@ -49,29 +45,7 @@ public class ChatService {
         );
         MessageResponse response = MessageResponse.fromEntity(savedMessage);
 
-        // 메시지를 보낸 방에 참여 중인 모든 유저 조회
-        List<RoomParticipant> participants = roomParticipantRepository.findByRoom_Id(chatRoom.getRoom().getId());
-
         messagingTemplate.convertAndSend("/topic/chatRooms/" + chatRoomId, response);
-
-        participants.forEach(participant -> {
-            String fcmToken = participant.getMember().getFcmToken();
-            Long participantId = participant.getMember().getId();
-
-            if (fcmToken != null) {
-                try {
-                    notificationService.sendNotification(
-                            fcmToken,
-                            "[Festamate!] 채팅 메시지가 도착했습니다!",
-                            member.getNickname() + ": " + message,
-                            participantId
-                    );
-                } catch (RuntimeException e) {
-                    log.warn("FCM 전송 실패 (memberId: {}) - {}", participantId, e.getMessage());
-                    // 필요시: 유효하지 않은 토큰이면 여기서 제거도 가능
-                }
-            }
-        });
 
         chatRoom.updateLastMessage(savedMessage.getMessage());
     }

@@ -13,7 +13,6 @@ import com.gobongbob.festamate.domain.image.persistence.ProfileImageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.domain.Role;
 import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
-import com.gobongbob.festamate.domain.member.dto.request.MemberFcmTokenRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
@@ -216,13 +215,5 @@ public class MemberService {
     public Member findById(Long memberId) {
         return memberRepository.findByIdWithProfileImage(memberId)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
-    }
-
-
-    // FCM 토큰 등록
-    @Transactional
-    public void registerFcmToken(Member member, MemberFcmTokenRequest request) {
-        member.updateFcmToken(request.fcmToken());
-        memberRepository.save(member);
     }
 }
