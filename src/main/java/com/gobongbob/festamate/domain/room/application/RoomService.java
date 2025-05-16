@@ -1,9 +1,17 @@
 package com.gobongbob.festamate.domain.room.application;
 
-import static com.gobongbob.festamate.global.response.ResponseCode.*;
+import static com.gobongbob.festamate.global.response.ResponseCode.ERROR_SEND_SMS;
+import static com.gobongbob.festamate.global.response.ResponseCode.FAIL_SEND_SMS;
+import static com.gobongbob.festamate.global.response.ResponseCode.FRIEND_GENDER_NOT_MATCH_WITH_HOST;
+import static com.gobongbob.festamate.global.response.ResponseCode.MEMBER_NOT_FOUND_BY_PHONE_NUMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.MUST_HOST;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_ENOUGH_TICKET;
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_DUPLICATE_AMONG_PARTICIPANTS;
+import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_UPDATE_NOT_AVAILABLE;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
-import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.image.domain.Image;
@@ -32,6 +40,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.nurigo.sdk.message.exception.NurigoMessageNotReceivedException;
+import net.nurigo.sdk.message.model.Message;
+import net.nurigo.sdk.message.service.DefaultMessageService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -39,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class RoomService {
@@ -49,6 +63,10 @@ public class RoomService {
     private final MessageRepository messageRepository;
     private final ImageService imageService;
     private final MemberRepository memberRepository;
+    private final DefaultMessageService messageService;
+
+    @Value("${coolsms.from.number}")
+    private String fromNumber;
 
     // 방 생성
     @Transactional
@@ -73,6 +91,7 @@ public class RoomService {
             roomParticipantRepository.save(participant);
             participant.getMember().useTicket(); // 각 참가자의 티켓 사용
         });
+        sendMatchingCompleteMessages(hostMember, participants, createdRoom);
 
         return createdRoom;
     }
@@ -116,6 +135,36 @@ public class RoomService {
         participants.add(RoomParticipant.createHost(room, hostMember));
 
         return participants;
+    }
+
+    private void sendMatchingCompleteMessages(Member host, List<RoomParticipant> participants, Room room) {
+        participants.stream()
+                .map(RoomParticipant::getMember)
+                .filter(member -> !member.equals(host))
+                .map(Member::getPhoneNumber)
+                .forEach(phoneNumber -> {
+                    Message message = setMessage(host, phoneNumber, room.getTitle());
+                    try {
+                        messageService.send(message);
+                    } catch (NurigoMessageNotReceivedException e) {
+                        log.error("(NurigoMessageNotReceivedException) 휴대폰 문자 전송 에러 상세 내용: " + e);
+                        throw new BadRequestException(FAIL_SEND_SMS);
+                    } catch (Exception e) {
+                        log.error("(Exception) 휴대폰 문자 전송 에러 상세 내용: " + e);
+                        throw new BadRequestException(ERROR_SEND_SMS);
+                    }
+                });
+    }
+
+    private Message setMessage(Member host, String phoneNumber, String title) {
+        Message message = new Message();
+        message.setFrom(fromNumber);
+        message.setTo(phoneNumber);
+        message.setText("[FestaMate!] "
+                + host.getNickname() + "님의 모임방 "
+                + title + "에 초대됐어요! 매칭이 완료되면 오픈채팅 링크를 보내드릴게요.");
+
+        return message;
     }
 
     private void validateSufficientTicketsForFriends(List<Member> members) {
