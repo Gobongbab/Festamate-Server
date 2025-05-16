@@ -75,10 +75,14 @@ public class RoomParticipationService {
             participantPhoneNumbers.add(room.getParticipants().get(i).getMember().getPhoneNumber());
         }
 
+        for (int i = 0; i < participantPhoneNumbers.size(); i++) {
+            log.warn(participantPhoneNumbers.get(i));
+        }
+
         participants.forEach(participant -> participateRoom(participant, room));
         if (room.isFull()) { // 방에 참여자가 다 찼을 때
-            room.updateStatus(Status.MATCHED);
             sendMatchingCompleteMessages(participantPhoneNumbers, room);
+            room.updateStatus(Status.MATCHED);
         }
 
         return room;
@@ -202,6 +206,7 @@ public class RoomParticipationService {
 
     private void sendMatchingCompleteMessages(List<String> participantPhoneNumbers, Room room) {
         participantPhoneNumbers.forEach(phone -> {
+            log.warn("phone -> " + phone);
             Message message = setMessage(phone, room.getOpenChatUrl(), room.getTitle());
             try {
                 messageService.send(message);
