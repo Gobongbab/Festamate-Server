@@ -159,7 +159,10 @@ public class SecurityConfig {
                 "Authorization",
                 "X-XSRF-token",
                 "Accept",
-                "Cookie"
+                "Cookie",
+                "Sec-CH-UA",
+                "Sec-CH-UA-Mobile",
+                "Sec-CH-UA-Platform"
         ));
 
         // 인증 정보 포함 여부
