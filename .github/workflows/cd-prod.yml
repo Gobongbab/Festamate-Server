@@ -1,8 +1,8 @@
-name: Java CD-Prod
+name: Java CD-Prod (via Bastion)
 
 on:
-  #  pull_request:
-  push:
+  pull_request: # 테스트할 때 편하고자 PR 날렸을 때 이벤트가 발생하도록 했다.
+    # 실제 운영할 때는 push로 바꿔줘야 함
     branches: [ main ] # 운영 브랜치 (main)
     paths-ignore:
       - '**.md'
@@ -41,7 +41,7 @@ jobs:
         run: chmod +x gradlew
         shell: bash
 
-      # 4) .env 파일 생성
+      # 4) .env 파일 생성, 생성하는 이유는 Docker Compose 빌드할 때 환경 변수를 사용하기 위해서다. 즉, runner에 .env파일을 만들어주는 것
       - name: Make .env file
         run: |
           # .env 파일 생성 및 환경 변수 추가
@@ -63,12 +63,21 @@ jobs:
 
       # 7) Docker Compose 빌드 및 푸시
       - name: Build and push with Docker Compose
-        env:
-          DB_URL: ${{ secrets.DB_URL }}
         run: |
           # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시 (운영 환경에 맞는 docker-compose 파일 사용)
-          docker compose -f docker-compose-prod.yml build
-          docker compose -f docker-compose-prod.yml push
+          docker compose -f docker-compose-dev.yml build
+          docker compose -f docker-compose-dev.yml push
+
+      # 8) 배포 파일들을 Bastion Host로 복사
+      - name: Copy deployment files to Bastion Host
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BASTION_HOST }}
+          username: ${{ secrets.BASTION_USERNAME }}
+          key: ${{ secrets.BASTION_PRIVATE_KEY }}
+          source: "docker-compose-dev.yml,.env" # 쉼표로 구분된 파일 목록
+          target: "/home/${{ secrets.BASTION_USERNAME }}/" # Bastion에 임시 저장될 디렉토리
+          overwrite: true
 
       # 8) EC2에 배포 (Bastion Host 경유)
       - name: Deploy to EC2 (via Bastion Host)
@@ -78,68 +87,52 @@ jobs:
           username: ${{ secrets.BASTION_USERNAME }} # Bastion Host 접속 사용자 이름
           key: ${{ secrets.BASTION_PRIVATE_KEY }} # Bastion Host 접속 Private Key
           script: |
-            # Private EC2 인스턴스 정보
-            export  PRIVATE_EC2_HOST_1="${{ secrets.PROD_EC2_HOST_1 }}" # 첫 번째 운영용 EC2 Private IP
-            export  PRIVATE_EC2_HOST_2="${{ secrets.PROD_EC2_HOST_2 }}" # 두 번째 운영용 EC2 Private IP
-            export  PRIVATE_EC2_USERNAME="${{ secrets.PROD_EC2_USERNAME }}" # Private EC2 인스턴스 접속 사용자 이름
-            export  PROD_EC2_PRIVATE_KEY_PATH="${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}" # Bastion Host에 있어야 함
+            BASTION_DEPLOY_DIR="/home/${{ secrets.BASTION_USERNAME }}/"
+            EC2_HOME_DIR="/home/${{ secrets.PROD_EC2_USERNAME }}"
+            EC2_USER_HOST="${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST }}"
+            INTERNAL_KEY_PATH_ON_BASTION="${BASTION_DEPLOY_DIR}/festamate-prod-key.pem" # Bastion에 임시로 저장될 Private EC2 접속 키 경로
 
-            # --- 첫 번째 운영용 EC2 배포 ---
-            echo "Deploying to Host1..."
+            echo "Deploying to Private EC2: ${EC2_USER_HOST} from Bastion"
 
-            # Docker Hub 로그인 (Private EC2 - 첫 번째 서버)
-            ssh -i '${{ secrets.PROD_EC2_PRIVATE_KEY_PATH }}' "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin"
+            # 0. Bastion에 Private EC2 접속용 Private Key 임시 생성
+            echo "${{ secrets.PROD_EC2_PRIVATE_KEY }}" > ${INTERNAL_KEY_PATH_ON_BASTION}
+            chmod 600 ${INTERNAL_KEY_PATH_ON_BASTION}
 
-            # .env 파일 생성 및 권한 설정 (첫 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "
-            sudo -s
-            touch .env
-            echo '${{ secrets.ENV }}' > .env
-            "
+            # 1. Bastion에서 Private EC2로 배포 파일들 복사
+            echo "Copying files from Bastion to Private EC2..."
+            scp -i ${INTERNAL_KEY_PATH_ON_BASTION} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+              ${BASTION_DEPLOY_DIR}/docker-compose-dev.yml \
+              ${BASTION_DEPLOY_DIR}/.env \
+              ${EC2_USER_HOST}:${EC2_HOME_DIR}/
+
+            # 2. Private EC2에서 배포 스크립트 실행
+            echo "Executing deployment script on Private EC2..."
+            ssh -i ${INTERNAL_KEY_PATH_ON_BASTION} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${EC2_USER_HOST} << 'EOFSSH'
+              set -e # Private EC2에서도 오류 발생 시 즉시 중단
             
-            # 이전 컨테이너 중지 및 제거 (Private EC2 - 첫 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker stop festamate || true"
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker rm festamate || true"
+              cd /home/${{ secrets.PROD_EC2_USERNAME }}/ # 작업 디렉토리로 이동
 
-            # 최신 이미지 pull (Private EC2 - 첫 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker pull gobongbab/festamate:latest"
+              # Docker Hub 로그인
+              echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-            # 컨테이너 시작 (Private EC2 - 첫 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" " docker run -d --name festamate -p 80:8080 --env-file .env -v /home/$PRIVATE_EC2_USERNAME/festamate-firebase-key.json:/festamate-firebase-key.json gobongbab/festamate:latest"
+              echo "Pulling latest images from Docker Hub..."
+              docker compose -f docker-compose-dev.yml pull
 
-            # 사용하지 않는 이미지 정리 (Private EC2 - 첫 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_1" "docker image prune -af"
+              echo "Taking down existing containers..."
+              docker compose -f docker-compose-dev.yml down || true # 실패해도 다음 단계 진행 (처음 배포 시 컨테이너가 없을 수 있음)
 
-            echo "Deployment to Host1 complete."
+              echo "Starting new containers..."
+              docker compose -f docker-compose-dev.yml up -d
 
-            echo ""
-            echo "--------------------------------------------------"
-            echo ""
+              echo "Pruning unused Docker images..."
+              docker image prune -af
 
-            # --- 두 번째 운영용 EC2 배포 ---
-            echo "Deploying to Host2..."
+              echo "Deployment to Private EC2 complete."
+            EOFSSH
 
-            # Docker Hub 로그인 (Private EC2 - 두 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin"
+            # 3. Bastion Host에 생성된 임시 Private Key 파일 및 배포 파일 정리
+            echo "Cleaning up temporary files on Bastion Host..."
+            rm -f ${INTERNAL_KEY_PATH_ON_BASTION}
+            rm -rf ${BASTION_DEPLOY_DIR}
 
-            # .env 파일 생성 및 권한 설정 (두 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "
-            sudo -s
-            touch .env
-            echo '${{ secrets.ENV }}' > .env
-            "
-            
-            # 이전 컨테이너 중지 및 제거 (Private EC2 - 두 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker stop festamate || true"
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker rm festamate || true"
-
-            # 최신 이미지 pull (Private EC2 - 두 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker pull gobongbab/festamate:latest"
-
-            # 컨테이너 시작 (Private EC2 - 두 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker run -d --name festamate -p 80:8080 --env-file .env -v /home/$PRIVATE_EC2_USERNAME/festamate-firebase-key.json:/festamate-firebase-key.json gobongbab/festamate:latest"
-
-            # 사용하지 않는 이미지 정리 (Private EC2 - 두 번째 서버)
-            ssh -i "$PROD_EC2_PRIVATE_KEY_PATH" "$PRIVATE_EC2_USERNAME@$PRIVATE_EC2_HOST_2" "docker image prune -af"
-
-            echo "Deployment to Host2 complete."
+            echo "Bastion cleanup complete."
