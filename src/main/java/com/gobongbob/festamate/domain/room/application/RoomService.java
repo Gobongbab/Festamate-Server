@@ -282,9 +282,13 @@ public class RoomService {
         messageRepository.deleteByRoomId(roomId);
         roomRepository.delete(room);
 
-        /*
-        추후 방 삭제 시, 방에 참여중인 사용자들에게 알림을 보내는 로직 추가 필요
-         */
+        roomParticipantRepository.findByRoom_Id(roomId)
+                .stream()
+                .map(RoomParticipant::getMember)
+                .forEach(participant -> {
+                    participant.returnTicket(); // 방 삭제 시, 티켓 반환
+                    memberRepository.save(participant);
+                });
     }
 
     private RoomAuthority findRoomAuthorityByMember(Room room, CustomMemberDetails memberDetails) {
