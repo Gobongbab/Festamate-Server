@@ -160,9 +160,7 @@ public class RoomService {
         Message message = new Message();
         message.setFrom(fromNumber);
         message.setTo(phoneNumber);
-        message.setText("[FestaMate!] "
-                + host.getNickname() + "님의 모임방 "
-                + title + "에 초대됐어요! 매칭이 완료되면 오픈채팅 링크를 보내드릴게요.");
+        message.setText("[FestaMate!] "+ host.getNickname() +"님의 모임방 "+ title + "에 초대됐어요! 매칭이 완료되면 오픈채팅 링크를 보내드릴게요.");
 
         return message;
     }

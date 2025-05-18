@@ -224,7 +224,7 @@ public class RoomParticipationService {
         Message message = new Message();
         message.setFrom(fromNumber);
         message.setTo(phone);
-        message.setText("[FestaMate!] 모임방 " + title + "에 매칭이 완료되었어요!  오픈채팅에 입장하여 시간과 장소를 정해보세요! \n " +
+        message.setText("[FestaMate!] '" + title + "'의 매칭이 완료되었어요! 오픈채팅에 입장하여 시간과 장소를 정해보세요!\n" +
                 "오픈채팅 링크: \n" +
                 openChatUrl);
 
