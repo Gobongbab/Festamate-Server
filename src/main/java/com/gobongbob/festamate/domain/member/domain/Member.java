@@ -4,9 +4,28 @@ import com.gobongbob.festamate.domain.auth.oauth.domain.OauthInfo;
 import com.gobongbob.festamate.domain.image.domain.ProfileImage;
 import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.global.entity.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import java.util.Set;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -119,6 +138,10 @@ public class Member extends BaseEntity {
 
     public void initializeRemainingTicket(int ticketCount) {
         this.remainingTicket = ticketCount;
+    }
+
+    public void returnTicket() {
+        this.remainingTicket++;
     }
 
     public void useTicket() {
