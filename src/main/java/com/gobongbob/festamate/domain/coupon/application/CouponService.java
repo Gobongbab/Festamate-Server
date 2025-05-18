@@ -1,23 +1,22 @@
 package com.gobongbob.festamate.domain.coupon.application;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.NOT_EXIST_TICKET;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
+
 import com.gobongbob.festamate.domain.coupon.domain.Coupon;
 import com.gobongbob.festamate.domain.coupon.dto.request.UseCouponRequest;
 import com.gobongbob.festamate.domain.coupon.persistence.CouponRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-
-import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.gobongbob.festamate.global.response.ResponseCode.NOT_EXIST_TICKET;
-import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +39,6 @@ public class CouponService {
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
 
         coupon.useCoupon();
-        coupon.assignToMember(findMember);
         findMember.increaseMaximumTicket();
         findMember.initializeRemainingTicket(findMember.getMaximumTicket());
     }
