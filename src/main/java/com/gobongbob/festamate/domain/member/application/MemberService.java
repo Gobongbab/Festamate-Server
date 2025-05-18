@@ -2,6 +2,8 @@ package com.gobongbob.festamate.domain.member.application;
 
 import static com.gobongbob.festamate.global.response.ResponseCode.DUPLICATE_NICKNAME;
 import static com.gobongbob.festamate.global.response.ResponseCode.DUPLICATE_STUDENT_ID;
+import static com.gobongbob.festamate.global.response.ResponseCode.ERROR_SEND_SMS;
+import static com.gobongbob.festamate.global.response.ResponseCode.FAIL_SEND_SMS;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_ADMIN;
 import static com.gobongbob.festamate.global.response.ResponseCode.NO_MEMBER;
 
@@ -25,10 +27,16 @@ import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.nurigo.sdk.message.exception.NurigoMessageNotReceivedException;
+import net.nurigo.sdk.message.model.Message;
+import net.nurigo.sdk.message.service.DefaultMessageService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -40,6 +48,10 @@ public class MemberService {
     private final ProfileImageRepository profileImageRepository;
     private final ImageService imageService;
     private final ReportRepository reportRepository;
+    private final DefaultMessageService messageService;
+
+    @Value("${coolsms.from.number}")
+    private String fromNumber;
 
     @Transactional
     public Member createMember(MemberCreateRequest request) {
@@ -109,7 +121,7 @@ public class MemberService {
     @Transactional
     @CheckActiveUser
     public void updateMemberProfileById(Member member, ProfileUpdateRequest request) {
-        if(memberRepository.existsByNickname(request.nickname())){
+        if (memberRepository.existsByNickname(request.nickname())) {
             throw new BadRequestException(DUPLICATE_NICKNAME);
         }
         member.updateProfile(request.nickname());
@@ -170,6 +182,7 @@ public class MemberService {
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
         member.block();
         memberRepository.save(member);
+        sendMatchingCompleteMessages(member);
 
         // 해당 유저가 피신고자인 모든 신고의 processed = true 처리
         List<Report> reports = reportRepository.findByReportedMember(member);
@@ -218,5 +231,27 @@ public class MemberService {
     public Member findById(Long memberId) {
         return memberRepository.findByIdWithProfileImage(memberId)
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
+    }
+
+    private void sendMatchingCompleteMessages(Member member) {
+        Message message = setMessage(member.getPhoneNumber());
+        try {
+            messageService.send(message);
+        } catch (NurigoMessageNotReceivedException e) {
+            log.error("(NurigoMessageNotReceivedException) 휴대폰 문자 전송 에러 상세 내용: " + e);
+            throw new BadRequestException(FAIL_SEND_SMS);
+        } catch (Exception e) {
+            log.error("(Exception) 휴대폰 문자 전송 에러 상세 내용: " + e);
+            throw new BadRequestException(ERROR_SEND_SMS);
+        }
+    }
+
+    private Message setMessage(String phoneNumber) {
+        Message message = new Message();
+        message.setFrom(fromNumber);
+        message.setTo(phoneNumber);
+        message.setText("[FestaMate!] 부적절한 행위로 인해 제재되었어요. 자세한 사항은 관리자를 통해 문의해주세요.");
+
+        return message;
     }
 }
