@@ -17,7 +17,7 @@ public class RoomCloseScheduler {
 
     @Scheduled(fixedRate = 60000) // 1분마다 실행
     public void closeExpiredRooms() {
-        List<Room> expiredRooms = roomRepository.findRoomsByScheduledTimeBefore(LocalDateTime.now());
+        List<Room> expiredRooms = roomRepository.findRoomsByScheduledTimeBefore(LocalDateTime.now().plusDays(1));
         expiredRooms.forEach(room -> room.updateStatus(Status.CLOSED));
 
         roomRepository.saveAll(expiredRooms); // 변경된 상태 저장
