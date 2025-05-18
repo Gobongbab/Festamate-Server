@@ -3,12 +3,18 @@ package com.gobongbob.festamate.domain.coupon.domain;
 import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_USED_TICKET;
 import static com.gobongbob.festamate.global.response.ResponseCode.EXPIRED_TICKET;
 
-import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.global.entity.BaseEntity;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalDateTime;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -31,14 +37,6 @@ public class Coupon extends BaseEntity {
     private boolean used = false;
 
     private LocalDateTime expiresAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
-
-    public void assignToMember(Member member) {
-        this.member = member;
-    }
 
     public void useCoupon() {
         if (this.used) {
