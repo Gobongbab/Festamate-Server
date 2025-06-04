@@ -2,76 +2,94 @@ package com.gobongbob.festamate.domain.member.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.member.application.MemberService;
-import com.gobongbob.festamate.domain.member.domain.Member;
-import com.gobongbob.festamate.domain.member.dto.request.MemberCreateRequest;
-import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
+import com.gobongbob.festamate.domain.member.dto.request.MemberExistRequest;
 import com.gobongbob.festamate.domain.member.dto.request.ProfileUpdateRequest;
 import com.gobongbob.festamate.domain.member.dto.response.MemberProfileResponse;
 import com.gobongbob.festamate.domain.member.dto.response.MemberResponse;
+import com.gobongbob.festamate.domain.room.dto.response.MemberExistResponse;
+import com.gobongbob.festamate.global.response.SuccessResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-@RestController
 @RequiredArgsConstructor
-public class MemberController {
+@RestController
+@Validated
+@RequestMapping("/api/members")
+@Tag(name = "Member", description = "회원 관련 API")
+public class MemberController implements MemberApi {
 
     private final MemberService memberService;
 
-    @PostMapping("/auth/signup")
-    public ResponseEntity<Void> signUp(@RequestBody MemberCreateRequest request) {
-        Member member = memberService.createMember(request);
-
-        return ResponseEntity.ok().build();
+    // 모든 회원 조회
+    @Override
+    @GetMapping("")
+    public SuccessResponse<List<MemberResponse>> findAllMembers() {
+        return new SuccessResponse<>(memberService.findAllMembers());
     }
 
-    @GetMapping("/members")
-    public ResponseEntity<List<MemberResponse>> findAllMembers() {
-        return ResponseEntity.ok(memberService.findAllMembers());
+    // 회원 상세 조회
+    @Override
+    @GetMapping("/{memberId}")
+    public SuccessResponse<MemberResponse> findMemberById(
+            @PathVariable("memberId") Long memberId
+    ) {
+        return new SuccessResponse<>(memberService.findMemberById(memberId));
     }
 
-    @GetMapping("/members/{memberId}")
-    public ResponseEntity<MemberResponse> findMemberById(@PathVariable Long memberId) {
-        return ResponseEntity.ok(memberService.findMemberById(memberId));
+    // 프로필 조회
+    @Override
+    @GetMapping("/profile")
+    public SuccessResponse<MemberProfileResponse> getProfile(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
+    ) {
+        return new SuccessResponse<>(memberService.findProfile(memberDetails.getMember()));
     }
 
-    @GetMapping("/api/auth/members/profile")
-    public ResponseEntity<MemberProfileResponse> getProfile(
-            @AuthenticationPrincipal CustomMemberDetails memberDetails) {
-        return ResponseEntity.ok(memberService.findProfile(memberDetails.getMember()));
-    }
-
-    @PatchMapping("/members/profile")
-    public ResponseEntity<Void> updateProfile(
+    // 나의 닉네임 수정
+    @Override
+    @PatchMapping("/profile")
+    public SuccessResponse<Void> updateProfile(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @RequestBody ProfileUpdateRequest request
+            @RequestBody @Valid ProfileUpdateRequest request
     ) {
         memberService.updateMemberProfileById(memberDetails.getMember(), request);
-
-        return ResponseEntity.ok().build();
+        return new SuccessResponse<>();
     }
 
-    @DeleteMapping("/members/{memberId}")
-    public ResponseEntity<Void> deleteMemberById(@PathVariable Long memberId) {
-        memberService.deleteMemberById(memberId);
-
-        return ResponseEntity.ok().build();
+    // 나의 프로필 사진 수정
+    @Override
+    @PutMapping("/profile/photo")
+    public SuccessResponse<Void> updateProfilePhoto(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @RequestPart("profileImage") MultipartFile profileImage
+    ) {
+        memberService.updateProfilePhoto(memberDetails.getMember(), profileImage);
+        return new SuccessResponse<>();
     }
 
-    // 프로필 등록 API
-    @PostMapping("/api/auth/register/profile") // 추후 /api/auth를 상위 경로에 작성하도록 변경 필요
-    public ResponseEntity<Void> registerProfile(@RequestBody ProfileRegisterRequest request,
-            @AuthenticationPrincipal Member member) {
-        Long userId = member.getId();
-        memberService.registerProfile(request, userId);
-        return ResponseEntity.ok().build();
+    // 회원 존재 여부 확인
+    @Override
+    @PostMapping("/exist")
+    public SuccessResponse<MemberExistResponse> checkMemberExist(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @RequestBody MemberExistRequest request
+    ) {
+        return new SuccessResponse<>(memberService.checkMemberExist(request.phoneNumber()));
+    }
+
+    // 닉네임 중복 확인
+    @Override
+    @GetMapping("/check/nickname")
+    public SuccessResponse<String> checkNickname(
+            @RequestParam(name = "nickname") String nickname
+    ) {
+        memberService.checkNicknameDuplication(nickname);
+        return new SuccessResponse<>();
     }
 }

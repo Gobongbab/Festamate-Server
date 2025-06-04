@@ -1,65 +1,108 @@
 package com.gobongbob.festamate.domain.auth.oauth.presentation;
 
+import com.gobongbob.festamate.domain.auth.jwt.application.TokenService;
+import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.auth.oauth.application.OauthService;
-import com.gobongbob.festamate.domain.auth.oauth.dto.request.LoginRequest;
-import jakarta.servlet.http.HttpServletRequest;
+import com.gobongbob.festamate.domain.auth.oauth.dto.request.KakaoLoginRequest;
+import com.gobongbob.festamate.domain.auth.oauth.dto.request.LoginWithKakaoRequest;
+import com.gobongbob.festamate.domain.auth.oauth.dto.response.AuthResponse;
+import com.gobongbob.festamate.domain.auth.oauth.dto.response.KakaoCheckResponse;
+import com.gobongbob.festamate.domain.member.application.MemberService;
+import com.gobongbob.festamate.domain.member.dto.request.ProfileRegisterRequest;
+import com.gobongbob.festamate.global.response.SuccessResponse;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import java.time.Duration;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.view.RedirectView;
-
+// 소그인 핵심 로직
 // 인가 코드를 받아 OauthService의 kakaoLogin 메서드를 호출하고, 인가 코드를 사용하여 액세스 토큰을 요청 후 사용자 정보를 가져와 처리함
 
 @RestController
+@Validated
 @RequiredArgsConstructor
-@RequestMapping
-public class OauthController {
+@RequestMapping("/api/auth")
+public class OauthController implements OauthApi {
 
     private final OauthService oauthService;
+    private final MemberService memberService;
+    private final TokenService tokenService;
 
-    // @PostMapping을 통해 request로 인가 코드를 전달하고, response로 액세스 토큰을 받아옴
-    // 수동으로 인가 코드를 전달받아 처리 (테스트용으로 추후 삭제 가능)
-    @PostMapping("/api/auth/kakao")
-    public ResponseEntity<Map<String, String>> kakaoLogin(@RequestBody LoginRequest loginRequest,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        // 인가 코드 처리
-        Map<String, String> tokens = oauthService.kakaoLogin(loginRequest.getCode(), request,
-                response);
-        return ResponseEntity.ok(tokens);
+    // 1️⃣ 회원 여부 확인용 (카카오 인가코드로)
+    @PostMapping("/kakao")
+    public SuccessResponse<KakaoCheckResponse> kakaoCheck(
+            @RequestBody @Valid KakaoLoginRequest kakaoLoginRequest) {
+
+        KakaoCheckResponse response = oauthService.checkKakaoUser(kakaoLoginRequest.getCode());
+        return new SuccessResponse<>(response);
     }
 
-    // 리다이렉트 URI에서 인가 코드를 자동으로 처리(운영용)
-    @GetMapping("/login/oauth2/code/kakao")
-    public ResponseEntity<Map<String, String>> handleKakaoRedirect(@RequestParam String code,
-            HttpServletRequest request,
+    // 2️⃣ 기존 회원 로그인 (카카오 access token으로)
+    @PostMapping("/login")
+    public ResponseEntity<SuccessResponse<AuthResponse>> loginWithKakao(
+            @RequestBody LoginWithKakaoRequest request,
             HttpServletResponse response) {
-        // 전달받은 인가 코드를 서비스로 넘겨 처리
-        Map<String, String> tokens = oauthService.kakaoLogin(code, request, response);
 
-        // 성공 시 JWT 토큰 반환
-        return ResponseEntity.ok(tokens);
+        // OauthService는 내부적으로 Member 조회 후 TokenService를 호출하여 토큰 Map 반환 가정
+        Map<String, String> tokens = oauthService.loginWithKakao(request.getKakaoAccessToken());
+        String accessToken = tokens.get("accessToken");
+        String refreshToken = tokens.get("refreshToken"); // OauthService로부터 리프레시 토큰 받아옴
+
+        // 리프레시 토큰을 HttpOnly 쿠키로 설정
+        ResponseCookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+        // 본문에는 액세스 토큰만 포함하는 DTO 반환
+        AuthResponse authResponse = new AuthResponse(accessToken);
+        return ResponseEntity.ok(new SuccessResponse<>(authResponse));
     }
 
-    @Value("${KAKAO_CLIENT_ID}")
-    private String clientId;
+    // 3️⃣ 신규 회원 프로필 등록 후 JWT 발급
+    @PostMapping("/register/profile")
+    @Transactional // 회원 저장과 토큰 생성을 한 트랜잭션으로 묶음 (DB 기준)
+    public ResponseEntity<SuccessResponse<AuthResponse>> registerProfile(
+            @RequestBody ProfileRegisterRequest request,
+            HttpServletResponse response) {
 
-    @Value("${KAKAO_REDIRECT_URI}")
-    private String redirectUri;
+        // 학번 중복 여부 확인
+        memberService.checkStudentIdDuplication(request.studentId());
 
-    @GetMapping("/api/auth/login") // 로그인 리다이렉트
-    public RedirectView redirectToKakao() {
-        String kakaoAuthUrl =
-                "https://kauth.kakao.com/oauth/authorize?client_id=" + clientId + "&redirect_uri="
-                        + redirectUri + "&response_type=code";
-        return new RedirectView(kakaoAuthUrl);
+        // OauthService를 통해 회원 정보 DB에 저장 및 회원 ID 반환
+        Long userId = oauthService.registerNewMember(request);
+
+        // TokenService를 사용하여 JWT 토큰 생성 및 Redis 저장
+        Map<String, String> tokens = tokenService.generateAndSaveTokens(userId,
+                TokenType.FINAL_ACCESS);
+        String accessToken = tokens.get("accessToken");
+        String refreshToken = tokens.get("refreshToken"); // 생성된 리프레시 토큰
+
+        // 리프레시 토큰을 HttpOnly 쿠키로 설정
+        ResponseCookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString()); // 응답 헤더에 쿠키 추가
+
+        // 본문에는 액세스 토큰만 포함하는 DTO 반환
+        AuthResponse authResponse = new AuthResponse(accessToken);
+        return ResponseEntity.ok(new SuccessResponse<>(authResponse)); // SuccessResponse 래퍼 사용
+    }
+
+    private ResponseCookie createRefreshTokenCookie(String refreshToken) {
+        Duration refreshTokenValidity = TokenType.FINAL_REFRESH.getDuration();
+
+        return ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)          // JavaScript 접근 불가
+                .secure(true)           // HTTPS 환경에서만 전송 (로컬 HTTP 테스트 시 임시 주석 처리 고려)
+                .path("/")              // 전체 경로에서 쿠키 사용 가능
+                .maxAge(refreshTokenValidity) // 쿠키 만료 시간 (Redis TTL과 일치 권장)
+                .sameSite("None")      // 동일 출처 요청에만 쿠키 전송 (CSRF 방지)
+                .build();
     }
 }

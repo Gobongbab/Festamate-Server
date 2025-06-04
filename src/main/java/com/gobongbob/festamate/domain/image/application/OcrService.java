@@ -4,13 +4,15 @@ package com.gobongbob.festamate.domain.image.application;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gobongbob.festamate.domain.image.dto.response.StudentInfoResponse;
-import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
@@ -23,8 +25,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import static com.gobongbob.festamate.global.response.ResponseCode.CAN_NOT_RECOGNIZE_STUDENT_CARD;
+import static com.gobongbob.festamate.global.response.ResponseCode.EMPTY_FILE;
+
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OcrService {
 
@@ -36,10 +41,10 @@ public class OcrService {
 
     private final MemberRepository memberRepository;
 
-    public StudentInfoResponse checkStudentCard(MultipartFile file, Member member) throws IOException {
+    public StudentInfoResponse checkStudentCard(MultipartFile file) throws IOException {
         // 파일이 비어있거나 null인 경우 예외 처리
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("파일이 비어있습니다.");
+            throw new BadRequestException(EMPTY_FILE);
         }
 
         // 임시 파일로 저장
@@ -54,11 +59,13 @@ public class OcrService {
         String studentDepartment = getValueAfterKeyword(result, "학과");
         String studentId = getValueAfterKeyword(result, "학번");
 
+        if (StringUtils.isEmpty(studentName) || StringUtils.isEmpty(studentDepartment) || StringUtils.isEmpty(studentId)) {
+            // 하나라도 null이거나 공백이면 예외 처리
+            throw new BadRequestException(CAN_NOT_RECOGNIZE_STUDENT_CARD);
+        }
+
         // 임시 파일 삭제
         Files.delete(tempFile);
-
-        member.setStudentInfo(studentName, studentDepartment, studentId);
-        memberRepository.save(member);
 
         return StudentInfoResponse.fromEntity(studentName, studentDepartment, studentId);
     }

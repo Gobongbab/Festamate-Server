@@ -1,17 +1,21 @@
 package com.gobongbob.festamate.domain.room.persistence;
 
 import com.gobongbob.festamate.domain.room.domain.Room;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.repository.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-public interface RoomRepository extends Repository<Room, Long> {
+public interface RoomRepository extends JpaRepository<Room, Long>, RoomQueryDslRepository {
 
-    Room save(Room room);
-
-    List<Room> findAll();
+    @Query("SELECT r FROM Room r WHERE r.meetingDateTime <= ?1")
+    List<Room> findRoomsByScheduledTimeBefore(LocalDateTime meetingDateTime);
 
     Optional<Room> findById(Long id);
+
+    @Query("SELECT r FROM Room r JOIN FETCH r.host WHERE r.id = :id")
+    Optional<Room> findByIdWithHost(Long id);
 
     void delete(Room room);
 }

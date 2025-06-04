@@ -38,3 +38,4 @@ out/
 
 .env
 festamate-firebase-key.json
+generated/

@@ -11,9 +11,8 @@ public class RoomFixture {
 
     public static Room createRoom(int headCount, Gender gender, Member member) {
         return Room.builder()
-                .headCount(headCount)
+                .maxParticipants(headCount)
                 .preferredGender(gender)
-                .openChatLink("https://open.kakao.com/o/test")
                 .meetingDateTime(LocalDateTime.now())
                 .title("test title")
                 .content("test content")
@@ -31,12 +30,14 @@ public class RoomFixture {
 
     public static RoomCreateRequest createRoomCreateRequest(Room room) {
         return new RoomCreateRequest(
-                room.getHeadCount(),
-                room.getPreferredGender().getName(),
-                room.getOpenChatLink(),
-                room.getMeetingDateTime(),
                 room.getTitle(),
-                room.getContent()
+                room.getPlace(),
+                room.getContent(),
+                room.getPreferredGender(),
+                room.getPreferredStudentIdMin(),
+                room.getPreferredStudentIdMax(),
+                room.getMeetingDateTime(),
+                room.getMaxParticipants()
         );
     }
 

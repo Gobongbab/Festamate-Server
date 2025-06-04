@@ -2,14 +2,13 @@ package com.gobongbob.festamate.domain.report.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.report.application.ReportService;
+import com.gobongbob.festamate.domain.report.dto.request.ReportMemberRequest;
 import com.gobongbob.festamate.domain.report.dto.request.ReportRoomRequest;
-import com.gobongbob.festamate.domain.report.dto.response.ReportRoomResponse;
-import java.util.List;
+import com.gobongbob.festamate.global.response.SuccessResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,35 +16,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/report")
-public class ReportController {
+public class ReportController implements ReportApi {
 
     private final ReportService reportService;
 
-    @PostMapping("/{roomId}")
-    public ResponseEntity<Void> reportRoom(
+    // 모임방 신고
+    @Override
+    @PostMapping("/room/{roomId}")
+    public SuccessResponse<Void> reportRoom(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long roomId,
-            @RequestBody ReportRoomRequest request
+            @PathVariable("roomId") Long roomId,
+            @RequestBody @Valid ReportRoomRequest request
     ) {
         reportService.reportRoom(memberDetails.getMember(), roomId, request);
-        return ResponseEntity.ok().build();
+        return new SuccessResponse<>();
     }
 
-    @GetMapping("")
-    public ResponseEntity<List<ReportRoomResponse>> getAllReports() {
-        return ResponseEntity.ok(reportService.getAllReports());
-    }
-
-    @GetMapping("/unprocessed")
-    public ResponseEntity<List<ReportRoomResponse>> getUnprocessedReports() {
-        return ResponseEntity.ok(reportService.getUnprocessedReports());
-    }
-
-    @PatchMapping("/{reportId}/process")
-    public ResponseEntity<Void> processReport(@PathVariable Long reportId) {
-        reportService.processReport(reportId);
-        return ResponseEntity.ok().build();
+    // 사용자 신고
+    @Override
+    @PostMapping("/member/{memberId}")
+    public SuccessResponse<Void> reportMember(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @PathVariable("memberId") Long memberId,
+            @RequestBody @Valid ReportMemberRequest request
+    ) {
+        reportService.reportMember(memberDetails.getMember(), memberId, request);
+        return new SuccessResponse<>();
     }
 }

@@ -1,113 +1,139 @@
 package com.gobongbob.festamate.global.util;
 
+import com.gobongbob.festamate.domain.auth.jwt.domain.TokenType;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.jwt.JwtException;
+import org.springframework.stereotype.Component;
 
-// 카카오 서버로부터 받은 액세스 토큰을 사용하여 자체 JWT 토큰을 생성함
+@Component
 @RequiredArgsConstructor
-@Service
 public class TokenProvider {
 
-    private final String header = "Authorization";
-
-    @Value("${JWT_SECRET}")
+    @Value("${jwt.secret}")
     private String secret;
+    private final UserDetailsService userDetailsService;
 
-    // Access Token 생성 메서드
-    public String generateAccessToken(Member member) {
-        return makeToken(new Date(System.currentTimeMillis() + Duration.ofHours(2).toMillis()),
-                member, "access");
+    // 토큰 생성 (TokenType에 따라 다르게 생성)
+    public Map<String, String> generateTokens(Member member, TokenType type) {
+        String accessToken = createToken(member, "access", type.getDuration(),
+                TokenType.FINAL_ACCESS);
+        String refreshToken = createToken(member, "refresh", type.getDuration(),
+                TokenType.FINAL_REFRESH);
+
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", accessToken);
+        tokens.put("refreshToken", refreshToken);
+        return tokens;
     }
 
-    // Refresh Token 생성 메서드
-    public String generateRefreshToken(Member member) {
-        return makeToken(new Date(System.currentTimeMillis() + Duration.ofDays(7).toMillis()),
-                member, "refresh");
+    // Access Token 생성
+    public String createAccessToken(Member member, TokenType type) {
+        return createToken(member, "access", type.getDuration(), type);
     }
 
-    // JWT 토큰을 실제로 생성하는 내부 메서드로, 토큰의 헤더, 페이로드, 서명을 설정함
-
-    /***
-     * 헤더 typ(타입) : JWT
-     * 내용 iat(발급 일시) : 현재 시간
-     * 내용 exp(만료일시) : expiry 멤버 변수값
-     * 내용 sub(토큰 제목) : 회원 ID
-     * 클레임 id : 회원 ID
-     * 서명 : 비밀값과 함께 해시값을 HS256 방식으로 암호화
-     */
-    private String makeToken(Date expiry, Member member, String type) {
+    // 기본 토큰 생성 로직
+    private String createToken(Member member, String tokenType, Duration duration, TokenType type) {
         Date now = new Date();
+        Date expiry = new Date(now.getTime() + duration.toMillis());
+        Key key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 
-        return Jwts.builder()
+        JwtBuilder builder = Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .setSubject(String.valueOf(member.getId()))
                 .claim("id", member.getId())
-                .claim("type", type) // 타입 추가
-                .signWith(SignatureAlgorithm.HS256, secret)
-                .compact();
+                .claim("name", member.getName())
+                .claim("nickname", member.getNickname())
+                .claim("studentId", member.getStudentId())
+                .claim("phoneNumber", member.getPhoneNumber())
+                .claim("type", tokenType)
+                .claim("memberType", type.name())
+                .claim("status", member.getStatus())
+                .claim("role",
+                        member.getRole().getAuthority()); // "ROLE_USER", "ROLE_ADMIN" 등 권한 문자열 추가
+
+        if (member.getGender() != null) {
+            builder.claim("gender", member.getGender().name());
+        }
+        if (member.getStudentDepartment() != null) {
+            builder.claim("department", member.getStudentDepartment());
+        }
+
+        return builder.signWith(key, SignatureAlgorithm.HS256).compact();
     }
 
-    // JWT 토큰의 유효성을 검증하는 메서드
+    // Refresh Token을 사용하여 새로운 Access Token을 생성할 때 사용
+    public Long getMemberIdFromRefreshToken(String refreshToken) {
+        return parseClaims(refreshToken).get("id", Long.class);
+    }
+
+    /**
+     * 토큰의 유효성을 검증합니다. 유효하지 않은 경우 BadCredentialsException을 던져 JwtAuthenticationEntryPoint가 동작하도록 유도합니다.
+     *
+     * @param token 검증할 JWT 토큰
+     * @throws BadCredentialsException 토큰이 유효하지 않을 때 (서명 오류, 만료, 형식 오류 등)
+     */
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                    .setSigningKey(secret)   // 비밀값으로 복호화
-                    .parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
             return true;
-        } catch (Exception e) { // 복호화 과정에서 에러가 나면 유효하지 않은 토큰임
+        } catch (ExpiredJwtException | JwtException | IllegalArgumentException e) {
             return false;
         }
     }
 
-    // 토큰 기반으로 인증 정보를 가져오는 메서드
-    // JWT 토큰에서 사용자 정보를 추출하여 Authentication 객체를 생성하며, 이를 통해 @AuthenticationPrincipal을 사용할 수 있음
-    public Authentication getAuthentication(String token) {
-        Claims claims = getClaims(token);
-        Set<SimpleGrantedAuthority> authorities = Collections.singleton(
-                new SimpleGrantedAuthority("ROLE_USER"));
-
-        return new UsernamePasswordAuthenticationToken(
-                new Member(claims.getSubject(), "", authorities), token, authorities);
+    public Claims parseClaims(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 
-    // 토큰에서 회원 ID를 추출함
     public Long getUserId(String token) {
-        Claims claims = getClaims(token);
-        return claims.get("id", Long.class);
+        Claims claims = parseClaims(token);
+        return Long.valueOf(claims.get("id").toString());
     }
 
-    // 주어진 토큰에서 클레임을 추출함
-    private Claims getClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody();
+    public Authentication getAuthentication(String token) {
+        String username = getUsernameFromToken(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        return new UsernamePasswordAuthenticationToken(userDetails, null,
+                userDetails.getAuthorities());
     }
 
-    // 클레임에서 토큰 타입을 확인하여 access token인지 검증하는 로직 추가
-    public boolean isAccessToken(String token) {
-        Claims claims = getClaims(token);
-        return "access".equals(claims.get("type")); // 타입 검증
-    }
-
-    // Refresh Token인지 확인하는 메서드
-    public boolean isRefreshToken(String token) {
-        Claims claims = getClaims(token);
-        return "refresh".equals(claims.get("type")); // 타입 검증
+    private String getUsernameFromToken(String token) {
+        Claims claims = parseClaims(token);
+        return claims.getSubject();
     }
 }

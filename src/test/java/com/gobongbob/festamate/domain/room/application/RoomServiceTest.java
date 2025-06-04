@@ -3,16 +3,25 @@ package com.gobongbob.festamate.domain.room.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.gobongbob.festamate.common.fixture.MemberFixture;
 import com.gobongbob.festamate.common.fixture.RoomFixture;
 import com.gobongbob.festamate.common.fixture.RoomParticipantFixture;
+import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.image.infrastructure.ImageService;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
 import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
 import com.gobongbob.festamate.domain.room.domain.Room;
+import com.gobongbob.festamate.domain.room.domain.Status;
+import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomUpdateRequest;
+import com.gobongbob.festamate.domain.room.dto.response.RoomListResponse;
 import com.gobongbob.festamate.domain.room.dto.response.RoomResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
 import com.gobongbob.festamate.serviceSliceTest;
@@ -20,9 +29,19 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+@Import(RoomServiceTest.TestConfig.class)
 @DisplayName("RoomServiceTest")
 class RoomServiceTest extends serviceSliceTest {
 
@@ -32,6 +51,17 @@ class RoomServiceTest extends serviceSliceTest {
     RoomRepository roomRepository;
     @Autowired
     MemberRepository memberRepository;
+    @Autowired
+    ImageService imageService;
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public ImageService imageService() {
+            return Mockito.mock(ImageService.class);
+        }
+    }
 
     @Nested
     @DisplayName("모임방을 생성할 시")
@@ -43,20 +73,29 @@ class RoomServiceTest extends serviceSliceTest {
         void successCreateRoom() {
             // given
             Member member = testFixtureBuilder.buildMember(MemberFixture.MEMBER1());
-
             Room room = RoomFixture.ROOM1(member);
             RoomCreateRequest request = RoomFixture.createRoomCreateRequest(room);
 
+            MultipartFile imageFile = new MockMultipartFile(
+                    "imageFiles",
+                    "test-image.jpg",
+                    "image/jpeg",
+                    "fake-image-content".getBytes()
+            );
+            List<MultipartFile> imageFiles = List.of(imageFile);
+            doNothing().when(imageService).uploadImages(any());
+
             // when
-            Room createdRoom = roomService.createRoom(member, request);
+            Room createdRoom = roomService.createRoom(member.getId(), request, imageFiles).getRoom();
 
             // then
             assertAll(
                     () -> assertThat(createdRoom.getId()).isNotNull(),
-                    () -> assertThat(createdRoom.getHeadCount()).isEqualTo(room.getHeadCount()),
+                    () -> assertThat(createdRoom.getMaxParticipants()).isEqualTo(room.getMaxParticipants()),
                     () -> assertThat(createdRoom.getPreferredGender()).isEqualTo(
                             room.getPreferredGender())
             );
+            verify(imageService, times(1)).uploadImages(any());
         }
     }
 
@@ -72,7 +111,7 @@ class RoomServiceTest extends serviceSliceTest {
             Room room = testFixtureBuilder.buildRoom(RoomFixture.ROOM1(member));
 
             // when
-            RoomResponse findRoom = roomService.findRoomById(room.getId());
+            RoomResponse findRoom = roomService.findRoomById(new CustomMemberDetails(member), room.getId());
 
             // then
             assertThat(room.getId()).isEqualTo(findRoom.id());
@@ -86,8 +125,18 @@ class RoomServiceTest extends serviceSliceTest {
             List<Room> rooms = RoomFixture.createRooms(member);
             rooms.forEach(room -> testFixtureBuilder.buildRoom(room));
 
+            Pageable pageable = PageRequest.of(0, 10);
+            FilteringCondition filteringCondition = new FilteringCondition(
+                    Status.MATCHING,
+                    Gender.MALE,
+                    "25",
+                    "20",
+                    4,
+                    "20"
+            );
+
             // when
-            List<RoomResponse> findRoomResponses = roomService.findAllRooms();
+            Slice<RoomListResponse> findRoomResponses = roomService.findBySearchCondition(pageable, filteringCondition);
 
             // then
             assertThat(findRoomResponses).hasSize(rooms.size());
@@ -107,23 +156,35 @@ class RoomServiceTest extends serviceSliceTest {
             Room room = testFixtureBuilder.buildRoom(RoomFixture.ROOM1(member));
             testFixtureBuilder.buildRoomParticipant(RoomParticipantFixture.createHost(room, member));
 
-            int headCountToUpdate = room.getHeadCount() + 4;
+            int maxParticipantsToUpdate = room.getMaxParticipants() + 4;
             Gender preferredGenderToUpdate = room.getPreferredGender();
 
             // when
             RoomUpdateRequest request = new RoomUpdateRequest(
-                    headCountToUpdate,
-                    preferredGenderToUpdate.getName(),
-                    room.getOpenChatLink(),
-                    room.getMeetingDateTime(),
                     room.getTitle(),
-                    room.getContent()
+                    room.getPlace(),
+                    room.getContent(),
+                    preferredGenderToUpdate,
+                    room.getPreferredStudentIdMin(),
+                    room.getPreferredStudentIdMax(),
+                    room.getMeetingDateTime(),
+                    maxParticipantsToUpdate
             );
-            roomService.updateRoomById(member, room.getId(), request);
+
+            MultipartFile imageFile = new MockMultipartFile(
+                    "imageFiles",
+                    "test-image.jpg",
+                    "image/jpeg",
+                    "fake-image-content".getBytes()
+            );
+            List<MultipartFile> imageFiles = List.of(imageFile);
+            doNothing().when(imageService).uploadImages(any());
+
+            roomService.updateRoomById(member, room.getId(), request, imageFiles);
 
             // then
             assertAll(
-                    () -> assertThat(room.getHeadCount()).isEqualTo(headCountToUpdate),
+                    () -> assertThat(room.getMaxParticipants()).isEqualTo(maxParticipantsToUpdate),
                     () -> assertThat(room.getPreferredGender()).isEqualTo(preferredGenderToUpdate)
             );
         }

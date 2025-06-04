@@ -21,16 +21,19 @@ class RoomTest {
 
         // when
         room.updateRoom(
-                6,
-                Gender.FEMALE,
-                room.getOpenChatLink(),
-                room.getMeetingDateTime(),
                 room.getTitle(),
-                room.getContent()
+                room.getPlace(),
+                room.getContent(),
+                Gender.FEMALE,
+                room.getPreferredStudentIdMin(),
+                room.getPreferredStudentIdMax(),
+                room.getMeetingDateTime(),
+                6
+
         );
 
         // then
-        assertThat(room.getHeadCount()).isEqualTo(6);
+        assertThat(room.getMaxParticipants()).isEqualTo(6);
         assertThat(room.getPreferredGender()).isEqualTo(Gender.FEMALE);
     }
 

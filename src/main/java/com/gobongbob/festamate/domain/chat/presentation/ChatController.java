@@ -2,29 +2,67 @@ package com.gobongbob.festamate.domain.chat.presentation;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
-import com.gobongbob.festamate.domain.chat.dto.request.ChatRequest;
-import com.gobongbob.festamate.domain.chat.dto.response.ChatResponse;
+import com.gobongbob.festamate.domain.chat.dto.request.MessageRequest;
+import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
+import com.gobongbob.festamate.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class ChatController {
+@Slf4j
+@RequestMapping("/api/messages")
+public class ChatController implements ChatApi {
 
     private final ChatService chatService;
 
-    @MessageMapping("/chat/room/{roomId}") // 이거 쓸라면 /publish/chat/{roomId} 엔드포인트 필요
-    @SendTo("/subscribe/room/{roomId}")   //구독하고 있는 장소로 메시지 전송 (목적지)  -> WebSocketConfig Broker 에서 적용한건 앞에 붙어줘야됨
-    public ResponseEntity<ChatResponse> chat(
-            @DestinationVariable Long roomId,
+    @Override
+    @MessageMapping("/chatRooms/{chatRoomId}")
+    public SuccessResponse<Void> sendMessage(
+            @DestinationVariable("chatRoomId") Long chatRoomId,
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            ChatRequest request
+            @Payload MessageRequest request
     ) {
-        return ResponseEntity.ok(chatService.createChat(roomId, memberDetails.getMember(), request));
+        chatService.sendMessage(chatRoomId, memberDetails.getMember(), request.message());
+
+        return new SuccessResponse<>();
+    }
+
+//    @Override
+//    @GetMapping("/chatRooms/participations")
+//    public SuccessResponse<Slice<ChatRoomListResponse>> findParticipatingChatRooms(
+//            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+//            @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC) Pageable pageable
+//    ) {
+//        return new SuccessResponse<>(chatService.findParticipatingChatRooms(pageable, memberDetails.getMember()));
+//    }
+
+    // 메시지 조회
+    @Override
+    @GetMapping("/chatRooms/{chatRoomId}")
+    public SuccessResponse<Slice<MessageResponse>> findMessages(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @PathVariable("chatRoomId") Long chatRoomId,
+            @PageableDefault(size = 100, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Slice<MessageResponse> messages = chatService.findMessagesByRoomId(
+                memberDetails.getMember().getId(),
+                chatRoomId,
+                pageable
+        );
+
+        return new SuccessResponse<>(messages);
     }
 }

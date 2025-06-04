@@ -1,46 +1,72 @@
 package com.gobongbob.festamate.domain.chat.application;
 
-import com.gobongbob.festamate.domain.chat.domain.Chat;
-import com.gobongbob.festamate.domain.chat.dto.request.ChatRequest;
-import com.gobongbob.festamate.domain.chat.dto.response.ChatResponse;
-import com.gobongbob.festamate.domain.chat.persistence.ChatRepository;
-import com.gobongbob.festamate.domain.chatRoom.domain.ChatRoom;
-import com.gobongbob.festamate.domain.chatRoom.repository.ChatRoomRepository;
+import static com.gobongbob.festamate.global.response.ResponseCode.CHAT_ROOM_NOT_FOUND;
+import static com.gobongbob.festamate.global.response.ResponseCode.NO_AUTHORITY_CHAT_ROOM;
+
+import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
+import com.gobongbob.festamate.domain.chat.domain.Message;
+import com.gobongbob.festamate.domain.chat.dto.response.MessageResponse;
+import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
+import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.member.domain.Member;
-import com.gobongbob.festamate.domain.member.persistence.MemberRepository;
-import java.util.List;
+import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
+import com.gobongbob.festamate.global.aop.CheckActiveUser;
+import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ChatService {
 
-    private final ChatRepository chatRepository;
+    private final MessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final MemberRepository memberRepository;
+    private final RoomParticipantRepository roomParticipantRepository;
+    private final SimpMessageSendingOperations messagingTemplate;
 
     @Transactional
-    public ChatResponse createChat(Long roomId, Member member, ChatRequest request) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+    public void sendMessage(Long chatRoomId, Member member, String message) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new BadRequestException(CHAT_ROOM_NOT_FOUND));
 
-        Chat chat = Chat.builder()
-                .room(chatRoom)
-                .nickname(member.getNickname())
-                .message(request.message())
-                .build();
-        Chat savedChat = chatRepository.save(chat);
+        Message savedMessage = messageRepository.save(
+                Message.builder()
+                        .chatRoom(chatRoom)
+                        .sender(member)
+                        .message(message)
+                        .build()
+        );
+        MessageResponse response = MessageResponse.fromEntity(savedMessage);
 
-        return ChatResponse.fromEntity(savedChat);
+        messagingTemplate.convertAndSend("/topic/chatRooms/" + chatRoomId, response);
+
+        chatRoom.updateLastMessage(savedMessage.getMessage());
     }
 
-    public List<ChatResponse> getChatsByRoomId(Long roomId) {
-        return chatRepository.findByRoomId(roomId)
-                .stream()
-                .map(ChatResponse::fromEntity)
-                .toList();
+    // 메시지 조회
+    @CheckActiveUser
+    public Slice<MessageResponse> findMessagesByRoomId(Long memberId, Long roomId, Pageable pageable) {
+//        validateRoomParticipation(memberId, roomId);
+
+        return messageRepository.findByRoomId(roomId, pageable)
+                .map(MessageResponse::fromEntity);
     }
+
+    private void validateRoomParticipation(Long memberId, Long roomId) {
+        if (roomParticipantRepository.findByRoom_IdAndMember_Id(memberId, roomId).isEmpty()) {
+            throw new BadRequestException(NO_AUTHORITY_CHAT_ROOM);
+        }
+    }
+
+//    public Slice<ChatRoomListResponse> findParticipatingChatRooms(Pageable pageable, Member member) {
+//        return chatRoomRepository.findParticipatingChatRooms(pageable, member.getId())
+//                .map(ChatRoomListResponse::fromEntity);
+//    }
 }

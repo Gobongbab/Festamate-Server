@@ -10,34 +10,97 @@ services:
       - "8080:8080"
     restart: unless-stopped
     environment:
-      - USE_PROFILE=dev
+      # --- 기존 설정 유지 ---
+      - USE_PROFILE=dev # Spring 프로파일 설정
+      - TZ=Asia/Seoul   # 시간대 설정
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} # Spring 프로파일 설정
+
+      # --- 데이터베이스 관련 ---
       - DB_URL=${DB_URL}
       - DB_USER=${DB_USER}
       - DB_PASS=${DB_PASS}
+      - MASTER_DB_URL=${MASTER_DB_URL}
+      - SLAVE_DB_URL=${SLAVE_DB_URL}
+      - PROD_DB_USER=${PROD_DB_USER}
+      - PROD_DB_PASS=${PROD_DB_PASS}
+
+
+      # --- Redis 관련 ---
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_CONTAINER_NAME=${REDIS_CONTAINER_NAME}
+
+      # --- Firebase 관련 ---
+      # application.yml에서는 직접 사용되지 않았지만, SDK가 참조할 수 있는 표준 변수 또는 사용자 정의 변수
+      - FIREBASE_KEY_PATH=/config/festamate-firebase-key.json
+
+      # --- Kakao OAuth 관련 ---
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - KAKAO_REDIRECT_URI=${KAKAO_REDIRECT_URI}
+      - KAKAO_TOKEN_URI=${KAKAO_TOKEN_URI}
+      - KAKAO_USER_INFO_URI=${KAKAO_USER_INFO_URI}
+      - BASE_URL=${BASE_URL} # 프론트엔드에서 사용하는 URL
+
+      # --- AWS SNS 관련 ---
+      - AWS_SNS_ACCESS_KEY=${AWS_SNS_ACCESS_KEY}
+      - AWS_SNS_SECRET_KEY=${AWS_SNS_SECRET_KEY}
+
+      # --- JWT 관련 ---
+      - JWT_SECRET=${JWT_SECRET}
+
+      # --- Naver OCR 관련 ---
+      - OCR_API_URL=${OCR_API_URL}
+      - OCR_API_SECRET=${OCR_API_SECRET}
+
+      # --- Sentry 관련 ---
+      - SENTRY_DSN=${SENTRY_DSN}
+      - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+
+      # --- AWS S3 관련 ---
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - IAM_USER_ACCESS_KEY=${IAM_USER_ACCESS_KEY} # S3용 Access Key
+      - IAM_USER_SECRET_KEY=${IAM_USER_SECRET_KEY} # S3용 Secret Key
+      - TZ=Asia/Seoul
+
+      # --- 관리자 관련 ---
+      - ADMIN_LOGIN_ID=${ADMIN_LOGIN_ID}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_KAKAO_ID=${ADMIN_KAKAO_ID}
+
+      # --- CORS 설정 ---
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS} # CORS 허용 도메인 설정
+
+      # --- Redis 관련 ---
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_CONTAINER_NAME=${REDIS_CONTAINER_NAME}
+
+      # --- CoolSms 관련 ---
+      - COOLSMS_KEY=${COOLSMS_KEY}
+      - COOLSMS_SECRET=${COOLSMS_SECRET}
+      - FROM_NUMBER=${FROM_NUMBER}
+
+
+    volumes: # EC2 호스트 경로와 Docker 컨테이너 내부의 특정 경로를 연결(마운트)하는 역할
+      # EC2의 키 파일 경로: /home/ubuntu/festamate-firebase-key.json 컨테이너 내부 경로:/config/festamate-firebase-key.json
+      - /home/ubuntu/festamate-firebase-key.json:/config/festamate-firebase-key.json:ro # 읽기 전용(ro)으로 마운트 권장
     networks:
       - festamate-network
     depends_on:
-      - redis
+      - redis-service
 
   # Redis 캐시 서버 설정
-  redis:
-    image: redis:6.2.4-alpine
-    container_name: redis-dev
+  redis-service:
+    image: redis:latest
+    container_name: ${REDIS_CONTAINER_NAME}
     restart: always
     ports:
-      - "16379:6379"
-    environment:
-      - REDIS_HOST=localhost
-      - REDIS_PASSWORD=
-      - REDIS_PORT=16379
-      - TZ=Asia/Seoul
-    volumes:
-      - redis-dev-data:/data # Redis 데이터 영속성을 위한 볼륨
+      - "${REDIS_PORT}:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD} # Redis 비밀번호 설정
     networks:
       - festamate-network
-
-volumes:
-  redis-dev-data: # Redis 데이터 저장용 볼륨
 
 networks:
   festamate-network: # 서비스 간 통신을 위한 브릿지 네트워크
