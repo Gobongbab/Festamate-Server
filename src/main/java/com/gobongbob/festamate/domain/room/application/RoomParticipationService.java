@@ -75,10 +75,14 @@ public class RoomParticipationService {
             participantPhoneNumbers.add(room.getParticipants().get(i).getMember().getPhoneNumber());
         }
 
+        for (int i = 0; i < participantPhoneNumbers.size(); i++) {
+            log.warn(participantPhoneNumbers.get(i));
+        }
+
         participants.forEach(participant -> participateRoom(participant, room));
         if (room.isFull()) { // 방에 참여자가 다 찼을 때
-            room.updateStatus(Status.MATCHED);
             sendMatchingCompleteMessages(participantPhoneNumbers, room);
+            room.updateStatus(Status.MATCHED);
         }
 
         return room;
@@ -202,6 +206,7 @@ public class RoomParticipationService {
 
     private void sendMatchingCompleteMessages(List<String> participantPhoneNumbers, Room room) {
         participantPhoneNumbers.forEach(phone -> {
+            log.warn("phone -> " + phone);
             Message message = setMessage(phone, room.getOpenChatUrl(), room.getTitle());
             try {
                 messageService.send(message);
@@ -219,7 +224,7 @@ public class RoomParticipationService {
         Message message = new Message();
         message.setFrom(fromNumber);
         message.setTo(phone);
-        message.setText("[FestaMate!] 모임방 " + title + "에 매칭이 완료되었어요!  오픈채팅에 입장하여 시간과 장소를 정해보세요! \n " +
+        message.setText("[FestaMate!] '" + title + "'의 매칭이 완료되었어요! 오픈채팅에 입장하여 시간과 장소를 정해보세요!\n" +
                 "오픈채팅 링크: \n" +
                 openChatUrl);
 
