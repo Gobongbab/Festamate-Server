@@ -19,13 +19,10 @@
   <logger name="jdbc" level="OFF" additive="false">
     <appender-ref ref="STDOUT"/>
   </logger>
-  <logger name="jdbc.sqlonly" level="DEBUG" additive="false">
-    <appender-ref ref="STDOUT"/>
-  </logger>
   <logger name="jdbc.sqltiming" level="OFF" additive="false">
     <appender-ref ref="STDOUT"/>
   </logger>
-  <logger name="org.hibernate.SQL" level="DEBUG" additive="false">
+  <logger name="org.hibernate.SQL" level="OFF" additive="false">
     <appender-ref ref="STDOUT"/>
   </logger>
   <logger name="com.gobongbob.festamate.domain" level="DEBUG" additive="false">
