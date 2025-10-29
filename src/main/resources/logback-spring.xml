@@ -16,18 +16,23 @@
   </appender>
 
 
-  <logger name="jdbc" level="OFF" additive="false">
+  <!-- ⚙️ Hibernate SQL 로그 차단 -->
+  <logger name="org.hibernate.SQL" level="OFF" additive="false"/>
+  <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="OFF" additive="false"/>
+  <logger name="jdbc" level="OFF" additive="false"/>
+  <logger name="jdbc.sqlonly" level="OFF" additive="false"/>
+  <logger name="jdbc.sqltiming" level="OFF" additive="false"/>
+
+  <!-- ⚙️ Hibernate 예외 및 DB 에러 로그는 유지 -->
+  <logger name="org.hibernate.engine.jdbc.spi.SqlExceptionHelper" level="WARN" additive="false">
     <appender-ref ref="STDOUT"/>
-  </logger>
-  <logger name="jdbc.sqltiming" level="OFF" additive="false">
-    <appender-ref ref="STDOUT"/>
-  </logger>
-  <logger name="org.hibernate.SQL" level="OFF" additive="false">
-    <appender-ref ref="STDOUT"/>
-  </logger>
-  <logger name="com.gobongbob.festamate.domain" level="DEBUG" additive="false">
     <appender-ref ref="FILE"/>
+  </logger>
+
+  <!-- ⚙️ 애플리케이션 패키지 로그 -->
+  <logger name="com.gobongbob.festamate" level="INFO" additive="false">
     <appender-ref ref="STDOUT"/>
+    <appender-ref ref="FILE"/>
   </logger>
 
   <root level="INFO">
