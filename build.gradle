@@ -93,9 +93,6 @@ dependencies {
 
     // CoolSMS
     implementation 'net.nurigo:sdk:4.2.7'
-
-    // Logback S3 Appender
-    implementation("io.github.dubtry:logback-s3-appender:3.0.0")
 }
 
 tasks.named('test') {
