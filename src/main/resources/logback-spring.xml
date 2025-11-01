@@ -6,6 +6,17 @@
     </encoder>
   </appender>
 
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>/app/logs/spring-app.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>/app/logs/spring-app.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
   <appender name="S3" class="io.github.dubtry.logback.S3Appender">
 
     <s3BucketName>festamate-logs</s3BucketName>
@@ -25,6 +36,7 @@
 
   <root level="INFO">
     <appender-ref ref="S3"/>
+    <appender-ref ref="FILE"/>
     <appender-ref ref="STDOUT"/>
   </root>
 </configuration>
