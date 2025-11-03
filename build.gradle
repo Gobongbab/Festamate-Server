@@ -93,6 +93,9 @@ dependencies {
 
     // CoolSMS
     implementation 'net.nurigo:sdk:4.2.7'
+
+    // logstash-logback-encoder
+    implementation 'net.logstash.logback:logstash-logback-encoder:9.0'
 }
 
 tasks.named('test') {
