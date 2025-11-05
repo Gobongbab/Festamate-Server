@@ -35,6 +35,9 @@ import net.nurigo.sdk.message.exception.NurigoMessageNotReceivedException;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +61,10 @@ public class RoomParticipationService {
     // 방 참여
     @Transactional
     @CheckActiveUser
+    @Retryable(
+            value = ObjectOptimisticLockingFailureException.class,
+            backoff = @Backoff(delay = 100, multiplier = 2, random = true)
+    )
     public Room participate(Long memberId, Long roomId, FriendPhoneNumbersRequest request) {
         Member member = memberRepository.findById(memberId) // 티켓 소모를 위해 영속성 컨텍스트에서 관리하는 member 객체를 재조회
                 .orElseThrow(() -> new BadRequestException(NO_MEMBER));
@@ -71,7 +78,7 @@ public class RoomParticipationService {
                 .map(Member::getPhoneNumber)
                 .collect(Collectors.toList());
 
-        for(int i=0; i< room.getParticipants().size(); i++) {
+        for (int i = 0; i < room.getParticipants().size(); i++) {
             participantPhoneNumbers.add(room.getParticipants().get(i).getMember().getPhoneNumber());
         }
 
@@ -123,10 +130,10 @@ public class RoomParticipationService {
 
     private List<Member> collectParticipants(Member member, FriendPhoneNumbersRequest request) {
         List<Member> members = request.friendPhoneNumbers()
-            .stream()
-            .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new BadRequestException(NO_MEMBER)))
-            .collect(Collectors.toList());
+                .stream()
+                .map(phoneNumber -> memberRepository.findByPhoneNumber(phoneNumber)
+                        .orElseThrow(() -> new BadRequestException(NO_MEMBER)))
+                .collect(Collectors.toList());
         members.add(member);
 
         return members;
