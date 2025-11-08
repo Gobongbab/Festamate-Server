@@ -2,8 +2,6 @@ package com.gobongbob.festamate.domain.room.application;
 
 import static com.gobongbob.festamate.global.response.ResponseCode.ALREADY_MATCHED;
 import static com.gobongbob.festamate.global.response.ResponseCode.ENTRY_MISMATCH_WITH_ROOM_CAPACITY;
-import static com.gobongbob.festamate.global.response.ResponseCode.ERROR_SEND_SMS;
-import static com.gobongbob.festamate.global.response.ResponseCode.FAIL_SEND_SMS;
 import static com.gobongbob.festamate.global.response.ResponseCode.GENDER_NOT_MATCH;
 import static com.gobongbob.festamate.global.response.ResponseCode.MUST_NORMAL;
 import static com.gobongbob.festamate.global.response.ResponseCode.NOT_FOUND_ROOM;
@@ -25,14 +23,17 @@ import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest
 import com.gobongbob.festamate.domain.room.dto.response.IsMemberHostResponse;
 import com.gobongbob.festamate.domain.room.persistence.RoomParticipantRepository;
 import com.gobongbob.festamate.domain.room.persistence.RoomRepository;
+import com.gobongbob.festamate.event.domain.OutboxEvent;
+import com.gobongbob.festamate.event.dto.SmsRequestDto;
+import com.gobongbob.festamate.event.persistence.OutboxEventRepository;
+import com.gobongbob.festamate.event.util.JsonUtils;
 import com.gobongbob.festamate.global.aop.CheckActiveUser;
 import com.gobongbob.festamate.global.response.exception.BadRequestException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.nurigo.sdk.message.exception.NurigoMessageNotReceivedException;
-import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -53,7 +54,8 @@ public class RoomParticipationService {
     private final RoomParticipantRepository roomParticipantRepository;
     private final MemberRepository memberRepository;
     private final DefaultMessageService messageService;
-
+    private final OutboxEventRepository outboxEventRepository;
+    private final JsonUtils jsonUtils;
 
     @Value("${coolsms.from.number}")
     private String fromNumber;
@@ -63,6 +65,7 @@ public class RoomParticipationService {
     @CheckActiveUser
     @Retryable(
             value = ObjectOptimisticLockingFailureException.class,
+            maxAttempts = 3,
             backoff = @Backoff(delay = 100, multiplier = 2, random = true)
     )
     public Room participate(Long memberId, Long roomId, FriendPhoneNumbersRequest request) {
@@ -85,7 +88,7 @@ public class RoomParticipationService {
         participants.forEach(participant -> participateRoom(participant, room));
         if (room.isFull()) { // 방에 참여자가 다 찼을 때
             room.updateStatus(Status.MATCHED);
-            sendMatchingCompleteMessages(participantPhoneNumbers, room);
+            createOutboxEvent(participantPhoneNumbers, room.getOpenChatUrl(), room.getTitle());
         }
 
         return room;
@@ -207,29 +210,19 @@ public class RoomParticipationService {
         }
     }
 
-    private void sendMatchingCompleteMessages(List<String> participantPhoneNumbers, Room room) {
-        participantPhoneNumbers.forEach(phone -> {
-            Message message = setMessage(phone, room.getOpenChatUrl(), room.getTitle());
-            try {
-                messageService.send(message);
-            } catch (NurigoMessageNotReceivedException e) {
-                log.error("(NurigoMessageNotReceivedException) 휴대폰 문자 전송 에러 상세 내용: " + e);
-                throw new BadRequestException(FAIL_SEND_SMS);
-            } catch (Exception e) {
-                log.error("(Exception) 휴대폰 문자 전송 에러 상세 내용: " + e);
-                throw new BadRequestException(ERROR_SEND_SMS);
-            }
-        });
-    }
+    private void createOutboxEvent(List<String> participantPhoneNumbers, String openChatUrl, String title) {
+        SmsRequestDto payloadDto = SmsRequestDto.builder()
+                .phoneNumbers(participantPhoneNumbers)
+                .openChatUrl(openChatUrl)
+                .title(title)
+                .build();
+        String payload = jsonUtils.toJson(payloadDto);
 
-    private Message setMessage(String phone, String openChatUrl, String title) {
-        Message message = new Message();
-        message.setFrom(fromNumber);
-        message.setTo(phone);
-        message.setText("[FestaMate!] 모임방 " + title + "에 매칭이 완료되었어요!  오픈채팅에 입장하여 시간과 장소를 정해보세요! \n " +
-                "오픈채팅 링크: \n" +
-                openChatUrl);
-
-        return message;
+        OutboxEvent roomMatchedSmsEvent = OutboxEvent.builder()
+                .messageId(UUID.randomUUID().toString())
+                .messageType("ROOM_MATCHED_SMS")
+                .payload(payload)
+                .build();
+        outboxEventRepository.save(roomMatchedSmsEvent);
     }
 }
