@@ -7,6 +7,8 @@ import com.gobongbob.festamate.event.processor.OutboxProcessor;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -17,19 +19,21 @@ public class OutboxScheduler {
 
     private final OutboxEventRepository outboxRepository;
     private final OutboxProcessor outboxProcessor;
+
     private static final int MAX_ATTEMPTS = 5;
+    private static final int BATCH_SIZE = 100;
 
     @Scheduled(fixedDelay = 5000)
     public void pollAndProcessEvents() {
 
-        List<OutboxEvent> eventsToProcess = outboxRepository.findEventsToProcess(MAX_ATTEMPTS);
+        Pageable pageable = PageRequest.of(0, BATCH_SIZE);
+        List<OutboxEvent> eventsToProcess = outboxRepository.findEventsToProcess(MAX_ATTEMPTS, pageable);
 
         if (eventsToProcess.isEmpty()) {
             return;
         }
 
         log.info("Outbox 이벤트 {}건 처리 시작", eventsToProcess.size());
-
         eventsToProcess.forEach(event -> {
             try {
                 log.debug("Outbox ID {} 처리 위임", event.getId());
