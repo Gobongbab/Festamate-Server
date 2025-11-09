@@ -4,7 +4,6 @@ import com.gobongbob.festamate.event.dto.SmsRequestDto;
 import com.gobongbob.festamate.event.exception.PermanentFailureException;
 import com.gobongbob.festamate.event.exception.RetryableException;
 import com.gobongbob.festamate.event.util.JsonUtils;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.message.exception.NurigoEmptyResponseException;
 import net.nurigo.sdk.message.exception.NurigoMessageNotReceivedException;

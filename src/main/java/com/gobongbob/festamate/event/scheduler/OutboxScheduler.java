@@ -22,7 +22,7 @@ public class OutboxScheduler {
     @Scheduled(fixedDelay = 5000)
     public void pollAndProcessEvents() {
 
-        List<OutboxEvent> eventsToProcess = outboxRepository.findRetriableEvents(MAX_ATTEMPTS);
+        List<OutboxEvent> eventsToProcess = outboxRepository.findEventsToProcess(MAX_ATTEMPTS);
 
         if (eventsToProcess.isEmpty()) {
             return;

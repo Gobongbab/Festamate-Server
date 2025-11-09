@@ -10,7 +10,8 @@ public interface OutboxEventRepository extends JpaRepository<OutboxEvent, Long> 
 
     @Query("SELECT e "
             + "FROM OutboxEvent e "
-            + "WHERE e.status = 'WAITING' OR (e.status = 'FAILED' AND e.failCount < :maxAttempts) "
+            + "WHERE (e.status = com.gobongbob.festamate.event.domain.EventStatus.WAITING "
+            + "   OR (e.status = com.gobongbob.festamate.event.domain.EventStatus.FAILED AND e.failCount < :maxAttempts)) "
             + "ORDER BY e.id ASC")
-    List<OutboxEvent> findRetriableEvents(@Param("maxAttempts") int maxAttempts);
+    List<OutboxEvent> findEventsToProcess(@Param("maxAttempts") int maxAttempts);
 }
