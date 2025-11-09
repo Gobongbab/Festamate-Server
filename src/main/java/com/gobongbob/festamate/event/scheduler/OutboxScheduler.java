@@ -1,9 +1,12 @@
 package com.gobongbob.festamate.event.scheduler;
 
+import static kotlinx.serialization.json.internal.JsonLexerKt.BATCH_SIZE;
+
 import com.gobongbob.festamate.event.domain.OutboxEvent;
 import com.gobongbob.festamate.event.exception.PermanentFailureException;
 import com.gobongbob.festamate.event.persistence.OutboxEventRepository;
 import com.gobongbob.festamate.event.processor.OutboxProcessor;
+import com.gobongbob.festamate.global.config.OutboxProperties;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,15 +22,14 @@ public class OutboxScheduler {
 
     private final OutboxEventRepository outboxRepository;
     private final OutboxProcessor outboxProcessor;
+    private final OutboxProperties outboxProperties;
 
-    private static final int MAX_ATTEMPTS = 5;
-    private static final int BATCH_SIZE = 100;
-
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelayString = "${outbox.schedule-delay}")
     public void pollAndProcessEvents() {
 
+        int maxAttempts = outboxProperties.getMaxAttempts();
         Pageable pageable = PageRequest.of(0, BATCH_SIZE);
-        List<OutboxEvent> eventsToProcess = outboxRepository.findEventsToProcess(MAX_ATTEMPTS, pageable);
+        List<OutboxEvent> eventsToProcess = outboxRepository.findEventsToProcess(maxAttempts, pageable);
 
         if (eventsToProcess.isEmpty()) {
             return;

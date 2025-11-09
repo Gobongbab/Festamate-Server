@@ -53,15 +53,18 @@ spring:
         static: ap-northeast-1 # 도쿄 리전 (SNS 관련)
 jwt:
   secret: ${JWT_SECRET}
+
 naver:
   ocr:
     api:
       url: ${OCR_API_URL}
       secret: ${OCR_API_SECRET}
+
 sentry:
   dsn: ${SENTRY_DSN}
   send-default-pii: true
   max-request-body-size: small
+
 server:
   forward-headers-strategy: framework
   servlet:
@@ -69,6 +72,10 @@ server:
       enabled: true
       charset: UTF-8
       force: true
+
+outbox:
+  schedule-delay: 5000
+
 kakao: # 설정값들을 직접 참조 하기 위함
   client-id: ${KAKAO_CLIENT_ID}
   redirect-uri: ${KAKAO_REDIRECT_URI}
@@ -86,6 +93,7 @@ cloud:
       static: ap-northeast-2 # 서울 리전 (S3 관련)
     stack:
       auto: false
+
 management:
   endpoints:
     web:
@@ -101,6 +109,7 @@ management:
       process:
         cpu:
           usage: false
+
 admin:
   loginId: ${ADMIN_LOGIN_ID}
   password: ${ADMIN_PASSWORD}
