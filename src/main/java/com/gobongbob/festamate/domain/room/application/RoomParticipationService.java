@@ -88,7 +88,7 @@ public class RoomParticipationService {
         participants.forEach(participant -> participateRoom(participant, room));
         if (room.isFull()) { // 방에 참여자가 다 찼을 때
             room.updateStatus(Status.MATCHED);
-            createOutboxEvent(participantPhoneNumbers, room.getOpenChatUrl(), room.getTitle());
+            saveOutboxEvent(participantPhoneNumbers, room.getOpenChatUrl(), room.getTitle());
         }
 
         return room;
@@ -210,19 +210,21 @@ public class RoomParticipationService {
         }
     }
 
-    private void createOutboxEvent(List<String> participantPhoneNumbers, String openChatUrl, String title) {
-        SmsRequestDto payloadDto = SmsRequestDto.builder()
-                .phoneNumbers(participantPhoneNumbers)
-                .openChatUrl(openChatUrl)
-                .title(title)
-                .build();
-        String payload = jsonUtils.toJson(payloadDto);
+    private void saveOutboxEvent(List<String> participantPhoneNumbers, String openChatUrl, String title) {
+        participantPhoneNumbers.forEach(phoneNumber -> {
+            SmsRequestDto smsRequestDto = SmsRequestDto.builder()
+                    .phoneNumber(phoneNumber)
+                    .openChatUrl(openChatUrl)
+                    .title(title)
+                    .build();
+            String payload = jsonUtils.toJson(smsRequestDto);
 
-        OutboxEvent roomMatchedSmsEvent = OutboxEvent.builder()
-                .messageId(UUID.randomUUID().toString())
-                .messageType("ROOM_MATCHED_SMS")
-                .payload(payload)
-                .build();
-        outboxEventRepository.save(roomMatchedSmsEvent);
+            OutboxEvent roomMatchedSmsEvent = OutboxEvent.builder()
+                    .messageId(UUID.randomUUID().toString())
+                    .messageType("ROOM_MATCHED_SMS")
+                    .payload(payload)
+                    .build();
+            outboxEventRepository.save(roomMatchedSmsEvent);
+        });
     }
 }

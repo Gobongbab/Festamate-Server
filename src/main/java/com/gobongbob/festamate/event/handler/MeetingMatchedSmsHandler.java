@@ -32,20 +32,18 @@ public class MeetingMatchedSmsHandler implements EventHandler {
     @Override
     public void handle(String payload) {
         SmsRequestDto requestDto = jsonUtils.fromJson(payload, SmsRequestDto.class);
-        List<String> phoneNumbers = requestDto.phoneNumbers();
+        String phoneNumber = requestDto.phoneNumber();
+        Message message = setMessage(phoneNumber, requestDto.title(), requestDto.openChatUrl());
 
-        phoneNumbers.forEach(phoneNumber -> {
-            Message message = setMessage(phoneNumber, requestDto.title(), requestDto.openChatUrl());
-            try {
-                smsService.send(message);
-            } catch (NurigoMessageNotReceivedException e) {
-                throw new PermanentFailureException("SMS 수신 불가: " + phoneNumber, e);
-            } catch (NurigoEmptyResponseException e) {
-                throw new RetryableException("CoolSMS API 일시적 오류", e);
-            } catch (NurigoUnknownException e) {
-                throw new RetryableException("SMS 발송 중 예상치 못한 오류", e);
-            }
-        });
+        try {
+            smsService.send(message);
+        } catch (NurigoMessageNotReceivedException e) {
+            throw new PermanentFailureException("SMS 수신 불가: " + phoneNumber, e);
+        } catch (NurigoEmptyResponseException e) {
+            throw new RetryableException("CoolSMS API 일시적 오류", e);
+        } catch (NurigoUnknownException e) {
+            throw new RetryableException("SMS 발송 중 예상치 못한 오류", e);
+        }
     }
 
     private Message setMessage(String phoneNumber, String title, String openChatUrl) {
