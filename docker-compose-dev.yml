@@ -90,7 +90,25 @@ services:
     networks:
       - festamate-network
     depends_on:
+      - mysql
       - redis-service
+
+  mysql:
+    image: mysql:8.0
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: festamate
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      TZ: Asia/Seoul
+      LANG: C.UTF-8
+    networks:
+      - festamate-network
 
   # Redis 캐시 서버 설정
   redis-service:
