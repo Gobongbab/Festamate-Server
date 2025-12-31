@@ -65,12 +65,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 7) Docker Compose 빌드 및 푸시
-      - name: Build and push with Docker Compose
+      # 7) Docker Image 빌드 및 푸시
+      - name: Build and push Docker Image
         run: |
-          # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시 (운영 환경에 맞는 docker-compose 파일 사용)
-          docker compose -f docker-compose-dev.yml build
-          docker compose -f docker-compose-dev.yml push
+          docker build --platform=linux/arm64 -t ${{ secrets.DOCKER_USERNAME }}/festamate:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/festamate:latest
 
       # 9) docker-compose-dev.yml 파일을 EC2로 복사
       - name: Copy docker-compose-dev.yml to EC2
