@@ -86,7 +86,7 @@ services:
     volumes:
       # EC2의 키 파일 경로: /home/ubuntu/festamate-firebase-key.json 컨테이너 내부 경로:/config/festamate-firebase-key.json
       - /home/ubuntu/festamate/festamate-firebase-key.json:/config/festamate-firebase-key.json:ro # 읽기 전용(ro)으로 마운트 권장
-      - /var/log/spring-app:/app/logs
+      - /var/log/festamate-api:/app/logs
     networks:
       - festamate-network
     depends_on:
