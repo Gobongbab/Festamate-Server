@@ -68,7 +68,7 @@ jobs:
       # 7) Docker Image 빌드 및 푸시
       - name: Build and push Docker Image
         run: |
-          docker build --platform=linux/arm64 -t ${{ secrets.DOCKER_USERNAME }}/festamate:latest .
+          docker build -f Dockerfile.dev --platform=linux/arm64 -t ${{ secrets.DOCKER_USERNAME }}/festamate:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/festamate:latest
 
       # 9) docker-compose-dev.yml 파일을 EC2로 복사
