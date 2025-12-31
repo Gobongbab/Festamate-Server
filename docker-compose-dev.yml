@@ -121,6 +121,34 @@ services:
     networks:
       - festamate-network
 
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+      - ./loki-data:/loki
+    networks:
+      - festamate-network
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    user: root
+    ports:
+      - "12345:12345"
+    volumes:
+      - ./config.alloy:/etc/alloy/config.alloy
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./alloy-data:/var/lib/alloy
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy /etc/alloy/config.alloy
+    depends_on:
+      - loki
+    networks:
+      - festamate-network
+
 networks:
   festamate-network: # 서비스 간 통신을 위한 브릿지 네트워크
     driver: bridge
