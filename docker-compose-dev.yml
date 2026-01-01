@@ -1,11 +1,13 @@
 # 개발용
 services:
   app:
-    container_name: festamate
+    container_name: app
     build:
       context: .
       dockerfile: Dockerfile.dev
     image: gobongbab/festamate:latest
+    labels:
+      - "logging.type=app"
     ports:
       - "8080:8080"
     restart: unless-stopped
@@ -93,8 +95,11 @@ services:
       - mysql
       - redis-service
 
-  mysql:
+  db:
+    container_name: db
     image: mysql:8.0
+    labels:
+      - "logging.type=db"
     restart: always
     ports:
       - "3306:3306"
@@ -111,9 +116,11 @@ services:
       - festamate-network
 
   # Redis 캐시 서버 설정
-  redis-service:
+  cache:
+    container_name: cache
     image: redis:latest
-    container_name: ${REDIS_CONTAINER_NAME}
+    labels:
+      - "logging.type=cache"
     restart: always
     ports:
       - "${REDIS_PORT}:6379"
@@ -122,8 +129,10 @@ services:
       - festamate-network
 
   loki:
-    image: grafana/loki:3.0.0
     container_name: loki
+    image: grafana/loki:3.0.0
+    labels:
+      - "logging.type=loki"
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
@@ -134,8 +143,10 @@ services:
       - festamate-network
 
   alloy:
-    image: grafana/alloy:latest
     container_name: alloy
+    image: grafana/alloy:latest
+    labels:
+      - "logging.type=alloy"
     user: root
     ports:
       - "12345:12345"
