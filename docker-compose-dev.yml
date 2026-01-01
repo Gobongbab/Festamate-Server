@@ -99,7 +99,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - db-data:/var/lib/mysql
+      - ./mysql-data:/var/lib/mysql
     environment:
       MYSQL_DATABASE: festamate
       MYSQL_USER: ${DB_USER}
