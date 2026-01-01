@@ -92,8 +92,8 @@ services:
     networks:
       - festamate-network
     depends_on:
-      - mysql
-      - redis-service
+      - db
+      - cache
 
   db:
     container_name: db
