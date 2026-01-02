@@ -1,11 +1,13 @@
 # 개발용
 services:
   app:
-    container_name: festamate
+    container_name: app
     build:
       context: .
       dockerfile: Dockerfile.dev
     image: gobongbab/festamate:latest
+    labels:
+      - "logging.type=app"
     ports:
       - "8080:8080"
     restart: unless-stopped
@@ -85,21 +87,76 @@ services:
 
     volumes:
       # EC2의 키 파일 경로: /home/ubuntu/festamate-firebase-key.json 컨테이너 내부 경로:/config/festamate-firebase-key.json
-      - /home/ubuntu/festamate-firebase-key.json:/config/festamate-firebase-key.json:ro # 읽기 전용(ro)으로 마운트 권장
-      - /var/log/spring-app:/app/logs
+      - /home/ubuntu/festamate/festamate-firebase-key.json:/config/festamate-firebase-key.json:ro # 읽기 전용(ro)으로 마운트 권장
+      - /var/log/festamate-api:/app/logs
     networks:
       - festamate-network
     depends_on:
-      - redis-service
+      - db
+      - cache
+
+  db:
+    container_name: db
+    image: mysql:8.0
+    labels:
+      - "logging.type=db"
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: festamate
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      TZ: Asia/Seoul
+      LANG: C.UTF-8
+    networks:
+      - festamate-network
 
   # Redis 캐시 서버 설정
-  redis-service:
+  cache:
+    container_name: cache
     image: redis:latest
-    container_name: ${REDIS_CONTAINER_NAME}
+    labels:
+      - "logging.type=cache"
     restart: always
     ports:
       - "${REDIS_PORT}:6379"
     command: redis-server --requirepass ${REDIS_PASSWORD} # Redis 비밀번호 설정
+    networks:
+      - festamate-network
+
+  loki:
+    container_name: loki
+    image: grafana/loki:3.0.0
+    labels:
+      - "logging.type=loki"
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+      - ./loki-data:/loki
+    networks:
+      - festamate-network
+
+  alloy:
+    container_name: alloy
+    image: grafana/alloy:latest
+    labels:
+      - "logging.type=alloy"
+    user: root
+    ports:
+      - "12345:12345"
+    volumes:
+      - ./config.alloy:/etc/alloy/config.alloy
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./alloy-data:/var/lib/alloy
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy /etc/alloy/config.alloy
+    depends_on:
+      - loki
     networks:
       - festamate-network
 

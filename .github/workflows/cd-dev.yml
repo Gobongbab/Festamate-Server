@@ -65,52 +65,54 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 7) Docker Compose 빌드 및 푸시
-      - name: Build and push with Docker Compose
+      # 7) Docker Image 빌드 및 푸시
+      - name: Build and push Docker Image
         run: |
-          # 서비스 이름을 태그에 포함시켜 이미지 빌드 및 푸시 (운영 환경에 맞는 docker-compose 파일 사용)
-          docker compose -f docker-compose-dev.yml build
-          docker compose -f docker-compose-dev.yml push
+          docker build -f Dockerfile.dev --platform=linux/arm64 -t ${{ secrets.DOCKER_USERNAME }}/festamate:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/festamate:latest
 
       # 9) docker-compose-dev.yml 파일을 EC2로 복사
       - name: Copy docker-compose-dev.yml to EC2
         uses: appleboy/scp-action@v0.1.7 # scp-action을 사용하여 파일을 EC2로 복사
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
           source: "docker-compose-dev.yml"  # Runner의 현재 작업 디렉토리에 있는 파일
-          target: "/home/ubuntu/"  # EC2 인스턴스의 대상 디렉토리 (파일이 복사될 위치)
+          target: "/home/ubuntu/festamate/"  # EC2 인스턴스의 대상 디렉토리 (파일이 복사될 위치)
 
       # 9) EC2에 배포
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             # 1. Docker Hub 로그인
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-
-            # 2. Firebase 키 파일 생성 (docker-compose.yml의 volume 경로와 일치해야 함)
+            
+            # 2. festamate 프로젝트 경로로 이동
+            cd /home/ubuntu/festamate/
+            
+            # 3. Firebase 키 파일 생성 (docker-compose.yml의 volume 경로와 일치해야 함)
             echo "${{ secrets.FESTAMATE_FIREBASE_KEY }}" > ./festamate-firebase-key.json
             
-            # EC2 내부에 .env 파일 생성 
+            # 4. EC2 내부에 .env 파일 생성 
             echo "${{ secrets.ENV }}" > .env
 
-            # 3. 최신 이미지 받기 (docker-compose.yml에 정의된 모든 서비스를 pull)
+            # 5. 최신 이미지 받기 (docker-compose.yml에 정의된 모든 서비스를 pull)
             # docker-compose.yml 파일에 명시된 이미지(예: gobongbab/festamate:latest, redis:6.2.4-alpine)가 
             # 이미 로컬에 존재한다면, docker compose up -d 명령어는 기본적으로 레지스트리를 확인하여 
             # 더 최신 버전이 있는지 검사하지 않고 로컬에 있는 기존 이미지를 사용하게 됩니다.
             # 따라서, docker compose pull 명령어를 사용하여 최신 이미지를 가져와야 합니다.
             docker compose -f docker-compose-dev.yml pull
 
-            # 4. 기존 컨테이너 내리기 (stop & remove)
+            # 6. 기존 컨테이너 내리기 (stop & remove)
             docker compose -f docker-compose-dev.yml down
 
-            # 5. 새 컨테이너 올리기 (백그라운드 실행, 현재 디렉토리의 .env 파일을 자동으로 읽음)
+            # 7. 새 컨테이너 올리기 (백그라운드 실행, 현재 디렉토리의 .env 파일을 자동으로 읽음)
             docker compose -f docker-compose-dev.yml up -d
 
-            # 6. 사용하지 않는 Docker 이미지 정리 (선택 사항)
+            # 8. 사용하지 않는 Docker 이미지 정리 (선택 사항)
             docker image prune -af
