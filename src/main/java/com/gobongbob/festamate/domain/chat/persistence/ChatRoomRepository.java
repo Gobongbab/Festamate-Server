@@ -20,7 +20,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long>, ChatR
                 join c.room r
                 join r.participants rp
                 where rp.member.id = :memberId
-                order by c.lastMessageTime desc nulls last
+                order by c.lastMessageTime desc nulls last, c.createdAt desc
             """)
     Slice<ChatRoom> findParticipatingChatRooms(Pageable pageable, Long memberId);
 
