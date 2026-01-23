@@ -12,6 +12,7 @@ import static com.gobongbob.festamate.global.response.ResponseCode.PHONE_NUMBER_
 import static com.gobongbob.festamate.global.response.ResponseCode.ROOM_UPDATE_NOT_AVAILABLE;
 
 import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
+import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.chat.persistence.ChatRoomRepository;
 import com.gobongbob.festamate.domain.chat.persistence.MessageRepository;
 import com.gobongbob.festamate.domain.image.domain.Image;
@@ -78,8 +79,8 @@ public class RoomService {
         Room createdRoom = roomRepository.save(request.toEntity(hostMember));
         uploadImageIfExist(imageFiles, createdRoom);
 
-//        ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
-//        chatRoomRepository.save(chatRoom);
+        ChatRoom chatRoom = ChatRoom.createChatRoom(createdRoom.getTitle(), createdRoom);
+        chatRoomRepository.save(chatRoom);
 
         List<RoomParticipant> participants = collectAndValidateInitialParticipants(
                 request.friendPhoneNumbers(),
@@ -267,7 +268,7 @@ public class RoomService {
                 request.meetingDateTime(),
                 request.maxParticipants()
         );
-//        room.getChatRoom().updateTitle(request.title());
+        room.getChatRoom().updateTitle(request.title());
     }
 
     // 방 삭제(일반, admin)
