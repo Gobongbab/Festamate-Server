@@ -10,6 +10,10 @@
 
 
 ### infrastructure
+```
+설계 시점의 구상도이며, 실제 인프라는 단일 서버 환경으로 구성되었습니다.
+```
+
 ![image](https://github.com/user-attachments/assets/67f34532-3693-4f53-bb04-6e6113405269)
 
 
