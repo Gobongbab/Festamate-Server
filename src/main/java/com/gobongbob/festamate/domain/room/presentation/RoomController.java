@@ -4,6 +4,7 @@ import com.gobongbob.festamate.domain.auth.jwt.domain.CustomMemberDetails;
 import com.gobongbob.festamate.domain.chat.application.ChatService;
 import com.gobongbob.festamate.domain.room.application.RoomParticipationService;
 import com.gobongbob.festamate.domain.room.application.RoomService;
+import com.gobongbob.festamate.domain.room.domain.Room;
 import com.gobongbob.festamate.domain.room.dto.request.FilteringCondition;
 import com.gobongbob.festamate.domain.room.dto.request.FriendPhoneNumbersRequest;
 import com.gobongbob.festamate.domain.room.dto.request.RoomCreateRequest;
@@ -52,12 +53,12 @@ public class RoomController implements RoomApi {
             @RequestPart("request") @Valid RoomCreateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> multipartFiles
     ) {
-        roomService.createRoom(memberDetails.getMember().getId(), request, multipartFiles);
-//        chatService.sendMessage(
-//                createdChatRoom.getId(),
-//                memberDetails.getMember(),
-//                "안녕하세요! " + createdChatRoom.getTitle() + "에 오신 것을 환영합니다!"
-//        );
+        Room room = roomService.createRoom(memberDetails.getMember().getId(), request, multipartFiles);
+        chatService.sendMessage(
+                room.getChatRoom().getId(),
+                memberDetails.getMember(),
+                "안녕하세요! " + room.getChatRoom().getTitle() + "에 오신 것을 환영합니다!"
+        );
 
         return new SuccessResponse<>();
     }
@@ -136,12 +137,12 @@ public class RoomController implements RoomApi {
             @PathVariable("roomId") Long roomId,
             @RequestBody FriendPhoneNumbersRequest request
     ) {
-        roomParticipationService.participate(memberDetails.getMember().getId(), roomId, request);
-//        chatService.sendMessage(
-//                chatRoom.getId(),
-//                memberDetails.getMember(),
-//                memberDetails.getMember().getNickname() + "님이 들어왔습니다."
-//        );
+        Room room = roomParticipationService.participate(memberDetails.getMember().getId(), roomId, request);
+        chatService.sendMessage(
+                room.getChatRoom().getId(),
+                memberDetails.getMember(),
+                memberDetails.getMember().getNickname() + "님이 들어왔습니다."
+        );
 
         return new SuccessResponse<>();
     }
@@ -153,12 +154,12 @@ public class RoomController implements RoomApi {
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
             @PathVariable("roomId") Long roomId
     ) {
-        roomParticipationService.leave(memberDetails.getMember(), roomId);
-//        chatService.sendMessage(
-//                chatRoom.getId(),
-//                memberDetails.getMember(),
-//                memberDetails.getMember().getNickname() + "님이 나갔습니다."
-//        );
+        Room room = roomParticipationService.leave(memberDetails.getMember(), roomId);
+        chatService.sendMessage(
+                room.getChatRoom().getId(),
+                memberDetails.getMember(),
+                memberDetails.getMember().getNickname() + "님이 나갔습니다."
+        );
 
         return new SuccessResponse<>();
     }

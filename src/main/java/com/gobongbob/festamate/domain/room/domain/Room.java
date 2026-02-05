@@ -1,5 +1,6 @@
 package com.gobongbob.festamate.domain.room.domain;
 
+import com.gobongbob.festamate.domain.chat.domain.ChatRoom;
 import com.gobongbob.festamate.domain.image.domain.RoomImage;
 import com.gobongbob.festamate.domain.member.domain.Gender;
 import com.gobongbob.festamate.domain.member.domain.Member;
@@ -15,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -80,9 +83,9 @@ public class Room extends BaseEntity {
     @Builder.Default
     private List<RoomImage> images = new ArrayList<>();
 
-//    @OneToOne(mappedBy = "room", cascade = CascadeType.ALL)
-//    @Setter
-//    private ChatRoom chatRoom;
+    @OneToOne(mappedBy = "room", cascade = CascadeType.ALL)
+    @Setter
+    private ChatRoom chatRoom;
 
     // 연관관계 편의 메서드
     public void assignImages(List<RoomImage> roomImages) {

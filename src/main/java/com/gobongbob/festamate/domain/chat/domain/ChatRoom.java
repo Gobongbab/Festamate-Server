@@ -54,7 +54,7 @@ public class ChatRoom extends BaseEntity {
     // 연관관계 편의 메서드
     public void setRoom(Room room) {
         this.room = room;
-//        room.setChatRoom(this);
+        room.setChatRoom(this);
     }
 
     public void updateTitle(String title) {
